@@ -1,0 +1,90 @@
+.register {
+  height: 100vh;
+  background-color: rgb(193, 190, 225);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .card {
+    display: flex;
+    flex-direction: row-reverse;
+    background-color: white;
+    color: black;
+    height: 600px;
+    width: 50%;
+    border-radius: 20px;
+    overflow-x: hidden;
+
+    .left {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 40px;
+      background: linear-gradient(
+          rgba(155, 111, 238, 0.477),
+          rgba(100, 44, 180, 0.528)
+        ),
+        url(https://images.pexels.com/photos/7725999/pexels-photo-7725999.jpeg)
+          center;
+      background-size: cover;
+      padding: 30px;
+      color: rgb(0, 0, 0);
+
+      h1 {
+        font-size: 40px;
+      }
+
+      p {
+        font-size: 22px;
+      }
+
+      span {
+        font-size: 18px;
+      }
+
+      button {
+        width: 40%;
+        cursor: pointer;
+        padding: 10px;
+        font-size: 16px;
+        border: none;
+        border-radius: 5px;
+        background-color: rgb(8, 104, 128);
+        color: white;
+      }
+    }
+
+    .right {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 30px;
+      padding: 30px;
+
+      h1 {
+        font-size: 40px;
+      }
+
+      form {
+        display: flex;
+        flex-direction: column;
+        gap: 50px;
+        width: 80%;
+
+        input {
+          font-size: 16px;
+          border: none;
+          border-bottom: 1px solid lightgray;
+        }
+
+        button {
+          width: 50%;
+          cursor: pointer;
+          padding: 10px;
+          font-size: 16px;
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,16 @@
+.r-container {
+  width: 20%;
+  border-left: 1px solid lightgray;
+  padding: 10px;
+  background-color: rgb(242, 242, 242);
+
+  .ppl-container {
+    padding: 10px;
+    height: 200px;
+    border: 0.5px solid lightgray;
+
+    span {
+      color: rgb(129, 129, 129);
+    }
+  }
+}
