@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { auth, db } from "../../config/firebase";
-import { updateDoc, doc } from "firebase/firestore";
+import { setDoc, doc, serverTimestamp } from "firebase/firestore";
 import {
   CLOUDINARY_CLOUD_NAME,
   CLOUDINARY_UPLOAD_PRESET,
@@ -24,7 +24,6 @@ export default function Onboarding() {
 
   const handleFileChange = (e) => {
     setAvatarFile(e.target.files[0]);
-    console.log("File selected in handleFileChange:", e.target.files[0]);
   };
 
   const handleBioChange = (e) => {
@@ -42,16 +41,10 @@ export default function Onboarding() {
       return;
     }
 
-    console.log("handleSubmit triggered.");
-    console.log("avatarFile state at handleSubmit start:", avatarFile);
-
     try {
       let avatarUrl = "";
 
       if (avatarFile) {
-        console.log(
-          "avatarFile is present. Proceeding with Cloudinary upload."
-        );
         const formData = new FormData();
         formData.append("file", avatarFile);
         formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
@@ -65,41 +58,35 @@ export default function Onboarding() {
           }
         );
 
-        console.log("Cloudinary API Response object:", response);
-
         if (!response.ok) {
           const errorText = await response.text();
-          console.error("Cloudinary failed response text:", errorText);
           throw new Error(
             `Cloudinary upload failed: ${response.statusText} - ${errorText}`
           );
         }
 
         const data = await response.json();
-        console.log("Cloudinary API Response data (JSON):", data);
         avatarUrl = data.secure_url;
-        console.log("Cloudinary upload successful. URL:", avatarUrl);
-      } else {
-        console.log(
-          "avatarFile is NULL or UNDEFINED. Skipping Cloudinary upload."
-        );
       }
 
       const userDocRef = doc(db, "users", currentUser.uid);
-      await updateDoc(userDocRef, {
-        bio: bio,
-        avatarUrl: avatarUrl,
-      });
-      console.log("Firestore update successful.");
+      await setDoc(
+        userDocRef,
+        {
+          username: currentUser.displayName || "",
+          email: currentUser.email,
+          bio: bio,
+          avatarUrl: avatarUrl,
+          createdAt: serverTimestamp(),
+        },
+        { merge: true }
+      );
 
       navigate("/");
-      console.log("Navigation to home initiated.");
     } catch (error) {
       setErr(error.message);
-      console.error("Profile setup failed:", error.message);
     } finally {
       setLoading(false);
-      console.log("Loading set to false. Form submission complete.");
     }
   };
 

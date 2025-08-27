@@ -25,6 +25,7 @@
         padding: 20px 0px;
         border-bottom: 1px solid lightgray;
         transition: 0.5s;
+
         &:hover {
           background-color: rgb(239, 233, 233);
         }
@@ -34,6 +35,27 @@
           color: black;
           font-size: 24px;
           padding-left: 10px;
+          display: flex; // Added for avatar alignment
+          align-items: center; // Added for avatar alignment
+          gap: 10px; // Space between avatar and text
+        }
+
+        .profile-link-with-avatar {
+          text-decoration: none;
+          color: black;
+          font-size: 24px;
+          padding-left: 10px;
+          display: flex;
+          align-items: center;
+          gap: 10px;
+        }
+
+        .profile-avatar-thumbnail {
+          width: 30px; // Adjust size as needed
+          height: 30px; // Adjust size as needed
+          border-radius: 50%;
+          object-fit: cover;
+          margin-left: 0px; // Align with existing padding
         }
       }
     }

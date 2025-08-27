@@ -4,8 +4,7 @@ import { auth } from "../../config/firebase";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { useState } from "react";
 import { db } from "../../config/firebase";
-import { doc, setDoc, collection } from "firebase/firestore";
-import { GoogleAuthProvider } from "firebase/auth";
+import { doc, setDoc, serverTimestamp } from "firebase/firestore"; // Added serverTimestamp
 
 export default function Register() {
   const [inputs, setInputs] = useState({
@@ -38,19 +37,20 @@ export default function Register() {
 
       await setDoc(newUserDocRef, {
         uid: user.uid,
-        displayName: inputs.name,
+        displayName: inputs.name, // Using displayName for consistency with Auth
         username: inputs.username,
         email: inputs.email,
         avatarUrl: "",
         bio: "",
         followersCount: 0,
         followingCount: 0,
+        postsCount: 0, // Initializing postsCount
+        createdAt: serverTimestamp(), // Added createdAt timestamp
       });
 
       navigate("/onboarding");
     } catch (error) {
       setErr(error.message);
-      console.error("Registration failed:", error.message);
     }
   };
 
