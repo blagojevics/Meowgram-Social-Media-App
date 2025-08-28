@@ -12,6 +12,7 @@ import Rightbar from "./components/rightbar/Rightbar";
 import Home from "./pages/homepage/Home";
 import Profile from "./pages/profile/Profile";
 import Onboarding from "./pages/onboarding/Onboarding";
+import AddPost from "./pages/addpost/AddPost";
 import { useEffect, useState } from "react";
 import "./style.scss";
 import { auth, db } from "./config/firebase";
@@ -94,6 +95,7 @@ export default function App() {
       children: [
         { index: true, element: <Home /> },
         { path: "profile/:id", element: <Profile currentUser={currentUser} /> },
+        { path: "addpost", element: <AddPost currentUser={currentUser} /> },
       ],
     },
     {
@@ -111,7 +113,7 @@ export default function App() {
           currentUser={currentUser}
           userProfileCompleted={userProfileCompleted}
         >
-          <Onboarding />
+          <Onboarding currentUser={currentUser} />
         </ProtectedRoute>
       ),
     },

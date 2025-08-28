@@ -1,11 +1,24 @@
 import "./leftbar.scss";
 import Logo from "../../assets/logoo.webp";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { signOut } from "firebase/auth";
+import { auth } from "../../config/firebase";
 
 export default function Leftbar({ currentUser }) {
   const profileLink = currentUser ? `/profile/${currentUser.uid}` : "/login";
   const avatarToDisplay =
     currentUser && currentUser.avatarUrl ? currentUser.avatarUrl : Logo;
+
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      navigate("/login");
+    } catch (err) {
+      console.log(err);
+    }
+  };
 
   return (
     <div className="container">
@@ -44,6 +57,13 @@ export default function Leftbar({ currentUser }) {
           <li>
             <Link to="/addpost">Add Post</Link>
           </li>
+          {currentUser && ( // Conditionally render logout button only if a user is logged in
+            <li>
+              <button onClick={handleLogout} className="logout-button">
+                Logout
+              </button>
+            </li>
+          )}
         </ul>
       </div>
     </div>
