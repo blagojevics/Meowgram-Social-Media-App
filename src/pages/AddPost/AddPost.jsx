@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import "./addpost.scss";
 import { useNavigate } from "react-router-dom";
-import { collection, addDoc, serverTimestamp } from "firebase/firestore"; // Ensure addDoc, serverTimestamp are imported
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "../../config/firebase";
 import {
   CLOUDINARY_CLOUD_NAME,
@@ -38,7 +38,6 @@ export default function AddPost({ currentUser }) {
     setLoading(true);
     setError(null);
 
-    // --- Frontend Input Validation ---
     if (!imageFile && caption.trim() === "") {
       setError("Please add an image or write a caption.");
       setLoading(false);
@@ -49,7 +48,7 @@ export default function AddPost({ currentUser }) {
       setLoading(false);
       return;
     }
-    // Also validate if currentUser has necessary info for the post (username, avatar)
+
     if (!currentUser.username && !currentUser.displayName) {
       setError("User profile incomplete: missing username.");
       setLoading(false);
@@ -59,7 +58,6 @@ export default function AddPost({ currentUser }) {
     let imageUrl = "";
 
     try {
-      // --- Cloudinary Image Upload (if an image is selected) ---
       if (imageFile) {
         const formData = new FormData();
         formData.append("file", imageFile);
@@ -85,22 +83,21 @@ export default function AddPost({ currentUser }) {
         imageUrl = data.secure_url;
       }
 
-      // --- Save Post Data to Firestore ---
       const postsCollectionRef = collection(db, "posts");
 
       await addDoc(postsCollectionRef, {
-        userId: currentUser.uid, // CORRECT: this is what Profile.jsx expects for the link
+        userId: currentUser.uid,
         username:
-          currentUser.username || currentUser.displayName || "Unknown User", // CORRECTED: ensure we get a displayable name
-        userAvatar: currentUser.avatarUrl || "https://via.placeholder.com/50", // CORRECTED: ensure an avatar URL
-        caption: caption, // CORRECT: this matches the state and Post.jsx
-        imageUrl: imageUrl, // CORRECT: this matches the state and Post.jsx
-        createdAt: serverTimestamp(), // CORRECT: Firestore Timestamp
+          currentUser.username || currentUser.displayName || "Unknown User",
+        userAvatar: currentUser.avatarUrl || "https://via.placeholder.com/50",
+        caption: caption,
+        imageUrl: imageUrl,
+        createdAt: serverTimestamp(),
         likesCount: 0,
         commentsCount: 0,
+        likedByUsers: [],
       });
 
-      // --- Success: Redirect User ---
       navigate("/");
     } catch (err) {
       console.error("Failed to add post:", err);
@@ -125,7 +122,7 @@ export default function AddPost({ currentUser }) {
           onChange={handleFileChange}
           accept="image/*"
         />
-        <label htmlFor="post-caption">Caption:</label> {/* Corrected label */}
+        <label htmlFor="post-caption">Caption:</label>
         <textarea
           value={caption}
           id="post-caption"

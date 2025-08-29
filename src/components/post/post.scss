@@ -1,7 +1,7 @@
 .post-card {
   // Corresponds to your .post
   width: 100%;
-  height: 800px; // Consider making height dynamic or using min-height for responsive content
+  height: 850px; // Consider making height dynamic or using min-height for responsive content
   aspect-ratio: 4 / 3; /* or 1 / 1 if square, though height overrides aspect-ratio if fixed */
   overflow: hidden;
   border-radius: 12px;

@@ -4,7 +4,7 @@ import { auth } from "../../config/firebase";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { useState } from "react";
 import { db } from "../../config/firebase";
-import { doc, setDoc, serverTimestamp } from "firebase/firestore"; // Added serverTimestamp
+import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 
 export default function Register() {
   const [inputs, setInputs] = useState({
@@ -25,6 +25,27 @@ export default function Register() {
 
     setErr(null);
 
+    if (!inputs.name.trim()) {
+      setErr("Name cannot be empty.");
+      return;
+    }
+    if (!inputs.username.trim()) {
+      setErr("Username cannot be empty.");
+      return;
+    }
+    if (!inputs.email.trim()) {
+      setErr("Email cannot be empty.");
+      return;
+    }
+    if (!inputs.password.trim()) {
+      setErr("Password cannot be empty.");
+      return;
+    }
+    if (inputs.password.length < 8) {
+      setErr("Password must be at least 8 characters long.");
+      return;
+    }
+
     try {
       const userCredential = await createUserWithEmailAndPassword(
         auth,
@@ -37,15 +58,15 @@ export default function Register() {
 
       await setDoc(newUserDocRef, {
         uid: user.uid,
-        displayName: inputs.name, // Using displayName for consistency with Auth
+        displayName: inputs.name,
         username: inputs.username,
-        email: inputs.email,
+        email: user.email,
         avatarUrl: "",
         bio: "",
         followersCount: 0,
         followingCount: 0,
-        postsCount: 0, // Initializing postsCount
-        createdAt: serverTimestamp(), // Added createdAt timestamp
+        postsCount: 0,
+        createdAt: serverTimestamp(),
       });
 
       navigate("/onboarding");

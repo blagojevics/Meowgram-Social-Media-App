@@ -93,7 +93,7 @@ export default function App() {
         </ProtectedRoute>
       ),
       children: [
-        { index: true, element: <Home /> },
+        { index: true, element: <Home currentUser={currentUser} /> },
         { path: "profile/:id", element: <Profile currentUser={currentUser} /> },
         { path: "addpost", element: <AddPost currentUser={currentUser} /> },
       ],
