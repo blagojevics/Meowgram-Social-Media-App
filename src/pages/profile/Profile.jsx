@@ -10,12 +10,12 @@ import {
   orderBy,
   query,
   where,
-  addDoc,
   deleteDoc,
   setDoc,
   increment,
   serverTimestamp,
-  updateDoc, // <<< ADDED THIS IMPORT
+  updateDoc,
+  addDoc,
 } from "firebase/firestore";
 import { db } from "../../config/firebase";
 import Post from "../../components/post/Post";
@@ -36,24 +36,15 @@ export default function Profile({ currentUser }) {
   const fetchUserProfileDetails = async () => {
     setLoadingProfile(true);
     setErrorProfile(null);
-
-    if (!userId) {
-      setErrorProfile("User ID not found in URL.");
-      setLoadingProfile(false);
-      return;
-    }
-
     try {
       const userDocRef = doc(db, "users", userId);
       const userDocSnap = await getDoc(userDocRef);
-
       if (userDocSnap.exists()) {
         setProfileData(userDocSnap.data());
       } else {
         setErrorProfile("User Profile not found.");
       }
     } catch (err) {
-      console.error("Error fetching profile details: ", err);
       setErrorProfile("Failed to load user profile");
     } finally {
       setLoadingProfile(false);
@@ -63,12 +54,6 @@ export default function Profile({ currentUser }) {
   const fetchUserPosts = async () => {
     setLoadingPosts(true);
     setErrorPosts(null);
-
-    if (!userId) {
-      setLoadingPosts(false);
-      return;
-    }
-
     try {
       const postsCollectionRef = collection(db, "posts");
       const q = query(
@@ -76,7 +61,6 @@ export default function Profile({ currentUser }) {
         where("userId", "==", userId),
         orderBy("createdAt", "desc")
       );
-
       const querySnapshot = await getDocs(q);
       const postsArray = querySnapshot.docs.map((doc) => ({
         id: doc.id,
@@ -84,7 +68,6 @@ export default function Profile({ currentUser }) {
       }));
       setProfilePosts(postsArray);
     } catch (err) {
-      console.error("Error fetching posts:", err);
       setErrorPosts("Failed to load posts.");
     } finally {
       setLoadingPosts(false);
@@ -96,7 +79,6 @@ export default function Profile({ currentUser }) {
       setIsFollowing(false);
       return;
     }
-
     try {
       const followsCollectionRef = collection(db, "followers");
       const q = query(
@@ -106,9 +88,7 @@ export default function Profile({ currentUser }) {
       );
       const querySnapshot = await getDocs(q);
       setIsFollowing(!querySnapshot.empty);
-    } catch (err) {
-      console.error("Error checking follow status:", err);
-    }
+    } catch (err) {}
   };
 
   useEffect(() => {
@@ -118,32 +98,24 @@ export default function Profile({ currentUser }) {
   }, [userId, currentUser]);
 
   const handleFollowToggle = async () => {
-    if (!currentUser) {
-      console.error("User must be logged in to follow.");
-      return;
-    }
-    if (isOwnProfile) {
-      console.error("Cannot follow/unfollow yourself.");
-      return;
-    }
-
+    if (!currentUser || isOwnProfile || loadingFollow) return;
     setLoadingFollow(true);
-    try {
-      const followerDocRef = doc(db, "users", currentUser.uid);
-      const followingDocRef = doc(db, "users", userId);
-      const followDocId = `${currentUser.uid}_${userId}`;
 
-      if (isFollowing) {
-        await deleteDoc(doc(db, "followers", followDocId));
+    const followerDocRef = doc(db, "users", currentUser.uid);
+    const followingDocRef = doc(db, "users", userId);
+    const followDocId = `${currentUser.uid}_${userId}`;
+    const followDocRef = doc(db, "followers", followDocId);
+
+    try {
+      const followDocSnap = await getDoc(followDocRef);
+
+      if (followDocSnap.exists()) {
+        await deleteDoc(followDocRef);
         await updateDoc(followerDocRef, { followingCount: increment(-1) });
         await updateDoc(followingDocRef, { followersCount: increment(-1) });
         setIsFollowing(false);
-        setProfileData((prev) => ({
-          ...prev,
-          followersCount: (prev.followersCount || 0) - 1,
-        }));
       } else {
-        await setDoc(doc(db, "followers", followDocId), {
+        await setDoc(followDocRef, {
           followerId: currentUser.uid,
           followingId: userId,
           timestamp: serverTimestamp(),
@@ -151,13 +123,20 @@ export default function Profile({ currentUser }) {
         await updateDoc(followerDocRef, { followingCount: increment(1) });
         await updateDoc(followingDocRef, { followersCount: increment(1) });
         setIsFollowing(true);
-        setProfileData((prev) => ({
-          ...prev,
-          followersCount: (prev.followersCount || 0) + 1,
-        }));
+        if (userId !== currentUser.uid) {
+          await addDoc(collection(db, "notifications"), {
+            userId: userId,
+            fromUserId: currentUser.uid,
+            type: "follow",
+            createdAt: serverTimestamp(),
+            read: false,
+          });
+        }
       }
+
+      await fetchUserProfileDetails();
     } catch (err) {
-      console.error("Error following/unfollowing:", err);
+      console.error("Follow/unfollow error:", err);
     } finally {
       setLoadingFollow(false);
     }
@@ -189,7 +168,6 @@ export default function Profile({ currentUser }) {
   if (errorProfile) {
     return <div className="error-message">Error: {errorProfile}</div>;
   }
-
   if (!profileData) {
     return <div className="no-profile-found">Profile not found.</div>;
   }
@@ -204,7 +182,6 @@ export default function Profile({ currentUser }) {
             className="profile-avatar"
           />
         </div>
-
         <div className="profile-info-container">
           <div className="profile-username-actions">
             <span className="profile-username">
@@ -226,7 +203,6 @@ export default function Profile({ currentUser }) {
               </button>
             )}
           </div>
-
           <div className="profile-stats">
             <div className="stat-item">
               <span className="stat-value">{profilePosts.length || 0}</span>
@@ -245,37 +221,19 @@ export default function Profile({ currentUser }) {
               <span className="stat-label">following</span>
             </div>
           </div>
-
           <div className="profile-bio">
             {profileData.bio &&
               profileData.bio
                 .split("\n")
                 .map((line, index) => <p key={index}>{line}</p>)}
           </div>
-
-          <div className="followed-by">
-            Followed by <span className="mutual-users"></span>
-          </div>
         </div>
       </div>
-
       <div className="profile-tabs">
         <div className="tab-item active">
-          <svg
-            aria-label=""
-            color="#ffffff"
-            fill="#ffffff"
-            height="12"
-            role="img"
-            viewBox="0 0 24 24"
-            width="12"
-          >
-            <path d="M1 0H0V24H24V1H1ZM23 23H1V1H23ZM6.5 16.5C7.328 16.5 8 15.828 8 15S7.328 13.5 6.5 13.5C5.672 13.5 5 14.172 5 15S5.672 16.5 6.5 16.5ZM17.5 7.5C16.672 7.5 16 8.172 16 9S16.672 10.5 17.5 10.5C18.328 10.5 19 9.828 19 9S18.328 7.5 17.5 7.5Z"></path>
-          </svg>
           <span className="tab-label">POSTS</span>
         </div>
       </div>
-
       <div className="profile-posts-grid">
         {loadingPosts ? (
           <div className="loading-posts">Loading posts...</div>

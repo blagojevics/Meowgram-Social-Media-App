@@ -55,9 +55,12 @@ export default function Leftbar({ currentUser }) {
             )}
           </li>
           <li>
+            <Link to="/notifications">Notifications</Link>
+          </li>
+          <li>
             <Link to="/addpost">Add Post</Link>
           </li>
-          {currentUser && ( // Conditionally render logout button only if a user is logged in
+          {currentUser && (
             <li>
               <button onClick={handleLogout} className="logout-button">
                 Logout

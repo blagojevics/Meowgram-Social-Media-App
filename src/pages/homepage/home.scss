@@ -1,9 +1,13 @@
 .home-container {
+  height: 100vh;
   width: 50%;
   display: flex;
   flex-direction: column;
   background-color: rgba(255, 255, 255, 0.68);
   margin: 0 auto;
+  overflow: scroll;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(219, 219, 219, 0.825) transparent;
 }
 
 .posts-feed {

@@ -1,77 +1,65 @@
-import { Link, useNavigate } from "react-router-dom";
+import React, { useState } from "react";
 import "./register.scss";
-import { auth } from "../../config/firebase";
+import { Link, useNavigate } from "react-router-dom";
+import { auth, db } from "../../config/firebase";
 import { createUserWithEmailAndPassword } from "firebase/auth";
-import { useState } from "react";
-import { db } from "../../config/firebase";
-import { doc, setDoc, serverTimestamp } from "firebase/firestore";
+import { doc, setDoc } from "firebase/firestore";
 
 export default function Register() {
-  const [inputs, setInputs] = useState({
+  const [formInputs, setFormInputs] = useState({
     name: "",
     username: "",
     email: "",
     password: "",
   });
-  const [err, setErr] = useState(null);
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
-    setInputs((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    setFormInputs((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  const handleRegister = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setError(null);
 
-    setErr(null);
+    if (
+      !formInputs.name ||
+      !formInputs.username ||
+      !formInputs.email ||
+      !formInputs.password
+    ) {
+      setError("Please fill in all fields.");
+      return;
+    }
 
-    if (!inputs.name.trim()) {
-      setErr("Name cannot be empty.");
-      return;
-    }
-    if (!inputs.username.trim()) {
-      setErr("Username cannot be empty.");
-      return;
-    }
-    if (!inputs.email.trim()) {
-      setErr("Email cannot be empty.");
-      return;
-    }
-    if (!inputs.password.trim()) {
-      setErr("Password cannot be empty.");
-      return;
-    }
-    if (inputs.password.length < 8) {
-      setErr("Password must be at least 8 characters long.");
-      return;
-    }
+    const storedUsername = formInputs.username.toLowerCase();
+    const storedDisplayName = formInputs.name;
+    const storedDisplayNameLowercase = formInputs.name.toLowerCase();
 
     try {
-      const userCredential = await createUserWithEmailAndPassword(
+      const res = await createUserWithEmailAndPassword(
         auth,
-        inputs.email,
-        inputs.password
+        formInputs.email,
+        formInputs.password
       );
-      const user = userCredential.user;
 
-      const newUserDocRef = doc(db, "users", user.uid);
-
-      await setDoc(newUserDocRef, {
-        uid: user.uid,
-        displayName: inputs.name,
-        username: inputs.username,
-        email: user.email,
+      await setDoc(doc(db, "users", res.user.uid), {
+        uid: res.user.uid,
+        username: storedUsername,
+        displayName: storedDisplayName,
+        displayNameLowercase: storedDisplayNameLowercase,
+        email: formInputs.email,
         avatarUrl: "",
         bio: "",
         followersCount: 0,
         followingCount: 0,
-        postsCount: 0,
-        createdAt: serverTimestamp(),
       });
 
       navigate("/onboarding");
-    } catch (error) {
-      setErr(error.message);
+    } catch (err) {
+      console.error("Registration error:", err);
+      setError(err.message);
     }
   };
 
@@ -79,56 +67,53 @@ export default function Register() {
     <div className="register">
       <div className="card">
         <div className="left">
-          <h1>Welcome to Meowgram</h1>
+          <h1>Meowgram.</h1>
           <p>
-            Lorem, ipsum dolor sit amet consectetur adipisicing elit. Sint in
-            blanditiis voluptatem explicabo, architecto rem cum id dolor fugit
-            aspernatur alias porro?
+            The social network exclusively for our feline friends. Share
+            purr-fect moments!
           </p>
-          <span>Have an account? Login now!</span>
+          <span>Do you have an account?</span>
           <Link to="/login">
-            <button type="button">Login!</button>
+            <button>Login</button>
           </Link>
         </div>
         <div className="right">
           <h1>Register</h1>
-          <form onSubmit={handleRegister}>
+          <form onSubmit={handleSubmit}>
             <input
               type="text"
-              placeholder="Name"
+              placeholder="Your Name (e.g., Mali Cat)"
               name="name"
               onChange={handleChange}
+              value={formInputs.name}
               required
-              value={inputs.name}
             />
             <input
               type="text"
-              placeholder="Username"
+              placeholder="Unique Username (e.g., mali_cat)"
               name="username"
               onChange={handleChange}
+              value={formInputs.username}
               required
-              value={inputs.username}
             />
             <input
               type="email"
               placeholder="Email"
               name="email"
               onChange={handleChange}
+              value={formInputs.email}
               required
-              value={inputs.email}
             />
             <input
               type="password"
               placeholder="Password"
               name="password"
               onChange={handleChange}
+              value={formInputs.password}
               required
-              minLength="8"
-              value={inputs.password}
             />
-            {err && <span style={{ color: "red" }}>{err}</span>}
-            <button type="submit">Register!</button>
-            <button>Register via Google Account</button>
+            {error && <span className="error-message">{error}</span>}
+            <button type="submit">Register</button>
           </form>
         </div>
       </div>

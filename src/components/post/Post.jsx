@@ -3,6 +3,8 @@ import { FaPaw, FaComment } from "react-icons/fa";
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import "./post.scss";
+import CommentList from "../commentList/CommentList";
+import CommentInput from "../commentInput/CommentInput";
 import {
   deleteDoc,
   doc,
@@ -10,6 +12,9 @@ import {
   arrayUnion,
   arrayRemove,
   increment,
+  collection,
+  addDoc,
+  serverTimestamp,
 } from "firebase/firestore";
 import { db } from "../../config/firebase";
 
@@ -25,10 +30,10 @@ export default function Post({ post, currentUser, onPostActionComplete }) {
   const [editedCaption, setEditedCaption] = useState(post.caption || "");
   const [editingError, setEditingError] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [showComments, setShowComments] = useState(false);
 
   useEffect(() => {
     setEditedCaption(post.caption || "");
-
     setIsLiked(
       currentUser &&
         post.likedByUsers &&
@@ -42,15 +47,9 @@ export default function Post({ post, currentUser, onPostActionComplete }) {
     : "";
 
   const handleLike = async () => {
-    if (!currentUser) {
-      console.log("User must be logged in to like posts.");
-
-      return;
-    }
-
+    if (!currentUser) return;
     const postDocRef = doc(db, "posts", post.id);
     const userId = currentUser.uid;
-
     try {
       if (isLiked) {
         await updateDoc(postDocRef, {
@@ -66,6 +65,16 @@ export default function Post({ post, currentUser, onPostActionComplete }) {
         });
         setIsLiked(true);
         setLikesCount((prev) => prev + 1);
+        if (post.userId !== currentUser.uid) {
+          await addDoc(collection(db, "notifications"), {
+            userId: post.userId,
+            fromUserId: currentUser.uid,
+            type: "like",
+            postId: post.id,
+            createdAt: serverTimestamp(),
+            read: false,
+          });
+        }
       }
     } catch (err) {
       console.error("Error updating like:", err);
@@ -93,21 +102,17 @@ export default function Post({ post, currentUser, onPostActionComplete }) {
 
   const handleSaveEdit = async () => {
     setEditingError(null);
-
     if (editedCaption.trim() === "") {
       setEditingError("Caption cannot be empty.");
       return;
     }
-
     if (editedCaption === post.caption) {
       setIsEditing(false);
       return;
     }
-
     try {
       const postDocRef = doc(db, "posts", post.id);
       await updateDoc(postDocRef, { caption: editedCaption });
-
       if (onPostActionComplete) {
         onPostActionComplete({
           type: "edit",
@@ -115,10 +120,8 @@ export default function Post({ post, currentUser, onPostActionComplete }) {
           newCaption: editedCaption,
         });
       }
-
       setIsEditing(false);
     } catch (err) {
-      console.error("Error saving caption:", err);
       setEditingError(err.message || "Failed to update caption.");
     }
   };
@@ -126,11 +129,9 @@ export default function Post({ post, currentUser, onPostActionComplete }) {
   const handleDeletePost = async () => {
     setIsDeleting(true);
     setShowOptions(false);
-
     try {
       const postDocRef = doc(db, "posts", post.id);
       await deleteDoc(postDocRef);
-
       if (onPostActionComplete) {
         onPostActionComplete({ type: "delete", postId: post.id });
       }
@@ -163,58 +164,15 @@ export default function Post({ post, currentUser, onPostActionComplete }) {
           </span>
         )}
         {showOptions && (
-          <div
-            className="post-options-menu"
-            style={{
-              position: "absolute",
-              top: "55px",
-              right: "5px",
-              backgroundColor: "white",
-              border: "1px solid lightgray",
-              borderRadius: "5px",
-              boxShadow: "0px 2px 5px rgba(0,0,0,0.1)",
-              zIndex: 10,
-              display: "flex",
-              flexDirection: "column",
-              overflow: "hidden",
-            }}
-          >
-            <button
-              onClick={handleEditClick}
-              className="post-options-menu-item"
-              style={{
-                background: "none",
-                border: "none",
-                padding: "8px 15px",
-                textAlign: "left",
-                cursor: "pointer",
-                fontSize: "14px",
-                whiteSpace: "nowrap",
-                color: "black",
-              }}
-            >
-              Edit Description
-            </button>
-            <button
-              onClick={handleDeletePost}
-              className="post-options-menu-item"
-              disabled={isDeleting}
-              style={{
-                background: "none",
-                border: "none",
-                padding: "8px 15px",
-                textAlign: "left",
-                cursor: "pointer",
-                fontSize: "14px",
-                whiteSpace: "nowrap",
-                color: "black",
-              }}
-            >
+          <div className="post-options-menu">
+            <button onClick={handleEditClick}>Edit Description</button>
+            <button onClick={handleDeletePost} disabled={isDeleting}>
               {isDeleting ? "Deleting..." : "Delete Post"}
             </button>
           </div>
         )}
       </div>
+
       <div className="post-image-container">
         <img
           src={
@@ -231,65 +189,26 @@ export default function Post({ post, currentUser, onPostActionComplete }) {
           <FaPaw style={{ color: isLiked ? "red" : "gray" }} />
         </button>
         <span className="post-likes-count">{likesCount} Paws</span>
-        <button className="post-action-button">
+        <button
+          onClick={() => setShowComments((prev) => !prev)}
+          className="post-action-button"
+        >
           <FaComment />
         </button>
         <span className="post-comments-count">{post.commentsCount || 0}</span>
       </div>
+
       <div className="post-caption">
         {isEditing ? (
-          <div style={{ padding: "10px" }}>
+          <div>
             <textarea
               value={editedCaption}
               onChange={handleEditedCaptionChange}
               rows="3"
-              style={{
-                width: "100%",
-                minHeight: "70px",
-                padding: "8px",
-                border: "1px solid lightgray",
-                borderRadius: "4px",
-                fontSize: "14px",
-              }}
             ></textarea>
-            {editingError && (
-              <p style={{ color: "red", fontSize: "12px" }}>{editingError}</p>
-            )}
-            <div
-              style={{
-                display: "flex",
-                gap: "10px",
-                justifyContent: "flex-end",
-                marginTop: "5px",
-              }}
-            >
-              <button
-                onClick={handleSaveEdit}
-                style={{
-                  padding: "5px 12px",
-                  borderRadius: "4px",
-                  cursor: "pointer",
-                  background: "#007bff",
-                  color: "white",
-                  border: "none",
-                }}
-              >
-                Save
-              </button>
-              <button
-                onClick={handleCancelEdit}
-                style={{
-                  padding: "5px 12px",
-                  borderRadius: "4px",
-                  cursor: "pointer",
-                  background: "#f0f0f0",
-                  color: "black",
-                  border: "none",
-                }}
-              >
-                Cancel
-              </button>
-            </div>
+            {editingError && <p style={{ color: "red" }}>{editingError}</p>}
+            <button onClick={handleSaveEdit}>Save</button>
+            <button onClick={handleCancelEdit}>Cancel</button>
           </div>
         ) : (
           <>
@@ -302,11 +221,25 @@ export default function Post({ post, currentUser, onPostActionComplete }) {
           </>
         )}
       </div>
+
       <div className="post-timestamp">
-        <span className="post-timestamp-text">
-          {formattedDate || "Date N/A"}
-        </span>
+        <span>{formattedDate || "Date N/A"}</span>
       </div>
+
+      {showComments && (
+        <div className="post-comment-section">
+          <CommentList postId={post.id} />
+          {currentUser ? (
+            <CommentInput
+              postId={post.id}
+              currentUser={currentUser}
+              post={post}
+            />
+          ) : (
+            <div style={{ fontSize: 12, color: "#777" }}>Log in to comment</div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

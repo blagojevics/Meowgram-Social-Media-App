@@ -13,6 +13,8 @@ import Home from "./pages/homepage/Home";
 import Profile from "./pages/profile/Profile";
 import Onboarding from "./pages/onboarding/Onboarding";
 import AddPost from "./pages/addpost/AddPost";
+import Search from "./pages/search/Search";
+import Notifications from "./pages/notifications/Notifications";
 import { useEffect, useState } from "react";
 import "./style.scss";
 import { auth, db } from "./config/firebase";
@@ -96,6 +98,11 @@ export default function App() {
         { index: true, element: <Home currentUser={currentUser} /> },
         { path: "profile/:id", element: <Profile currentUser={currentUser} /> },
         { path: "addpost", element: <AddPost currentUser={currentUser} /> },
+        { path: "search", element: <Search currentUser={currentUser} /> },
+        {
+          path: "notifications",
+          element: <Notifications currentUser={currentUser} />,
+        },
       ],
     },
     {
@@ -119,9 +126,5 @@ export default function App() {
     },
   ]);
 
-  return (
-    <>
-      <RouterProvider router={router} />
-    </>
-  );
+  return <RouterProvider router={router} />;
 }
