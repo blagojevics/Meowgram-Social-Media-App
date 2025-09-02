@@ -1,15 +1,23 @@
-import { useState, useEffect } from "react";
-
+import { useEffect, useState } from "react";
 import {
   collection,
   query,
+  where,
   orderBy,
   onSnapshot,
-  where,
+  deleteDoc,
+  doc,
+  updateDoc,
+  increment,
 } from "firebase/firestore";
 import { db } from "../../config/firebase";
 
-export default function CommentList({ postId }) {
+export default function CommentList({
+  postId,
+  currentUser,
+  isPostOwner,
+  onClose,
+}) {
   const [comments, setComments] = useState([]);
 
   useEffect(() => {
@@ -19,40 +27,30 @@ export default function CommentList({ postId }) {
       orderBy("createdAt", "asc")
     );
     const unsub = onSnapshot(q, (snap) => {
-      const list = snap.docs.map((d) => ({
-        id: d.id,
-        ...d.data(),
-      }));
-      setComments(list);
+      setComments(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
     });
     return () => unsub();
   }, [postId]);
 
+  const handleDelete = async (comment) => {
+    if (isPostOwner || comment.authorId === currentUser.uid) {
+      await deleteDoc(doc(db, "comments", comment.id));
+      await updateDoc(doc(db, "posts", postId), {
+        commentsCount: increment(-1),
+      });
+    }
+  };
+
   return (
-    <div className="comments-list" aria-label="comments">
+    <div>
+      <button onClick={onClose}>Close</button>
       {comments.map((c) => (
-        <div
-          key={c.id}
-          className="comment-item"
-          style={{
-            display: "flex",
-            gap: 8,
-            alignItems: "flex-start",
-            padding: "6px 0",
-          }}
-        >
-          <img
-            src={c.avatarUrl || "https://via.placeholder.com/28"}
-            alt=""
-            style={{ width: 28, height: 28, borderRadius: "50%" }}
-          />
-          <div>
-            <div style={{ fontSize: 13, fontWeight: 600 }}>{c.username}</div>
-            <div style={{ fontSize: 13 }}>{c.text}</div>
-            <div style={{ fontSize: 11, color: "#666" }}>
-              {c.createdAt?.toDate ? c.createdAt.toDate().toLocaleString() : ""}
-            </div>
-          </div>
+        <div key={c.id}>
+          <span>{c.username}</span>
+          <span>{c.text}</span>
+          {(isPostOwner || c.authorId === currentUser.uid) && (
+            <button onClick={() => handleDelete(c)}>Delete</button>
+          )}
         </div>
       ))}
     </div>

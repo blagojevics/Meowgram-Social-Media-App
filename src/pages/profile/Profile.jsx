@@ -1,11 +1,11 @@
 import "./profile.scss";
 import storyImg from "../../assets/story.png";
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
+import EditProfile from "../../components/editProfile/EditProfile";
 import { useParams } from "react-router-dom";
 import {
   collection,
   doc,
-  getDoc,
   getDocs,
   orderBy,
   query,
@@ -16,6 +16,8 @@ import {
   serverTimestamp,
   updateDoc,
   addDoc,
+  onSnapshot,
+  getDoc,
 } from "firebase/firestore";
 import { db } from "../../config/firebase";
 import Post from "../../components/post/Post";
@@ -29,28 +31,37 @@ export default function Profile({ currentUser }) {
   const [errorPosts, setErrorPosts] = useState(null);
   const [isFollowing, setIsFollowing] = useState(false);
   const [loadingFollow, setLoadingFollow] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedPost, setSelectedPost] = useState(null); // for modal
 
   const { id: userId } = useParams();
   const isOwnProfile = currentUser && currentUser.uid === userId;
 
-  const fetchUserProfileDetails = async () => {
+  // Real-time profile listener
+  useEffect(() => {
+    if (!userId) return;
     setLoadingProfile(true);
-    setErrorProfile(null);
-    try {
-      const userDocRef = doc(db, "users", userId);
-      const userDocSnap = await getDoc(userDocRef);
-      if (userDocSnap.exists()) {
-        setProfileData(userDocSnap.data());
-      } else {
-        setErrorProfile("User Profile not found.");
+    const userDocRef = doc(db, "users", userId);
+    const unsub = onSnapshot(
+      userDocRef,
+      (snap) => {
+        if (snap.exists()) {
+          setProfileData(snap.data());
+          setErrorProfile(null);
+        } else {
+          setErrorProfile("User Profile not found.");
+        }
+        setLoadingProfile(false);
+      },
+      () => {
+        setErrorProfile("Failed to load user profile");
+        setLoadingProfile(false);
       }
-    } catch (err) {
-      setErrorProfile("Failed to load user profile");
-    } finally {
-      setLoadingProfile(false);
-    }
-  };
+    );
+    return () => unsub();
+  }, [userId]);
 
+  // Fetch posts once
   const fetchUserPosts = async () => {
     setLoadingPosts(true);
     setErrorPosts(null);
@@ -74,6 +85,7 @@ export default function Profile({ currentUser }) {
     }
   };
 
+  // Check follow status
   const checkFollowStatus = async () => {
     if (!currentUser || isOwnProfile) {
       setIsFollowing(false);
@@ -92,11 +104,11 @@ export default function Profile({ currentUser }) {
   };
 
   useEffect(() => {
-    fetchUserProfileDetails();
     fetchUserPosts();
     checkFollowStatus();
   }, [userId, currentUser]);
 
+  // Follow/unfollow toggle
   const handleFollowToggle = async () => {
     if (!currentUser || isOwnProfile || loadingFollow) return;
     setLoadingFollow(true);
@@ -110,11 +122,13 @@ export default function Profile({ currentUser }) {
       const followDocSnap = await getDoc(followDocRef);
 
       if (followDocSnap.exists()) {
+        // Unfollow
         await deleteDoc(followDocRef);
         await updateDoc(followerDocRef, { followingCount: increment(-1) });
         await updateDoc(followingDocRef, { followersCount: increment(-1) });
         setIsFollowing(false);
       } else {
+        // Follow
         await setDoc(followDocRef, {
           followerId: currentUser.uid,
           followingId: userId,
@@ -123,6 +137,8 @@ export default function Profile({ currentUser }) {
         await updateDoc(followerDocRef, { followingCount: increment(1) });
         await updateDoc(followingDocRef, { followersCount: increment(1) });
         setIsFollowing(true);
+
+        // Create follow notification
         if (userId !== currentUser.uid) {
           await addDoc(collection(db, "notifications"), {
             userId: userId,
@@ -133,8 +149,6 @@ export default function Profile({ currentUser }) {
           });
         }
       }
-
-      await fetchUserProfileDetails();
     } catch (err) {
       console.error("Follow/unfollow error:", err);
     } finally {
@@ -185,10 +199,26 @@ export default function Profile({ currentUser }) {
         <div className="profile-info-container">
           <div className="profile-username-actions">
             <span className="profile-username">
-              {profileData.username || profileData.displayName || "No Username"}
+              {profileData.username || "No Username"}
+            </span>
+            <span className="profile-displayname">
+              {profileData.displayName || ""}
             </span>
             {isOwnProfile ? (
-              <button className="edit-profile-button">Edit Profile</button>
+              <>
+                <button
+                  className="edit-profile-button"
+                  onClick={() => setShowEditModal(true)}
+                >
+                  Edit Profile
+                </button>
+                {showEditModal && (
+                  <EditProfile
+                    currentUser={currentUser}
+                    onClose={() => setShowEditModal(false)}
+                  />
+                )}
+              </>
             ) : (
               <button
                 onClick={handleFollowToggle}
@@ -234,6 +264,8 @@ export default function Profile({ currentUser }) {
           <span className="tab-label">POSTS</span>
         </div>
       </div>
+
+      {/* --- Instagram-style grid --- */}
       <div className="profile-posts-grid">
         {loadingPosts ? (
           <div className="loading-posts">Loading posts...</div>
@@ -243,15 +275,32 @@ export default function Profile({ currentUser }) {
           <div className="no-posts-message">No posts to display yet.</div>
         ) : (
           profilePosts.map((post) => (
-            <Post
+            <div
               key={post.id}
-              post={post}
-              currentUser={currentUser}
-              onPostActionComplete={handlePostActionComplete}
-            />
+              className="post-grid-item"
+              onClick={() => setSelectedPost(post)}
+            >
+              <img src={post.imageUrl} alt={post.caption || "Post"} />
+            </div>
           ))
         )}
       </div>
+
+      {/* --- Modal with full Post --- */}
+      {selectedPost && (
+        <div className="post-modal">
+          <div className="post-modal-content">
+            <button className="close-btn" onClick={() => setSelectedPost(null)}>
+              X
+            </button>
+            <Post
+              post={selectedPost}
+              currentUser={currentUser}
+              onPostActionComplete={handlePostActionComplete}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

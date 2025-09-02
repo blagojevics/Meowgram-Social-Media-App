@@ -1,9 +1,13 @@
 import React, { useState } from "react";
-import "./register.scss";
 import { Link, useNavigate } from "react-router-dom";
 import { auth, db } from "../../config/firebase";
-import { createUserWithEmailAndPassword } from "firebase/auth";
-import { doc, setDoc } from "firebase/firestore";
+import {
+  createUserWithEmailAndPassword,
+  updateProfile,
+  sendEmailVerification,
+} from "firebase/auth";
+import { doc, setDoc, serverTimestamp } from "firebase/firestore";
+import "./register.scss";
 
 export default function Register() {
   const [formInputs, setFormInputs] = useState({
@@ -23,20 +27,6 @@ export default function Register() {
     e.preventDefault();
     setError(null);
 
-    if (
-      !formInputs.name ||
-      !formInputs.username ||
-      !formInputs.email ||
-      !formInputs.password
-    ) {
-      setError("Please fill in all fields.");
-      return;
-    }
-
-    const storedUsername = formInputs.username.toLowerCase();
-    const storedDisplayName = formInputs.name;
-    const storedDisplayNameLowercase = formInputs.name.toLowerCase();
-
     try {
       const res = await createUserWithEmailAndPassword(
         auth,
@@ -44,19 +34,29 @@ export default function Register() {
         formInputs.password
       );
 
-      await setDoc(doc(db, "users", res.user.uid), {
-        uid: res.user.uid,
-        username: storedUsername,
-        displayName: storedDisplayName,
-        displayNameLowercase: storedDisplayNameLowercase,
-        email: formInputs.email,
-        avatarUrl: "",
-        bio: "",
-        followersCount: 0,
-        followingCount: 0,
-      });
+      await updateProfile(res.user, { displayName: formInputs.username });
 
-      navigate("/onboarding");
+      await setDoc(
+        doc(db, "users", res.user.uid),
+        {
+          uid: res.user.uid,
+          username: formInputs.username.toLowerCase(),
+          displayName: formInputs.name,
+          email: formInputs.email,
+          avatarUrl: "",
+          bio: "",
+          followersCount: 0,
+          followingCount: 0,
+          postsCount: 0,
+          onboardingComplete: false,
+          createdAt: serverTimestamp(),
+        },
+        { merge: true }
+      );
+
+      await sendEmailVerification(res.user);
+
+      navigate("/verify-email");
     } catch (err) {
       console.error("Registration error:", err);
       setError(err.message);
@@ -68,10 +68,7 @@ export default function Register() {
       <div className="card">
         <div className="left">
           <h1>Meowgram.</h1>
-          <p>
-            The social network exclusively for our feline friends. Share
-            purr-fect moments!
-          </p>
+          <p>The social network exclusively for our feline friends.</p>
           <span>Do you have an account?</span>
           <Link to="/login">
             <button>Login</button>
@@ -82,7 +79,7 @@ export default function Register() {
           <form onSubmit={handleSubmit}>
             <input
               type="text"
-              placeholder="Your Name (e.g., Mali Cat)"
+              placeholder="Your Name"
               name="name"
               onChange={handleChange}
               value={formInputs.name}
@@ -90,7 +87,7 @@ export default function Register() {
             />
             <input
               type="text"
-              placeholder="Unique Username (e.g., mali_cat)"
+              placeholder="Unique Username"
               name="username"
               onChange={handleChange}
               value={formInputs.username}

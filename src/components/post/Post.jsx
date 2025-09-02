@@ -15,6 +15,10 @@ import {
   collection,
   addDoc,
   serverTimestamp,
+  query,
+  where,
+  orderBy,
+  onSnapshot,
 } from "firebase/firestore";
 import { db } from "../../config/firebase";
 
@@ -30,7 +34,11 @@ export default function Post({ post, currentUser, onPostActionComplete }) {
   const [editedCaption, setEditedCaption] = useState(post.caption || "");
   const [editingError, setEditingError] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [showComments, setShowComments] = useState(false);
+
+  // comments
+  const [previewComments, setPreviewComments] = useState([]);
+  const [totalComments, setTotalComments] = useState(0);
+  const [showFullComments, setShowFullComments] = useState(false);
 
   useEffect(() => {
     setEditedCaption(post.caption || "");
@@ -142,6 +150,25 @@ export default function Post({ post, currentUser, onPostActionComplete }) {
     }
   };
 
+  // fetch preview comments
+  useEffect(() => {
+    const q = query(
+      collection(db, "comments"),
+      where("postId", "==", post.id),
+      orderBy("createdAt", "desc")
+    );
+    const unsub = onSnapshot(q, (snap) => {
+      const all = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+      setTotalComments(all.length);
+      if (all.length < 10) {
+        setPreviewComments(all.slice(0, 1));
+      } else {
+        setPreviewComments(all.slice(0, 2));
+      }
+    });
+    return () => unsub();
+  }, [post.id]);
+
   return (
     <div className="post-card">
       <div className="post-header">
@@ -154,7 +181,7 @@ export default function Post({ post, currentUser, onPostActionComplete }) {
             alt="User Avatar"
             className="post-header-avatar"
           />
-          <span className="post-header-username">
+          <span className="post-username-header">
             {post.username || "Unknown User"}
           </span>
         </Link>
@@ -190,7 +217,7 @@ export default function Post({ post, currentUser, onPostActionComplete }) {
         </button>
         <span className="post-likes-count">{likesCount} Paws</span>
         <button
-          onClick={() => setShowComments((prev) => !prev)}
+          onClick={() => setShowFullComments(true)}
           className="post-action-button"
         >
           <FaComment />
@@ -226,18 +253,54 @@ export default function Post({ post, currentUser, onPostActionComplete }) {
         <span>{formattedDate || "Date N/A"}</span>
       </div>
 
-      {showComments && (
-        <div className="post-comment-section">
-          <CommentList postId={post.id} />
-          {currentUser ? (
-            <CommentInput
-              postId={post.id}
-              currentUser={currentUser}
-              post={post}
+      {/* --- Comments preview --- */}
+      <div className="post-comment-section">
+        {previewComments.map((c) => (
+          <div key={c.id} className="comment">
+            <img
+              src={c.avatarUrl || "https://via.placeholder.com/24"}
+              alt=""
+              className="comment-avatar"
             />
-          ) : (
-            <div style={{ fontSize: 12, color: "#777" }}>Log in to comment</div>
-          )}
+            <span className="comment-username">{c.username}</span>
+            <span className="comment-text">{c.text}</span>
+          </div>
+        ))}
+
+        {totalComments > previewComments.length && (
+          <button
+            onClick={() => setShowFullComments(true)}
+            className="show-more-comments-btn"
+          >
+            Show more comments
+          </button>
+        )}
+      </div>
+
+      {/* --- Full comments modal/list --- */}
+      {showFullComments && (
+        <CommentList
+          postId={post.id}
+          currentUser={currentUser}
+          isPostOwner={post.userId === currentUser.uid}
+          onClose={() => setShowFullComments(false)}
+        />
+      )}
+
+      {/* --- Comment input --- */}
+      {currentUser ? (
+        <CommentInput postId={post.id} currentUser={currentUser} post={post} />
+      ) : (
+        <div
+          style={{
+            fontSize: 12,
+            color: "#777",
+            margin: "0 auto",
+            width: "90%",
+            height: "50px",
+          }}
+        >
+          Log in to comment
         </div>
       )}
     </div>

@@ -11,15 +11,6 @@ export default function Leftbar({ currentUser }) {
 
   const navigate = useNavigate();
 
-  const handleLogout = async () => {
-    try {
-      await signOut(auth);
-      navigate("/login");
-    } catch (err) {
-      console.log(err);
-    }
-  };
-
   return (
     <div className="container">
       <div className="logo-container">
@@ -60,13 +51,9 @@ export default function Leftbar({ currentUser }) {
           <li>
             <Link to="/addpost">Add Post</Link>
           </li>
-          {currentUser && (
-            <li>
-              <button onClick={handleLogout} className="logout-button">
-                Logout
-              </button>
-            </li>
-          )}
+          <li>
+            <Link to="/settings">Settings</Link>
+          </li>
         </ul>
       </div>
     </div>

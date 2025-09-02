@@ -1,5 +1,7 @@
 import Login from "./pages/login/Login";
 import Register from "./pages/register/Register";
+import VerifyEmail from "./pages/verifyEmail/VerifyEmail";
+import Settings from "./pages/settings/Settings";
 import {
   createBrowserRouter,
   RouterProvider,
@@ -19,21 +21,33 @@ import { useEffect, useState } from "react";
 import "./style.scss";
 import { auth, db } from "./config/firebase";
 import { onAuthStateChanged } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, onSnapshot } from "firebase/firestore";
 
 const ProtectedRoute = ({ children, currentUser, userProfileCompleted }) => {
   const location = useLocation();
 
   if (currentUser === undefined || userProfileCompleted === undefined) {
-    return <div>Loading authentication...</div>;
+    return <div>Loading...</div>;
   }
 
+  // Not logged in
   if (!currentUser) {
-    return <Navigate to="/login" state={{ from: location }} />;
+    return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
+  // Logged in but email not verified
+  if (currentUser && !currentUser.emailVerified) {
+    return <Navigate to="/verify-email" replace />;
+  }
+
+  // Verified but not onboarded
   if (userProfileCompleted === false && location.pathname !== "/onboarding") {
-    return <Navigate to="/onboarding" state={{ from: location }} />;
+    return <Navigate to="/onboarding" replace />;
+  }
+
+  // Already onboarded but trying to access onboarding
+  if (userProfileCompleted === true && location.pathname === "/onboarding") {
+    return <Navigate to="/" replace />;
   }
 
   return children;
@@ -54,33 +68,33 @@ export default function App() {
   };
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+    let unsubscribeDoc;
+    const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
+      if (unsubscribeDoc) {
+        unsubscribeDoc();
+        unsubscribeDoc = null;
+      }
       if (user) {
-        const userDocRef = doc(db, "users", user.uid);
-        const userDocSnap = await getDoc(userDocRef);
-
-        if (userDocSnap.exists()) {
-          const userData = userDocSnap.data();
-          setCurrentUser({
-            ...user,
-            ...userData,
-          });
-
-          if (userData.avatarUrl && userData.bio) {
-            setUserProfileCompleted(true);
+        const ref = doc(db, "users", user.uid);
+        unsubscribeDoc = onSnapshot(ref, (snap) => {
+          if (snap.exists()) {
+            const data = snap.data();
+            setCurrentUser({ ...user, ...data });
+            setUserProfileCompleted(!!data.onboardingComplete);
           } else {
+            setCurrentUser(user);
             setUserProfileCompleted(false);
           }
-        } else {
-          setCurrentUser(user);
-          setUserProfileCompleted(false);
-        }
+        });
       } else {
         setCurrentUser(null);
         setUserProfileCompleted(undefined);
       }
     });
-    return () => unsubscribe();
+    return () => {
+      unsubscribeAuth();
+      if (unsubscribeDoc) unsubscribeDoc();
+    };
   }, []);
 
   const router = createBrowserRouter([
@@ -103,16 +117,14 @@ export default function App() {
           path: "notifications",
           element: <Notifications currentUser={currentUser} />,
         },
+        {
+          path: "settings",
+          element: <Settings currentUser={currentUser} />,
+        },
       ],
     },
-    {
-      path: "/login",
-      element: <Login />,
-    },
-    {
-      path: "/register",
-      element: <Register />,
-    },
+    { path: "/login", element: <Login /> },
+    { path: "/register", element: <Register /> },
     {
       path: "/onboarding",
       element: (
@@ -124,6 +136,7 @@ export default function App() {
         </ProtectedRoute>
       ),
     },
+    { path: "/verify-email", element: <VerifyEmail /> },
   ]);
 
   return <RouterProvider router={router} />;

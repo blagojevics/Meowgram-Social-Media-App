@@ -77,6 +77,7 @@ export default function Onboarding() {
           email: currentUser.email,
           bio: bio,
           avatarUrl: avatarUrl,
+          onboardingComplete: true,
           createdAt: serverTimestamp(),
         },
         { merge: true }

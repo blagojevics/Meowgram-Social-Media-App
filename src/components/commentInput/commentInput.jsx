@@ -48,39 +48,23 @@ export default function CommentInput({ postId, currentUser, post }) {
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="comment-input"
-      style={{ display: "flex", alignItems: "center", gap: 8, paddingTop: 8 }}
-    >
+    <form onSubmit={handleSubmit} className="comment-input">
       <img
+        style={{ width: "50px" }}
         src={currentUser?.avatarUrl || "https://via.placeholder.com/28"}
         alt=""
-        style={{ width: 28, height: 28, borderRadius: "50%" }}
+        className="comment-input-avatar"
       />
       <input
         value={text}
         onChange={(e) => setText(e.target.value)}
         placeholder="Write a comment..."
-        style={{
-          flex: 1,
-          padding: "8px 10px",
-          borderRadius: 6,
-          border: "1px solid #ddd",
-          outline: "none",
-        }}
+        className="comment-input-field"
       />
       <button
         type="submit"
         disabled={!text.trim()}
-        style={{
-          padding: "8px 12px",
-          borderRadius: 6,
-          border: "none",
-          background: text.trim() ? "#007bff" : "#ccc",
-          color: "white",
-          cursor: text.trim() ? "pointer" : "not-allowed",
-        }}
+        className="comment-input-btn"
       >
         Post
       </button>
