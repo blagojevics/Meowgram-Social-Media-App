@@ -1,52 +1,59 @@
 import "./home.scss";
 import Stories from "../../components/stories/Stories";
 import { useEffect, useState } from "react";
-import { collection, query, orderBy, getDocs } from "firebase/firestore";
+import { collection, query, orderBy, onSnapshot } from "firebase/firestore";
 import { db } from "../../config/firebase";
 import Post from "../../components/post/Post";
+import { useAuth } from "../../context/AuthContext";
 
-export default function Home({ currentUser }) {
+export default function Home() {
+  const { authUser, userDoc } = useAuth();
   const [posts, setPosts] = useState([]);
   const [loadingPosts, setLoadingPosts] = useState(true);
   const [error, setError] = useState(null);
 
-  const fetchPosts = async () => {
+  useEffect(() => {
+    if (!authUser) return;
+
     setLoadingPosts(true);
     setError(null);
 
     try {
       const postsCollectionRef = collection(db, "posts");
       const q = query(postsCollectionRef, orderBy("createdAt", "desc"));
-      const querySnapshot = await getDocs(q);
 
-      const postsArray = querySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      setPosts(postsArray);
+      const unsub = onSnapshot(
+        q,
+        (snapshot) => {
+          const postsArray = snapshot.docs.map((doc) => {
+            const data = doc.data();
+            return {
+              id: doc.id,
+              ...data,
+              createdAt: data.createdAt || null,
+            };
+          });
+          setPosts(postsArray);
+          setLoadingPosts(false);
+        },
+        (err) => {
+          console.error("Error fetching posts:", err);
+          setError(err.message || "Failed to load posts from server.");
+          setLoadingPosts(false);
+        }
+      );
+
+      return () => unsub();
     } catch (err) {
-      console.error("Error fetching posts:", err);
+      console.error("Error setting up listener:", err);
       setError(err.message || "Failed to load posts from server.");
-    } finally {
       setLoadingPosts(false);
     }
-  };
+  }, [authUser]);
 
-  useEffect(() => {
-    fetchPosts();
-  }, [currentUser]);
-
-  const handlePostActionComplete = ({ type, postId, newCaption }) => {
-    if (type === "delete") {
-      setPosts((prevPosts) => prevPosts.filter((post) => post.id !== postId));
-    } else if (type === "edit") {
-      setPosts((prevPosts) =>
-        prevPosts.map((post) =>
-          post.id === postId ? { ...post, caption: newCaption } : post
-        )
-      );
-    }
-  };
+  if (!authUser || !userDoc) {
+    return <div className="loading-message">Loading user...</div>;
+  }
 
   if (loadingPosts) {
     return <div className="loading-message">Loading posts...</div>;
@@ -72,8 +79,7 @@ export default function Home({ currentUser }) {
           <Post
             key={post.id}
             post={post}
-            currentUser={currentUser}
-            onPostActionComplete={handlePostActionComplete}
+            currentUser={{ ...authUser, ...userDoc }}
           />
         ))}
       </div>

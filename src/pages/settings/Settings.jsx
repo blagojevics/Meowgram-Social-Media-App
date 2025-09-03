@@ -1,15 +1,25 @@
 import { useState } from "react";
-import { auth, db } from "../../config/firebase";
-import { signOut, sendPasswordResetEmail, deleteUser } from "firebase/auth";
+import { auth, db, googleProvider } from "../../config/firebase";
+import {
+  signOut,
+  sendPasswordResetEmail,
+  deleteUser,
+  reauthenticateWithCredential,
+  EmailAuthProvider,
+  reauthenticateWithPopup,
+} from "firebase/auth";
 import { doc, deleteDoc } from "firebase/firestore";
+import { useNavigate } from "react-router-dom";
 
 export default function Settings() {
   const [status, setStatus] = useState("");
+  const navigate = useNavigate();
 
   const handleLogout = async () => {
     try {
       await signOut(auth);
       setStatus("Logged out successfully.");
+      navigate("/login");
     } catch (err) {
       setStatus("Error logging out: " + err.message);
     }
@@ -29,15 +39,48 @@ export default function Settings() {
   };
 
   const handleDeleteAccount = async () => {
-    if (!auth.currentUser) return;
+    const user = auth.currentUser;
+    if (!user) return;
+
     try {
-      // Delete Firestore user doc
-      await deleteDoc(doc(db, "users", auth.currentUser.uid));
-      // Delete Auth user
-      await deleteUser(auth.currentUser);
+      // Try deleting directly
+      await deleteDoc(doc(db, "users", user.uid));
+      await deleteUser(user);
       setStatus("Account deleted successfully.");
+      navigate("/login");
     } catch (err) {
-      setStatus("Error deleting account: " + err.message);
+      if (err.code === "auth/requires-recent-login") {
+        setStatus("Re-authentication required...");
+
+        try {
+          if (user.providerData[0]?.providerId === "password") {
+            // Email/Password re-auth
+            const password = prompt("Please re-enter your password:");
+            if (!password) {
+              setStatus("Password required to delete account.");
+              return;
+            }
+            const credential = EmailAuthProvider.credential(
+              user.email,
+              password
+            );
+            await reauthenticateWithCredential(user, credential);
+          } else if (user.providerData[0]?.providerId === "google.com") {
+            // Google re-auth
+            await reauthenticateWithPopup(user, googleProvider);
+          }
+
+          // Retry deletion after re-auth
+          await deleteDoc(doc(db, "users", user.uid));
+          await deleteUser(user);
+          setStatus("Account deleted successfully.");
+          navigate("/login");
+        } catch (reauthErr) {
+          setStatus("Re-authentication failed: " + reauthErr.message);
+        }
+      } else {
+        setStatus("Error deleting account: " + err.message);
+      }
     }
   };
 

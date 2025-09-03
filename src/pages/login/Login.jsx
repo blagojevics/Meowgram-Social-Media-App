@@ -1,18 +1,16 @@
 import { Link, useNavigate } from "react-router-dom";
 import "./login.scss";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { auth, db, googleProvider } from "../../config/firebase";
 import { signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
 import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
+import { useAuth } from "../../context/AuthContext";
 
 export default function Login() {
-  const [inputs, setInputs] = useState({
-    email: "",
-    password: "",
-  });
-
+  const [inputs, setInputs] = useState({ email: "", password: "" });
   const [err, setErr] = useState(null);
   const navigate = useNavigate();
+  const { authUser, userDoc } = useAuth();
 
   const handleChange = (e) => {
     setInputs((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -21,10 +19,9 @@ export default function Login() {
   const handleLogin = async (e) => {
     e.preventDefault();
     setErr(null);
-
     try {
       await signInWithEmailAndPassword(auth, inputs.email, inputs.password);
-      navigate("/");
+      // ✅ no navigate here, we let useEffect handle it
     } catch (error) {
       setErr(error.message);
       console.error("Login error:", error.message);
@@ -37,12 +34,10 @@ export default function Login() {
       const result = await signInWithPopup(auth, googleProvider);
       const user = result.user;
 
-      // Check if Firestore user doc exists
       const userDocRef = doc(db, "users", user.uid);
       const userDocSnap = await getDoc(userDocRef);
 
       if (!userDocSnap.exists()) {
-        // Create Firestore doc for new Google user
         await setDoc(userDocRef, {
           uid: user.uid,
           username: user.displayName?.toLowerCase().replace(/\s+/g, "") || "",
@@ -57,13 +52,25 @@ export default function Login() {
           createdAt: serverTimestamp(),
         });
       }
-
-      navigate("/");
+      // ✅ no navigate here either, let useEffect handle it
     } catch (error) {
       setErr(error.message);
       console.error("Google login error:", error.message);
     }
   };
+
+  // ✅ Redirect once both authUser and userDoc are ready
+  useEffect(() => {
+    if (authUser && userDoc) {
+      if (!authUser.emailVerified) {
+        navigate("/verify-email");
+      } else if (userDoc.onboardingComplete === false) {
+        navigate("/onboarding");
+      } else {
+        navigate("/");
+      }
+    }
+  }, [authUser, userDoc, navigate]);
 
   return (
     <div className="login">

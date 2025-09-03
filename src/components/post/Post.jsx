@@ -1,10 +1,11 @@
 import { Link } from "react-router-dom";
 import { FaPaw, FaComment } from "react-icons/fa";
-import { useState, useEffect } from "react";
-import { format } from "date-fns";
+import { useState, useEffect, useRef } from "react";
+import CommentsModal from "../commentsmodal/CommentsModal";
 import "./post.scss";
-import CommentList from "../commentList/CommentList";
-import CommentInput from "../commentInput/CommentInput";
+import CommentList from "../comment-list/CommentList";
+import formatTimeAgo from "../../config/timeFormat";
+import CommentInput from "../comment-input/CommentInput";
 import {
   deleteDoc,
   doc,
@@ -35,11 +36,15 @@ export default function Post({ post, currentUser, onPostActionComplete }) {
   const [editingError, setEditingError] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  // comments
   const [previewComments, setPreviewComments] = useState([]);
   const [totalComments, setTotalComments] = useState(0);
   const [showFullComments, setShowFullComments] = useState(false);
 
+  const [postUser, setPostUser] = useState(null); // 🔑 live user data
+
+  const optionsRef = useRef(null);
+
+  // keep state in sync with Firestore
   useEffect(() => {
     setEditedCaption(post.caption || "");
     setIsLiked(
@@ -50,10 +55,34 @@ export default function Post({ post, currentUser, onPostActionComplete }) {
     setLikesCount(post.likesCount || 0);
   }, [post, currentUser]);
 
-  const formattedDate = post.createdAt
-    ? format(post.createdAt.toDate(), "MMM d, yyyy 'at' h:mm a")
-    : "";
+  // subscribe to live user profile
+  useEffect(() => {
+    if (!post.userId) return;
+    const ref = doc(db, "users", post.userId);
+    const unsub = onSnapshot(ref, (snap) => {
+      if (snap.exists()) {
+        setPostUser(snap.data());
+      }
+    });
+    return () => unsub();
+  }, [post.userId]);
 
+  // close options menu on outside click
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (optionsRef.current && !optionsRef.current.contains(e.target)) {
+        setShowOptions(false);
+      }
+    };
+    if (showOptions) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showOptions]);
+
+  // like/unlike
   const handleLike = async () => {
     if (!currentUser) return;
     const postDocRef = doc(db, "posts", post.id);
@@ -64,15 +93,11 @@ export default function Post({ post, currentUser, onPostActionComplete }) {
           likesCount: increment(-1),
           likedByUsers: arrayRemove(userId),
         });
-        setIsLiked(false);
-        setLikesCount((prev) => prev - 1);
       } else {
         await updateDoc(postDocRef, {
           likesCount: increment(1),
           likedByUsers: arrayUnion(userId),
         });
-        setIsLiked(true);
-        setLikesCount((prev) => prev + 1);
         if (post.userId !== currentUser.uid) {
           await addDoc(collection(db, "notifications"), {
             userId: post.userId,
@@ -89,10 +114,7 @@ export default function Post({ post, currentUser, onPostActionComplete }) {
     }
   };
 
-  const handleOpenOptions = () => {
-    setShowOptions((prev) => !prev);
-  };
-
+  // edit caption
   const handleEditClick = () => {
     setIsEditing(true);
     setShowOptions(false);
@@ -134,6 +156,7 @@ export default function Post({ post, currentUser, onPostActionComplete }) {
     }
   };
 
+  // delete post
   const handleDeletePost = async () => {
     setIsDeleting(true);
     setShowOptions(false);
@@ -150,7 +173,7 @@ export default function Post({ post, currentUser, onPostActionComplete }) {
     }
   };
 
-  // fetch preview comments
+  // fetch preview comments safely
   useEffect(() => {
     const q = query(
       collection(db, "comments"),
@@ -158,13 +181,16 @@ export default function Post({ post, currentUser, onPostActionComplete }) {
       orderBy("createdAt", "desc")
     );
     const unsub = onSnapshot(q, (snap) => {
-      const all = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+      const all = snap.docs.map((d) => {
+        const data = d.data();
+        return {
+          id: d.id,
+          ...data,
+          createdAt: data.createdAt || { toDate: () => new Date(0) },
+        };
+      });
       setTotalComments(all.length);
-      if (all.length < 10) {
-        setPreviewComments(all.slice(0, 1));
-      } else {
-        setPreviewComments(all.slice(0, 2));
-      }
+      setPreviewComments(all.slice(0, all.length < 10 ? 1 : 2));
     });
     return () => unsub();
   }, [post.id]);
@@ -175,23 +201,26 @@ export default function Post({ post, currentUser, onPostActionComplete }) {
         <Link to={`/profile/${post.userId}`} className="post-header-user-link">
           <img
             src={
-              post.userAvatar ||
+              postUser?.avatarUrl ||
               "https://via.placeholder.com/50/CCCCCC/FFFFFF?text=AV"
             }
             alt="User Avatar"
             className="post-header-avatar"
           />
           <span className="post-username-header">
-            {post.username || "Unknown User"}
+            {postUser?.username || "Unknown User"}
           </span>
         </Link>
         {currentUser && currentUser.uid === post.userId && (
-          <span onClick={handleOpenOptions} className="post-options-trigger">
+          <span
+            onClick={() => setShowOptions((p) => !p)}
+            className="post-options-trigger"
+          >
             •••
           </span>
         )}
         {showOptions && (
-          <div className="post-options-menu">
+          <div ref={optionsRef} className="post-options-menu">
             <button onClick={handleEditClick}>Edit Description</button>
             <button onClick={handleDeletePost} disabled={isDeleting}>
               {isDeleting ? "Deleting..." : "Delete Post"}
@@ -206,7 +235,9 @@ export default function Post({ post, currentUser, onPostActionComplete }) {
             post.imageUrl ||
             "https://via.placeholder.com/600x400/CCCCCC/FFFFFF?text=No%20Image"
           }
-          alt={post.caption || `Post by ${post.username || "Unknown User"}`}
+          alt={
+            post.caption || `Post by ${postUser?.username || "Unknown User"}`
+          }
           className="post-image"
         />
       </div>
@@ -240,20 +271,21 @@ export default function Post({ post, currentUser, onPostActionComplete }) {
         ) : (
           <>
             <span className="post-caption-username">
-              {post.username || "Unknown User"}
+              {postUser?.username || "Unknown User"}
             </span>
             <span className="post-caption-text">
               {post.caption || "No caption."}
             </span>
           </>
         )}
+
+        <span className="post-time">
+          {post.createdAt?.toDate
+            ? `· ${formatTimeAgo(post.createdAt.toDate())}`
+            : "· just now"}
+        </span>
       </div>
 
-      <div className="post-timestamp">
-        <span>{formattedDate || "Date N/A"}</span>
-      </div>
-
-      {/* --- Comments preview --- */}
       <div className="post-comment-section">
         {previewComments.map((c) => (
           <div key={c.id} className="comment">
@@ -277,19 +309,18 @@ export default function Post({ post, currentUser, onPostActionComplete }) {
         )}
       </div>
 
-      {/* --- Full comments modal/list --- */}
       {showFullComments && (
-        <CommentList
+        <CommentsModal
+          isOpen={showFullComments}
+          onClose={() => setShowFullComments(false)}
           postId={post.id}
           currentUser={currentUser}
           isPostOwner={post.userId === currentUser.uid}
-          onClose={() => setShowFullComments(false)}
         />
       )}
 
-      {/* --- Comment input --- */}
       {currentUser ? (
-        <CommentInput postId={post.id} currentUser={currentUser} post={post} />
+        <CommentInput post={post} postId={post.id} currentUser={currentUser} />
       ) : (
         <div
           style={{

@@ -1,5 +1,12 @@
 import { useState, useEffect } from "react";
-import { collection, query, where, getDocs, limit } from "firebase/firestore";
+import {
+  collection,
+  query,
+  where,
+  getDocs,
+  limit,
+  orderBy,
+} from "firebase/firestore";
 import { db } from "../../config/firebase";
 import { Link } from "react-router-dom";
 import "./search.scss";
@@ -8,9 +15,54 @@ export default function Search({ currentUser }) {
   const [searchQuery, setSearchQuery] = useState("");
   const [userResults, setUserResults] = useState([]);
   const [postResults, setPostResults] = useState([]);
+  const [recommendedUsers, setRecommendedUsers] = useState([]);
+  const [recentSearches, setRecentSearches] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  // Load recent searches from localStorage
+  useEffect(() => {
+    const saved = JSON.parse(localStorage.getItem("recentSearches")) || [];
+    setRecentSearches(saved);
+  }, []);
+
+  // Save recent searches when userResults change
+  useEffect(() => {
+    if (searchQuery.trim() !== "" && userResults.length > 0) {
+      const newSearches = [
+        searchQuery,
+        ...recentSearches.filter((s) => s !== searchQuery),
+      ].slice(0, 5); // keep last 5
+      setRecentSearches(newSearches);
+      localStorage.setItem("recentSearches", JSON.stringify(newSearches));
+    }
+    // eslint-disable-next-line
+  }, [userResults]);
+
+  // Fetch recommended users when search is empty
+  useEffect(() => {
+    const fetchRecommended = async () => {
+      try {
+        const usersRef = collection(db, "users");
+        // Example: get 5 most recent users
+        const q = query(usersRef, orderBy("createdAt", "desc"), limit(5));
+        const snap = await getDocs(q);
+        const recUsers = snap.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setRecommendedUsers(recUsers);
+      } catch (err) {
+        console.error("Error fetching recommended users:", err);
+      }
+    };
+
+    if (searchQuery.trim() === "") {
+      fetchRecommended();
+    }
+  }, [searchQuery]);
+
+  // Debounced search
   useEffect(() => {
     const delaySearch = setTimeout(() => {
       if (searchQuery.trim() !== "") {
@@ -22,6 +74,7 @@ export default function Search({ currentUser }) {
     }, 500);
 
     return () => clearTimeout(delaySearch);
+    // eslint-disable-next-line
   }, [searchQuery]);
 
   const fetchSearchResults = async (queryText) => {
@@ -99,6 +152,49 @@ export default function Search({ currentUser }) {
       {error && <div className="error-message">{error}</div>}
 
       <div className="search-results">
+        {/* Show recommended + recent when empty */}
+        {searchQuery.trim() === "" && (
+          <>
+            {recentSearches.length > 0 && (
+              <>
+                <h3>Recent Searches</h3>
+                <ul className="recent-searches">
+                  {recentSearches.map((s, i) => (
+                    <li key={i} onClick={() => setSearchQuery(s)}>
+                      {s}
+                    </li>
+                  ))}
+                </ul>
+              </>
+            )}
+
+            {recommendedUsers.length > 0 && (
+              <>
+                <h3>Suggested Users</h3>
+                <div className="user-results-list">
+                  {recommendedUsers.map((user) => (
+                    <Link
+                      to={`/profile/${user.id}`}
+                      key={user.id}
+                      className="user-search-item"
+                    >
+                      <img
+                        src={user.avatarUrl || "path/to/default/avatar.webp"}
+                        alt={user.username}
+                        className="user-avatar"
+                      />
+                      <span>
+                        {user.displayName || user.username} (@{user.username})
+                      </span>
+                    </Link>
+                  ))}
+                </div>
+              </>
+            )}
+          </>
+        )}
+
+        {/* Normal search results */}
         {searchQuery.trim() !== "" &&
           !loading &&
           userResults.length === 0 &&

@@ -8,6 +8,7 @@ import {
   increment,
 } from "firebase/firestore";
 import { db } from "../../config/firebase";
+import "./commentInput.scss";
 
 export default function CommentInput({ postId, currentUser, post }) {
   const [text, setText] = useState("");
@@ -18,12 +19,12 @@ export default function CommentInput({ postId, currentUser, post }) {
     if (!trimmed) return;
 
     const commentData = {
+      postId,
       authorId: currentUser?.uid,
-      username: currentUser?.displayName || currentUser?.username || "",
+      username: currentUser?.username || currentUser?.displayName || "Unknown",
       avatarUrl: currentUser?.avatarUrl || "",
       text: trimmed,
       createdAt: serverTimestamp(),
-      postId: postId,
     };
 
     try {
@@ -36,7 +37,7 @@ export default function CommentInput({ postId, currentUser, post }) {
           userId: post.userId,
           fromUserId: currentUser.uid,
           type: "comment",
-          postId: postId,
+          postId,
           createdAt: serverTimestamp(),
           read: false,
         });
@@ -50,7 +51,6 @@ export default function CommentInput({ postId, currentUser, post }) {
   return (
     <form onSubmit={handleSubmit} className="comment-input">
       <img
-        style={{ width: "50px" }}
         src={currentUser?.avatarUrl || "https://via.placeholder.com/28"}
         alt=""
         className="comment-input-avatar"

@@ -7,29 +7,35 @@ import {
   CLOUDINARY_CLOUD_NAME,
   CLOUDINARY_UPLOAD_PRESET,
 } from "../../config/cloudinary";
+import { useAuth } from "../../context/AuthContext";
 
-export default function AddPost({ currentUser }) {
+export default function AddPost() {
+  const { authUser, userDoc } = useAuth();
   const [caption, setCaption] = useState("");
   const [imageFile, setImageFile] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!currentUser) {
+    if (!authUser) {
       navigate("/login");
     }
-  }, [currentUser, navigate]);
+  }, [authUser, navigate]);
 
   const handleFileChange = (e) => {
     if (e.target.files && e.target.files[0]) {
-      setImageFile(e.target.files[0]);
+      const file = e.target.files[0];
+      setImageFile(file);
+      setPreviewUrl(URL.createObjectURL(file));
     }
   };
 
-  const handleCaptionChange = (e) => {
-    setCaption(e.target.value);
+  const handleClearImage = () => {
+    setImageFile(null);
+    setPreviewUrl(null);
   };
 
   const handleSubmit = async (e) => {
@@ -43,14 +49,8 @@ export default function AddPost({ currentUser }) {
       setLoading(false);
       return;
     }
-    if (!currentUser || !currentUser.uid) {
+    if (!authUser || !authUser.uid) {
       setError("Authentication error: No user ID found.");
-      setLoading(false);
-      return;
-    }
-
-    if (!currentUser.username && !currentUser.displayName) {
-      setError("User profile incomplete: missing username.");
       setLoading(false);
       return;
     }
@@ -86,10 +86,12 @@ export default function AddPost({ currentUser }) {
       const postsCollectionRef = collection(db, "posts");
 
       await addDoc(postsCollectionRef, {
-        userId: currentUser.uid,
-        username:
-          currentUser.username || currentUser.displayName || "Unknown User",
-        userAvatar: currentUser.avatarUrl || "https://via.placeholder.com/50",
+        userId: authUser.uid,
+        username: userDoc?.username || authUser.displayName || "Unknown User",
+        userAvatar:
+          userDoc?.avatarUrl ||
+          authUser.photoURL ||
+          "https://via.placeholder.com/50",
         caption: caption,
         imageUrl: imageUrl,
         createdAt: serverTimestamp(),
@@ -107,14 +109,14 @@ export default function AddPost({ currentUser }) {
     }
   };
 
-  if (!currentUser) {
-    return <div>Redirecting to login...</div>;
+  if (!authUser || !userDoc) {
+    return <div>Loading user...</div>;
   }
 
   return (
     <div className="add-post-page">
       <h1>Create New Post</h1>
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} className="add-post-form">
         <label htmlFor="image-upload">Upload Image:</label>
         <input
           type="file"
@@ -122,17 +124,36 @@ export default function AddPost({ currentUser }) {
           onChange={handleFileChange}
           accept="image/*"
         />
+
+        {previewUrl && (
+          <div className="image-preview-container">
+            <img src={previewUrl} alt="Preview" className="image-preview" />
+            <button
+              type="button"
+              className="clear-image-btn"
+              onClick={handleClearImage}
+            >
+              ✕
+            </button>
+          </div>
+        )}
+
         <label htmlFor="post-caption">Caption:</label>
         <textarea
           value={caption}
           id="post-caption"
-          onChange={handleCaptionChange}
+          onChange={(e) => setCaption(e.target.value)}
           rows={4}
           placeholder="Write a caption for your pet's moment..."
         ></textarea>
+
         {loading && <p>Posting...</p>}
         {error && <p style={{ color: "red" }}>Error: {error}</p>}
-        <button type="submit" disabled={loading}>
+
+        <button
+          type="submit"
+          disabled={loading || (!imageFile && caption.trim() === "")}
+        >
           {loading ? "Posting..." : "Add Post"}
         </button>
       </form>

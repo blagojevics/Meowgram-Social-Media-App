@@ -3,7 +3,6 @@ import {
   collection,
   query,
   where,
-  orderBy,
   onSnapshot,
   doc,
   updateDoc,
@@ -18,32 +17,48 @@ export default function Notifications({ currentUser }) {
 
   useEffect(() => {
     if (!currentUser) return;
+
+    // Debug log: check current user UID
+    console.log("Current user UID:", currentUser.uid);
+
+    // TEMP: no orderBy to avoid index issues
     const q = query(
       collection(db, "notifications"),
-      where("userId", "==", currentUser.uid),
-      orderBy("createdAt", "desc")
+      where("userId", "==", currentUser.uid)
     );
+
     const unsub = onSnapshot(q, async (snap) => {
       const list = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+      console.log("Fetched notifications:", list); // Debug log
+
       setNotifications(list);
 
-      const uniqueUserIds = [...new Set(list.map((n) => n.fromUserId))];
+      // Fetch sender info
+      const uniqueUserIds = [
+        ...new Set(list.map((n) => n.fromUserId).filter(Boolean)),
+      ];
       const userData = {};
       for (const uid of uniqueUserIds) {
-        const userDoc = await getDoc(doc(db, "users", uid));
-        if (userDoc.exists()) {
-          userData[uid] = userDoc.data();
+        if (!usersMap[uid]) {
+          const userDoc = await getDoc(doc(db, "users", uid));
+          if (userDoc.exists()) {
+            userData[uid] = userDoc.data();
+          }
         }
       }
-      setUsersMap(userData);
+      setUsersMap((prev) => ({ ...prev, ...userData }));
+
+      // Mark all as read
+      list.forEach(async (n) => {
+        if (!n.read) {
+          const notifRef = doc(db, "notifications", n.id);
+          await updateDoc(notifRef, { read: true });
+        }
+      });
     });
+
     return () => unsub();
   }, [currentUser]);
-
-  const markAsRead = async (id) => {
-    const notifRef = doc(db, "notifications", id);
-    await updateDoc(notifRef, { read: true });
-  };
 
   return (
     <div className="notifications-page">
@@ -59,10 +74,8 @@ export default function Notifications({ currentUser }) {
             return (
               <li
                 key={n.id}
-                onClick={() => markAsRead(n.id)}
                 style={{
                   fontWeight: n.read ? "normal" : "bold",
-                  cursor: "pointer",
                 }}
               >
                 {n.type === "like" && (

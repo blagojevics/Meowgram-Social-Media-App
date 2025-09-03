@@ -60,5 +60,77 @@
         }
       }
     }
+
+    .notifications-link {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .notif-badge {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: red;
+      color: white;
+      font-size: 12px;
+      font-weight: bold;
+      border-radius: 50%;
+
+      width: 20px;
+      height: 20px;
+      text-align: center;
+      line-height: 1;
+    }
+  }
+}
+
+@media screen and (min-width: 300px) and (max-width: 550px) {
+  .container {
+    width: 100%; /* full width at bottom */
+    height: 60px; /* small height for nav bar */
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    border-right: none; /* remove left border */
+    border-top: 1px solid lightgray; /* add top border */
+    flex-direction: row; /* horizontal instead of vertical */
+    justify-content: space-around;
+    align-items: center;
+    background-color: #fff;
+    z-index: 1000; /* stay above feed */
+  }
+
+  .container .logo-container {
+    display: none; /* hide logo on mobile */
+  }
+
+  .container .items-container {
+    width: 100%;
+
+    ul {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      width: 100%;
+      margin: 0;
+      padding: 0;
+
+      li {
+        border-bottom: none; /* remove borders */
+        padding: 0;
+
+        a {
+          font-size: 22px; /* icons only */
+          padding: 0;
+        }
+
+        span {
+          display: none; /* hide text, keep icons */
+        }
+      }
+    }
   }
 }

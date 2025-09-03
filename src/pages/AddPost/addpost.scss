@@ -1,0 +1,82 @@
+.add-post-page {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+
+  h1 {
+    margin-bottom: 20px;
+  }
+
+  .add-post-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+
+    input[type="file"] {
+      margin-bottom: 10px;
+    }
+
+    textarea {
+      resize: none;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+
+    button {
+      padding: 10px 16px;
+      background: #e63946;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+
+      &:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+      }
+
+      &:hover:not(:disabled) {
+        background: #d62828;
+      }
+    }
+  }
+
+  .image-preview-container {
+    position: relative;
+    display: inline-block;
+    margin-bottom: 0 auto;
+
+    .image-preview {
+      width: 100%;
+      max-height: 400px;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+    }
+
+    .clear-image-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: rgba(0, 0, 0, 0.6);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 28px;
+      height: 28px;
+      cursor: pointer;
+      font-size: 16px;
+      line-height: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+
+      &:hover {
+        background: rgba(0, 0, 0, 0.8);
+      }
+    }
+  }
+}

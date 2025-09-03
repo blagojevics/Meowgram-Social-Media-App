@@ -1,15 +1,42 @@
 import "./leftbar.scss";
 import Logo from "../../assets/logoo.webp";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { signOut } from "firebase/auth";
-import { auth } from "../../config/firebase";
+import { auth, db } from "../../config/firebase";
+import { useEffect, useState } from "react";
+import { collection, query, where, onSnapshot } from "firebase/firestore";
+import { useAuth } from "../../context/AuthContext";
 
-export default function Leftbar({ currentUser }) {
-  const profileLink = currentUser ? `/profile/${currentUser.uid}` : "/login";
-  const avatarToDisplay =
-    currentUser && currentUser.avatarUrl ? currentUser.avatarUrl : Logo;
-
+export default function Leftbar() {
+  const { authUser, userDoc } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  const profileLink = authUser ? `/profile/${authUser.uid}` : "/login";
+  const avatarToDisplay = userDoc?.avatarUrl || authUser?.photoURL || Logo;
+
+  useEffect(() => {
+    if (!authUser) return;
+
+    const q = query(
+      collection(db, "notifications"),
+      where("userId", "==", authUser.uid),
+      where("read", "==", false)
+    );
+
+    const unsub = onSnapshot(q, (snap) => {
+      setUnreadCount(snap.size);
+    });
+
+    return () => unsub();
+  }, [authUser]);
+
+  const handleLogout = async () => {
+    await signOut(auth);
+    navigate("/login");
+  };
 
   return (
     <div className="container">
@@ -25,7 +52,7 @@ export default function Leftbar({ currentUser }) {
             <Link to="/search">Search</Link>
           </li>
           <li>
-            {currentUser ? (
+            {authUser ? (
               <Link to={profileLink} className="profile-link-with-avatar">
                 <img
                   src={avatarToDisplay}
@@ -46,13 +73,21 @@ export default function Leftbar({ currentUser }) {
             )}
           </li>
           <li>
-            <Link to="/notifications">Notifications</Link>
+            <Link to="/notifications" className="notifications-link">
+              Notifications
+              {unreadCount > 0 && location.pathname !== "/notifications" && (
+                <span className="notif-badge">{unreadCount}</span>
+              )}
+            </Link>
           </li>
           <li>
             <Link to="/addpost">Add Post</Link>
           </li>
           <li>
             <Link to="/settings">Settings</Link>
+          </li>
+          <li>
+            <button onClick={handleLogout}>Logout</button>
           </li>
         </ul>
       </div>

@@ -17,6 +17,7 @@ export default function EditProfile({ currentUser, onClose }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  // ✅ Upload new avatar to Cloudinary
   const handleFileChange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -34,11 +35,19 @@ export default function EditProfile({ currentUser, onClose }) {
         }
       );
       const data = await res.json();
-      setAvatarUrl(data.secure_url);
+      if (data.secure_url) {
+        setAvatarUrl(data.secure_url);
+      } else {
+        throw new Error("Upload failed");
+      }
     } catch (err) {
       console.error("Cloudinary upload failed:", err);
       setError("Failed to upload avatar. Try again.");
     }
+  };
+
+  const handleDeleteAvatar = () => {
+    setAvatarUrl(""); // clear avatar
   };
 
   const handleSave = async (e) => {
@@ -52,7 +61,7 @@ export default function EditProfile({ currentUser, onClose }) {
         displayName,
         username,
         bio,
-        avatarUrl,
+        avatarUrl: avatarUrl || "", // if deleted, reset to empty
       });
       onClose();
     } catch (err) {
@@ -92,6 +101,7 @@ export default function EditProfile({ currentUser, onClose }) {
               value={bio}
               onChange={(e) => setBio(e.target.value)}
               rows="3"
+              placeholder="Write something about yourself..."
             />
           </label>
 
@@ -103,6 +113,13 @@ export default function EditProfile({ currentUser, onClose }) {
           {avatarUrl && (
             <div className="avatar-preview">
               <img src={avatarUrl} alt="Avatar Preview" />
+              <button
+                type="button"
+                className="delete-avatar-btn"
+                onClick={handleDeleteAvatar}
+              >
+                Remove Avatar
+              </button>
             </div>
           )}
 

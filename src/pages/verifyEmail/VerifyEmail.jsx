@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { auth } from "../../config/firebase";
 import { sendEmailVerification } from "firebase/auth";
-import { useNavigate } from "react-router-dom";
 
 export default function VerifyEmail() {
   const [status, setStatus] = useState("");
@@ -10,13 +10,13 @@ export default function VerifyEmail() {
   useEffect(() => {
     const interval = setInterval(async () => {
       if (auth.currentUser) {
-        await auth.currentUser.reload(); // refresh user data
+        await auth.currentUser.reload();
         if (auth.currentUser.emailVerified) {
           clearInterval(interval);
-          navigate("/onboarding"); // go straight to onboarding
+          navigate("/onboarding");
         }
       }
-    }, 5000); // check every 5 seconds
+    }, 3000);
 
     return () => clearInterval(interval);
   }, [navigate]);
@@ -33,7 +33,7 @@ export default function VerifyEmail() {
       <h2>Verify your email</h2>
       <p>
         We sent a verification link to <b>{auth.currentUser?.email}</b>. <br />
-        Please check your inbox and click the link to continue.
+        Once verified, you’ll be redirected automatically.
       </p>
       <button onClick={handleResend}>Resend Email</button>
       {status && <p>{status}</p>}

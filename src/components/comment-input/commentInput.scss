@@ -1,0 +1,30 @@
+.comment-input {
+  display: flex;
+  justify-content: start;
+  gap: 10px;
+  width: 90%;
+  margin: 10px auto;
+  img {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: solid 1px black;
+  }
+
+  input {
+    border: none;
+    background-color: transparent;
+    border-bottom: 1px solid lightgray;
+    width: 85%;
+  }
+
+  button {
+    background-color: rgb(147, 236, 250);
+    color: black;
+    border-radius: 10px;
+    font-size: 18px;
+    width: 80px;
+    height: 40px;
+  }
+}

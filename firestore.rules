@@ -1,0 +1,78 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ---------------- USERS ----------------
+    match /users/{userId} {
+      allow create: if request.auth != null && request.auth.uid == userId;
+      allow read: if request.auth != null;
+
+      // User can update their own profile fields
+      allow update: if request.auth != null && request.auth.uid == userId;
+
+      // Allow others to update counts only
+      allow update: if request.auth != null &&
+        request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['followersCount', 'followingCount', 'postsCount']);
+
+      allow delete: if false;
+
+      // Followers subcollection
+      match /followers/{followerId} {
+        allow read: if request.auth != null;
+        allow create: if request.auth != null && request.auth.uid == followerId;
+        allow delete: if request.auth != null && request.auth.uid == followerId;
+      }
+
+      // Following subcollection
+      match /following/{followingId} {
+        allow read: if request.auth != null;
+        allow create: if request.auth != null && request.auth.uid == userId;
+        allow delete: if request.auth != null && request.auth.uid == userId;
+      }
+    }
+
+    // ---------------- POSTS ----------------
+match /posts/{postId} {
+  allow create: if request.auth != null;
+  allow read: if request.auth != null;
+
+  // Post owner can update anything
+  allow update: if request.auth != null && request.auth.uid == resource.data.userId;
+
+  // Any authenticated user can update likes/comments count safely
+  allow update: if request.auth != null
+    && request.resource.data.likesCount is int
+    && request.resource.data.likedByUsers is list
+    && request.resource.data.commentsCount is int
+    && request.resource.data.keys().hasAll(resource.data.keys());
+
+  allow delete: if request.auth != null && request.auth.uid == resource.data.userId;
+}
+
+    // ---------------- COMMENTS ----------------
+    match /comments/{commentId} {
+      allow create: if request.auth != null && request.resource.data.authorId == request.auth.uid;
+      allow read: if request.auth != null;
+
+      // Author can delete their own comment
+      allow delete: if request.auth != null && request.auth.uid == resource.data.authorId;
+
+      // Post owner can delete any comment under their post
+      allow delete: if request.auth != null &&
+        request.auth.uid == get(/databases/$(database)/documents/posts/$(resource.data.postId)).data.userId;
+    }
+
+    // ---------------- NOTIFICATIONS ----------------
+    match /notifications/{notificationId} {
+      // Only sender can create
+      allow create: if request.auth != null && request.resource.data.fromUserId == request.auth.uid;
+
+      // Only recipient can read
+      allow read: if request.auth != null && request.auth.uid == resource.data.userId;
+
+      // Only recipient can update (mark as read)
+      allow update: if request.auth != null && request.auth.uid == resource.data.userId;
+    }
+  }
+}
