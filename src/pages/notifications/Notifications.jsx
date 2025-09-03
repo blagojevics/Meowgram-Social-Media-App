@@ -3,11 +3,13 @@ import {
   collection,
   query,
   where,
+  orderBy,
   onSnapshot,
   doc,
-  updateDoc,
   getDoc,
+  updateDoc,
 } from "firebase/firestore";
+import { Link } from "react-router-dom";
 import { db } from "../../config/firebase";
 import "./notifications.scss";
 
@@ -18,22 +20,18 @@ export default function Notifications({ currentUser }) {
   useEffect(() => {
     if (!currentUser) return;
 
-    // Debug log: check current user UID
-    console.log("Current user UID:", currentUser.uid);
-
-    // TEMP: no orderBy to avoid index issues
+    // ✅ Order notifications by newest first
     const q = query(
       collection(db, "notifications"),
-      where("userId", "==", currentUser.uid)
+      where("userId", "==", currentUser.uid),
+      orderBy("createdAt", "desc")
     );
 
     const unsub = onSnapshot(q, async (snap) => {
       const list = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
-      console.log("Fetched notifications:", list); // Debug log
-
       setNotifications(list);
 
-      // Fetch sender info
+      // ✅ Fetch sender info (cache in usersMap)
       const uniqueUserIds = [
         ...new Set(list.map((n) => n.fromUserId).filter(Boolean)),
       ];
@@ -47,18 +45,22 @@ export default function Notifications({ currentUser }) {
         }
       }
       setUsersMap((prev) => ({ ...prev, ...userData }));
+    });
 
-      // Mark all as read
-      list.forEach(async (n) => {
+    return () => unsub();
+  }, [currentUser]);
+
+  // ✅ Mark all as read when user visits the page
+  useEffect(() => {
+    if (notifications.length > 0) {
+      notifications.forEach(async (n) => {
         if (!n.read) {
           const notifRef = doc(db, "notifications", n.id);
           await updateDoc(notifRef, { read: true });
         }
       });
-    });
-
-    return () => unsub();
-  }, [currentUser]);
+    }
+  }, [notifications]);
 
   return (
     <div className="notifications-page">
@@ -71,20 +73,30 @@ export default function Notifications({ currentUser }) {
             const fromUser = usersMap[n.fromUserId];
             const displayName =
               fromUser?.username || fromUser?.displayName || "Someone";
+
             return (
               <li
                 key={n.id}
-                style={{
-                  fontWeight: n.read ? "normal" : "bold",
-                }}
+                className={`notification-item ${n.read ? "read" : "unread"}`}
               >
                 {n.type === "like" && (
-                  <span>{displayName} liked your post</span>
+                  <span>
+                    <Link to={`/profile/${n.fromUserId}`}>{displayName}</Link>{" "}
+                    liked your <Link to={`/post/${n.postId}`}>post</Link>
+                  </span>
                 )}
                 {n.type === "comment" && (
-                  <span>{displayName} commented on your post</span>
+                  <span>
+                    <Link to={`/profile/${n.fromUserId}`}>{displayName}</Link>{" "}
+                    commented on your <Link to={`/post/${n.postId}`}>post</Link>
+                  </span>
                 )}
-                {n.type === "follow" && <span>{displayName} followed you</span>}
+                {n.type === "follow" && (
+                  <span>
+                    <Link to={`/profile/${n.fromUserId}`}>{displayName}</Link>{" "}
+                    followed you
+                  </span>
+                )}
               </li>
             );
           })}
