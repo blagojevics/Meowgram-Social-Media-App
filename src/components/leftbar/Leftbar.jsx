@@ -7,6 +7,16 @@ import { useEffect, useState } from "react";
 import { collection, query, where, onSnapshot } from "firebase/firestore";
 import { useAuth } from "../../context/AuthContext";
 
+// ✅ Import icons
+import {
+  FaHome,
+  FaSearch,
+  FaUser,
+  FaBell,
+  FaPlusSquare,
+  FaCog,
+} from "react-icons/fa";
+
 export default function Leftbar() {
   const { authUser, userDoc } = useAuth();
   const navigate = useNavigate();
@@ -33,11 +43,6 @@ export default function Leftbar() {
     return () => unsub();
   }, [authUser]);
 
-  const handleLogout = async () => {
-    await signOut(auth);
-    navigate("/login");
-  };
-
   return (
     <div className="container">
       <div className="logo-container">
@@ -46,10 +51,16 @@ export default function Leftbar() {
       <div className="items-container">
         <ul>
           <li>
-            <Link to="/">Home</Link>
+            <Link to="/">
+              <FaHome className="menu-icon" />
+              <span className="menu-label">Home</span>
+            </Link>
           </li>
           <li>
-            <Link to="/search">Search</Link>
+            <Link to="/search">
+              <FaSearch className="menu-icon" />
+              <span className="menu-label">Search</span>
+            </Link>
           </li>
           <li>
             {authUser ? (
@@ -59,7 +70,7 @@ export default function Leftbar() {
                   alt="User Avatar"
                   className="profile-avatar-thumbnail"
                 />
-                Profile
+                <span className="menu-label">Profile</span>
               </Link>
             ) : (
               <Link to="/login" className="profile-link-with-avatar">
@@ -68,26 +79,30 @@ export default function Leftbar() {
                   alt="Placeholder"
                   className="profile-avatar-thumbnail"
                 />
-                Profile
+                <span className="menu-label">Profile</span>
               </Link>
             )}
           </li>
           <li>
             <Link to="/notifications" className="notifications-link">
-              Notifications
+              <FaBell className="menu-icon" />
+              <span className="menu-label">Notifications</span>
               {unreadCount > 0 && location.pathname !== "/notifications" && (
                 <span className="notif-badge">{unreadCount}</span>
               )}
             </Link>
           </li>
           <li>
-            <Link to="/addpost">Add Post</Link>
+            <Link to="/addpost">
+              <FaPlusSquare className="menu-icon" />
+              <span className="menu-label">Add Post</span>
+            </Link>
           </li>
           <li>
-            <Link to="/settings">Settings</Link>
-          </li>
-          <li>
-            <button onClick={handleLogout}>Logout</button>
+            <Link to="/settings">
+              <FaCog className="menu-icon" />
+              <span className="menu-label">Settings</span>
+            </Link>
           </li>
         </ul>
       </div>

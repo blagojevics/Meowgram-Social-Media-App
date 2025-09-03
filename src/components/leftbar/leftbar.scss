@@ -88,47 +88,65 @@
 
 @media screen and (min-width: 300px) and (max-width: 550px) {
   .container {
-    width: 100%; /* full width at bottom */
-    height: 60px; /* small height for nav bar */
+    width: 100%;
+    height: 60px;
     position: fixed;
     bottom: 0;
     left: 0;
     right: 0;
-    border-right: none; /* remove left border */
-    border-top: 1px solid lightgray; /* add top border */
-    flex-direction: row; /* horizontal instead of vertical */
+    border-right: none;
+    border-top: 1px solid lightgray;
+    flex-direction: row;
     justify-content: space-around;
     align-items: center;
     background-color: #fff;
-    z-index: 1000; /* stay above feed */
+    z-index: 1000;
   }
 
   .container .logo-container {
-    display: none; /* hide logo on mobile */
+    display: none;
   }
 
   .container .items-container {
     width: 100%;
 
+    .menu-label {
+      display: none; // hide text labels
+    }
+
+    .notif-badge {
+      width: 15px;
+      height: 15px;
+      font-size: 8px;
+      margin-left: -5px;
+    }
+
     ul {
       display: flex;
-      justify-content: space-around;
+      justify-content: space-between;
       align-items: center;
       width: 100%;
       margin: 0;
       padding: 0;
 
       li {
-        border-bottom: none; /* remove borders */
+        flex: 1; // ✅ each li takes equal space
+        display: flex;
+        justify-content: center; // ✅ center horizontally
+        align-items: center; // ✅ center vertically
+        border-bottom: none;
         padding: 0;
 
         a {
-          font-size: 22px; /* icons only */
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          font-size: 24px; // icon size
           padding: 0;
         }
 
-        span {
-          display: none; /* hide text, keep icons */
+        .menu-icon {
+          font-size: 24px; // ✅ keep icons visible
         }
       }
     }
