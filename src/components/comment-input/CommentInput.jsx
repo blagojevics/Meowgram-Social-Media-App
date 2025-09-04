@@ -21,8 +21,6 @@ export default function CommentInput({ postId, currentUser, post }) {
     const commentData = {
       postId,
       authorId: currentUser?.uid,
-      username: currentUser?.username || currentUser?.displayName || "Unknown",
-      avatarUrl: currentUser?.avatarUrl || "",
       text: trimmed,
       createdAt: serverTimestamp(),
     };

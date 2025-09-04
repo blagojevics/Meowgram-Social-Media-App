@@ -3,12 +3,19 @@
   margin: 0 auto;
   flex-direction: column;
   gap: 15px;
-
+  align-items: center;
   justify-content: center;
 
   .comment {
+    .comment-user-link {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 3px;
+    }
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 5px;
     img {
       width: 35px;

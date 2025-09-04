@@ -3,9 +3,9 @@ import { FaPaw, FaComment } from "react-icons/fa";
 import { useState, useEffect, useRef } from "react";
 import CommentsModal from "../commentsmodal/CommentsModal";
 import "./post.scss";
-import CommentList from "../comment-list/CommentList";
-import formatTimeAgo from "../../config/timeFormat";
 import CommentInput from "../comment-input/CommentInput";
+import CommentItem from "../commentitem/CommentItem";
+import formatTimeAgo from "../../config/timeFormat";
 import {
   deleteDoc,
   doc,
@@ -40,11 +40,10 @@ export default function Post({ post, currentUser, onPostActionComplete }) {
   const [totalComments, setTotalComments] = useState(0);
   const [showFullComments, setShowFullComments] = useState(false);
 
-  const [postUser, setPostUser] = useState(null); // 🔑 live user data
+  const [postUser, setPostUser] = useState(null);
 
   const optionsRef = useRef(null);
 
-  // keep state in sync with Firestore
   useEffect(() => {
     setEditedCaption(post.caption || "");
     setIsLiked(
@@ -55,7 +54,6 @@ export default function Post({ post, currentUser, onPostActionComplete }) {
     setLikesCount(post.likesCount || 0);
   }, [post, currentUser]);
 
-  // subscribe to live user profile
   useEffect(() => {
     if (!post.userId) return;
     const ref = doc(db, "users", post.userId);
@@ -67,7 +65,6 @@ export default function Post({ post, currentUser, onPostActionComplete }) {
     return () => unsub();
   }, [post.userId]);
 
-  // close options menu on outside click
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (optionsRef.current && !optionsRef.current.contains(e.target)) {
@@ -82,7 +79,6 @@ export default function Post({ post, currentUser, onPostActionComplete }) {
     };
   }, [showOptions]);
 
-  // like/unlike
   const handleLike = async () => {
     if (!currentUser) return;
     const postDocRef = doc(db, "posts", post.id);
@@ -114,7 +110,6 @@ export default function Post({ post, currentUser, onPostActionComplete }) {
     }
   };
 
-  // edit caption
   const handleEditClick = () => {
     setIsEditing(true);
     setShowOptions(false);
@@ -156,7 +151,6 @@ export default function Post({ post, currentUser, onPostActionComplete }) {
     }
   };
 
-  // delete post
   const handleDeletePost = async () => {
     setIsDeleting(true);
     setShowOptions(false);
@@ -173,7 +167,6 @@ export default function Post({ post, currentUser, onPostActionComplete }) {
     }
   };
 
-  // fetch preview comments safely
   useEffect(() => {
     const q = query(
       collection(db, "comments"),
@@ -195,6 +188,18 @@ export default function Post({ post, currentUser, onPostActionComplete }) {
     return () => unsub();
   }, [post.id]);
 
+  const handleDeleteComment = async (comment) => {
+    if (
+      post.userId === currentUser.uid ||
+      comment.authorId === currentUser.uid
+    ) {
+      await deleteDoc(doc(db, "comments", comment.id));
+      await updateDoc(doc(db, "posts", post.id), {
+        commentsCount: increment(-1),
+      });
+    }
+  };
+
   return (
     <div className="post-card">
       <div className="post-header">
@@ -209,6 +214,11 @@ export default function Post({ post, currentUser, onPostActionComplete }) {
           />
           <span className="post-username-header">
             {postUser?.username || "Unknown User"}
+          </span>
+          <span className="post-time">
+            {post.createdAt?.toDate
+              ? `· ${formatTimeAgo(post.createdAt.toDate())}`
+              : "· just now"}
           </span>
         </Link>
         {currentUser && currentUser.uid === post.userId && (
@@ -269,34 +279,28 @@ export default function Post({ post, currentUser, onPostActionComplete }) {
             <button onClick={handleCancelEdit}>Cancel</button>
           </div>
         ) : (
-          <>
-            <span className="post-caption-username">
-              {postUser?.username || "Unknown User"}
-            </span>
-            <span className="post-caption-text">
-              {post.caption || "No caption."}
-            </span>
-          </>
+          <div className="left">
+            <>
+              <span className="post-caption-username">
+                {postUser?.username + " •" || "Unknown User"}
+              </span>
+              <span className="post-caption-text">
+                {post.caption || "No caption."}
+              </span>
+            </>
+          </div>
         )}
-
-        <span className="post-time">
-          {post.createdAt?.toDate
-            ? `· ${formatTimeAgo(post.createdAt.toDate())}`
-            : "· just now"}
-        </span>
       </div>
 
       <div className="post-comment-section">
         {previewComments.map((c) => (
-          <div key={c.id} className="comment">
-            <img
-              src={c.avatarUrl || "https://via.placeholder.com/24"}
-              alt=""
-              className="comment-avatar"
-            />
-            <span className="comment-username">{c.username}</span>
-            <span className="comment-text">{c.text}</span>
-          </div>
+          <CommentItem
+            key={c.id}
+            comment={c}
+            currentUser={currentUser}
+            isPostOwner={post.userId === currentUser.uid}
+            onDelete={handleDeleteComment}
+          />
         ))}
 
         {totalComments > previewComments.length && (

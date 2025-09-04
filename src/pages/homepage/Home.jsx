@@ -73,6 +73,7 @@ export default function Home() {
 
   return (
     <div className="home-container">
+      <div className="home-header">MEOWGRAM</div>
       <Stories />
       <div className="posts-feed">
         {posts.map((post) => (

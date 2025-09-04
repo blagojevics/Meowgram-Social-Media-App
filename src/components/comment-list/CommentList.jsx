@@ -11,7 +11,7 @@ import {
   increment,
 } from "firebase/firestore";
 import { db } from "../../config/firebase";
-import { Link } from "react-router-dom";
+import CommentItem from "../commentitem/CommentItem";
 import "./commentList.scss";
 
 export default function CommentList({ postId, currentUser, isPostOwner }) {
@@ -51,22 +51,13 @@ export default function CommentList({ postId, currentUser, isPostOwner }) {
   return (
     <div className="comments-list">
       {comments.map((c) => (
-        <div key={c.id} className="comment">
-          <Link to={`/profile/${c.authorId}`} className="comment-user-link">
-            <img
-              src={c.avatarUrl || "https://via.placeholder.com/24"}
-              alt={c.username || "Unknown"}
-              className="comment-avatar"
-            />
-            <span className="comment-username">{c.username || "Unknown"}</span>
-          </Link>
-          <span className="comment-text">{c.text}</span>
-          {(isPostOwner || c.authorId === currentUser.uid) && (
-            <button onClick={() => handleDelete(c)} className="delete-btn">
-              Delete
-            </button>
-          )}
-        </div>
+        <CommentItem
+          key={c.id}
+          comment={c}
+          currentUser={currentUser}
+          isPostOwner={isPostOwner}
+          onDelete={handleDelete}
+        />
       ))}
     </div>
   );

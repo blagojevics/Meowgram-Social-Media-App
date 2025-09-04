@@ -98,3 +98,12 @@
     }
   }
 }
+
+@media screen and (min-width: 300px) and (max-width: 550px) {
+  .search-page {
+    .search-input {
+      width: 80%;
+      margin: 0 auto;
+    }
+  }
+}

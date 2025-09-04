@@ -185,12 +185,14 @@ export default function Profile() {
           </div>
           <div className="profile-info-container">
             <div className="profile-username-actions">
-              <span className="profile-username">
-                {profileData.username || "No Username"}
-              </span>
-              <span className="profile-displayname">
-                {profileData.displayName || ""}
-              </span>
+              <div className="profile-names">
+                <span className="profile-username">
+                  {profileData.username || "No Username"}
+                </span>
+                <span className="profile-displayname">
+                  {profileData.displayName || ""}
+                </span>
+              </div>
               {isOwnProfile ? (
                 <>
                   <button
