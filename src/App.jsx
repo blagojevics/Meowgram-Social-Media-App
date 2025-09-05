@@ -18,9 +18,9 @@ import Settings from "./pages/settings/Settings";
 import Login from "./pages/login/Login";
 import Register from "./pages/register/Register";
 import VerifyEmail from "./pages/verifyEmail/VerifyEmail";
+import PostPage from "./components/post/PostPage";
 import "./style.scss";
 
-// Layout wrapper
 const Layout = () => {
   const { authUser } = useAuth();
   return (
@@ -32,27 +32,22 @@ const Layout = () => {
   );
 };
 
-// ProtectedRoute
 const ProtectedRoute = ({ children }) => {
   const { authUser, userDoc } = useAuth();
   const location = useLocation();
 
-  // Still loading
   if (authUser === undefined || userDoc === undefined) {
     return <div>Loading...</div>;
   }
 
-  // Not logged in
   if (!authUser) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  // Logged in but email not verified
   if (!authUser.emailVerified) {
     return <Navigate to="/verify-email" replace />;
   }
 
-  // Verified but not onboarded
   if (
     userDoc &&
     userDoc.onboardingComplete === false &&
@@ -61,7 +56,6 @@ const ProtectedRoute = ({ children }) => {
     return <Navigate to="/onboarding" replace />;
   }
 
-  // Already onboarded but trying to access onboarding
   if (
     userDoc &&
     userDoc.onboardingComplete === true &&
@@ -89,6 +83,7 @@ export default function App() {
         { path: "search", element: <Search /> },
         { path: "notifications", element: <Notifications /> },
         { path: "settings", element: <Settings /> },
+        { path: "post/:postId", element: <PostPage /> },
       ],
     },
     { path: "/login", element: <Login /> },

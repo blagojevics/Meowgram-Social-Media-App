@@ -96,14 +96,14 @@ export default function Notifications() {
         <p>No notifications yet.</p>
       ) : (
         <ul className="notifications-list">
-          {notifications.map((n) => {
+          {notifications.map((n, idx) => {
             const fromUser = usersMap[n.fromUserId];
             const displayName =
               fromUser?.username || fromUser?.displayName || "Someone";
             const avatar = fromUser?.avatarUrl || placeholderImg;
 
             return (
-              <li key={n.id} className="notification-item">
+              <li key={n.id + "-" + idx} className="notification-item">
                 <Link to={`/profile/${n.fromUserId}`} className="notif-user">
                   <img
                     src={avatar}
