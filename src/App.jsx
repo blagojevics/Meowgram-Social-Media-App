@@ -32,7 +32,7 @@ const Layout = () => {
   );
 };
 
-// ProtectedRoute (only one version!)
+// ProtectedRoute
 const ProtectedRoute = ({ children }) => {
   const { authUser, userDoc } = useAuth();
   const location = useLocation();

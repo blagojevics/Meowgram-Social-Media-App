@@ -9,17 +9,20 @@ import {
   getDocs,
   doc,
   getDoc,
+  updateDoc,
 } from "firebase/firestore";
 import { db } from "../../config/firebase";
 import { Link } from "react-router-dom";
 import formatTimeAgo from "../../config/timeFormat";
 import { useAuth } from "../../context/AuthContext";
 import "./notifications.scss";
+import placeholderImg from "../../assets/placeholderImg.jpg";
+import PostPreview from "../../components/postpreview/PostPreview";
 
 const PAGE_SIZE = 10;
 
 export default function Notifications() {
-  const { authUser: currentUser } = useAuth(); // ✅ FIXED
+  const { authUser: currentUser } = useAuth();
   const [notifications, setNotifications] = useState([]);
   const [usersMap, setUsersMap] = useState({});
   const [lastDoc, setLastDoc] = useState(null);
@@ -29,7 +32,21 @@ export default function Notifications() {
   useEffect(() => {
     if (!currentUser) return;
     loadMore();
+    markAsRead();
   }, [currentUser]);
+
+  const markAsRead = async () => {
+    if (!currentUser) return;
+    const q = query(
+      collection(db, "notifications"),
+      where("userId", "==", currentUser.uid),
+      where("read", "==", false)
+    );
+    const snap = await getDocs(q);
+    snap.forEach(async (docSnap) => {
+      await updateDoc(doc(db, "notifications", docSnap.id), { read: true });
+    });
+  };
 
   const loadMore = async () => {
     if (!currentUser || loading || !hasMore) return;
@@ -55,10 +72,6 @@ export default function Notifications() {
     const snap = await getDocs(q);
     const list = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
 
-    console.log("Current user UID:", currentUser.uid);
-    console.log("Fetched notifications:", list);
-
-    // Fetch sender info
     const userData = {};
     for (const n of list) {
       if (n.fromUserId && !usersMap[n.fromUserId]) {
@@ -87,7 +100,7 @@ export default function Notifications() {
             const fromUser = usersMap[n.fromUserId];
             const displayName =
               fromUser?.username || fromUser?.displayName || "Someone";
-            const avatar = fromUser?.avatarUrl || "/default-avatar.png";
+            const avatar = fromUser?.avatarUrl || placeholderImg;
 
             return (
               <li key={n.id} className="notification-item">
@@ -105,9 +118,19 @@ export default function Notifications() {
                   >
                     {displayName}
                   </Link>
-                  {n.type === "like" && <span> liked your post</span>}
-                  {n.type === "comment" && <span> commented on your post</span>}
-                  {n.type === "follow" && <span> followed you</span>}
+                  {n.type === "like" && (
+                    <div className="notif-row">
+                      <span>liked your post</span>
+                      {n.postId && <PostPreview postId={n.postId} />}
+                    </div>
+                  )}
+                  {n.type === "comment" && (
+                    <div className="notif-row">
+                      <span>commented on your post</span>
+                      {n.postId && <PostPreview postId={n.postId} />}
+                    </div>
+                  )}
+                  {n.type === "follow" && <span>followed you</span>}
                   <div className="notif-time">
                     {n.createdAt?.toDate
                       ? formatTimeAgo(n.createdAt.toDate())

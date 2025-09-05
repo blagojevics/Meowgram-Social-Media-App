@@ -10,6 +10,7 @@ import {
 } from "firebase/auth";
 import { doc, deleteDoc } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
+import "./settings.scss";
 
 export default function Settings() {
   const [status, setStatus] = useState("");

@@ -1,5 +1,6 @@
 import "./profile.scss";
-import storyImg from "../../assets/story.png";
+import placeholderImg from "../../assets/placeholderImg.jpg";
+
 import { FaPaw, FaComment } from "react-icons/fa";
 import { useState, useEffect } from "react";
 import EditProfile from "../../components/editProfile/EditProfile";
@@ -27,10 +28,11 @@ import CommentList from "../../components/comment-list/CommentList";
 import CommentInput from "../../components/comment-input/CommentInput";
 import DropdownMenu from "../../components/dropdownmenu/DropdownMenu";
 import FollowListModal from "../../components/followlistmodal/FollowListModal";
+import LikesListModal from "../../components/likeslistmodal/LikesListModal";
 import { useAuth } from "../../context/AuthContext";
 
 export default function Profile() {
-  const { authUser, userDoc } = useAuth(); // ✅ use context instead of props
+  const { authUser, userDoc } = useAuth();
   const [profileData, setProfileData] = useState(null);
   const [loadingProfile, setLoadingProfile] = useState(true);
   const [errorProfile, setErrorProfile] = useState(null);
@@ -42,11 +44,12 @@ export default function Profile() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedPost, setSelectedPost] = useState(null);
   const [modalType, setModalType] = useState(null);
+  const [postUserData, setPostUserData] = useState(null);
+  const [showLikesModal, setShowLikesModal] = useState(false);
 
   const { id: userId } = useParams();
-  const isOwnProfile = authUser && authUser.uid === userId; // ✅ now reliable
+  const isOwnProfile = authUser && authUser.uid === userId;
 
-  // Load profile data
   useEffect(() => {
     if (!userId) return;
     setLoadingProfile(true);
@@ -70,7 +73,6 @@ export default function Profile() {
     return () => unsub();
   }, [userId]);
 
-  // Load posts
   useEffect(() => {
     const fetchUserPosts = async () => {
       setLoadingPosts(true);
@@ -102,7 +104,6 @@ export default function Profile() {
     if (userId) fetchUserPosts();
   }, [userId]);
 
-  // Follow state
   useEffect(() => {
     if (!authUser || isOwnProfile) {
       setIsFollowing(false);
@@ -115,6 +116,16 @@ export default function Profile() {
     return () => unsub();
   }, [authUser, userId, isOwnProfile]);
 
+  useEffect(() => {
+    if (!selectedPost) return;
+    const unsub = onSnapshot(doc(db, "users", selectedPost.userId), (snap) => {
+      if (snap.exists()) {
+        setPostUserData(snap.data());
+      }
+    });
+    return () => unsub();
+  }, [selectedPost]);
+
   const handleFollowToggle = async () => {
     if (!authUser || isOwnProfile || loadingFollow) return;
     setLoadingFollow(true);
@@ -124,13 +135,11 @@ export default function Profile() {
     const followerRef = doc(db, "users", userId, "followers", authUser.uid);
     try {
       if (isFollowing) {
-        // Unfollow
         await deleteDoc(followingRef);
         await deleteDoc(followerRef);
         await updateDoc(currentUserRef, { followingCount: increment(-1) });
         await updateDoc(targetUserRef, { followersCount: increment(-1) });
       } else {
-        // Follow
         await setDoc(followingRef, {
           uid: userId,
           username: profileData.username,
@@ -178,7 +187,7 @@ export default function Profile() {
         <div className="profile-header">
           <div className="profile-avatar-container">
             <img
-              src={profileData.avatarUrl || storyImg}
+              src={profileData.avatarUrl || placeholderImg}
               alt="User Avatar"
               className="profile-avatar"
             />
@@ -305,7 +314,7 @@ export default function Profile() {
                 <div className="lightbox-header">
                   <img
                     src={
-                      selectedPost.userAvatar ||
+                      postUserData?.avatarUrl ||
                       "https://via.placeholder.com/40"
                     }
                     alt=""
@@ -313,11 +322,8 @@ export default function Profile() {
                   />
                   <div className="lightbox-userinfo">
                     <span className="lightbox-username">
-                      {selectedPost.username || "Unknown"}
+                      {postUserData?.username || "Unknown"}
                     </span>
-                    {selectedPost.userBio && (
-                      <p className="lightbox-bio">{selectedPost.userBio}</p>
-                    )}
                   </div>
 
                   {authUser?.uid === selectedPost.userId && (
@@ -365,39 +371,7 @@ export default function Profile() {
                 <div className="lightbox-stats">
                   <span
                     className="likes"
-                    onClick={async () => {
-                      if (!authUser) return;
-                      const postRef = doc(db, "posts", selectedPost.id);
-                      const alreadyLiked = selectedPost.likedByUsers?.includes(
-                        authUser.uid
-                      );
-                      if (alreadyLiked) {
-                        await updateDoc(postRef, {
-                          likesCount: increment(-1),
-                          likedByUsers: arrayRemove(authUser.uid),
-                        });
-                        setSelectedPost((prev) => ({
-                          ...prev,
-                          likesCount: (prev.likesCount || 1) - 1,
-                          likedByUsers: prev.likedByUsers.filter(
-                            (id) => id !== authUser.uid
-                          ),
-                        }));
-                      } else {
-                        await updateDoc(postRef, {
-                          likesCount: increment(1),
-                          likedByUsers: arrayUnion(authUser.uid),
-                        });
-                        setSelectedPost((prev) => ({
-                          ...prev,
-                          likesCount: (prev.likesCount || 0) + 1,
-                          likedByUsers: [
-                            ...(prev.likedByUsers || []),
-                            authUser.uid,
-                          ],
-                        }));
-                      }
-                    }}
+                    onClick={() => setShowLikesModal(true)}
                     style={{ cursor: "pointer" }}
                   >
                     <FaPaw
@@ -442,6 +416,14 @@ export default function Profile() {
             </div>
           </div>
         </div>
+      )}
+
+      {showLikesModal && (
+        <LikesListModal
+          isOpen={showLikesModal}
+          onClose={() => setShowLikesModal(false)}
+          likedByUsers={selectedPost?.likedByUsers || []}
+        />
       )}
 
       {modalType && (

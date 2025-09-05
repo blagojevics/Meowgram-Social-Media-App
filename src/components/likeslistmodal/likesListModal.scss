@@ -1,0 +1,55 @@
+.likes-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+.likes-modal-content {
+  background: #fff;
+  border-radius: 8px;
+  padding: 20px;
+  width: 320px;
+  max-height: 400px;
+  overflow-y: auto;
+  position: relative;
+}
+
+.close-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  border: none;
+  background: transparent;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.likes-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.like-user {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.like-user-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  margin-right: 10px;
+}
+
+.like-user-name {
+  font-weight: 500;
+}

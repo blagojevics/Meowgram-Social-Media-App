@@ -1,21 +1,30 @@
 .notifications-page {
-  padding: 20px;
-  width: 55%;
+  padding: 0 10px;
+  width: 100vh;
+  margin: 0 auto;
 
   h2 {
     margin-bottom: 15px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 18px;
+    font-weight: 600;
   }
 
   .notifications-list {
+    width: 100%;
     list-style: none;
     padding: 0;
     margin: 0;
     height: 800px;
-    overflow: scroll;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(219, 219, 219, 0.825) transparent;
 
     .notification-item {
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       gap: 10px;
       padding: 12px 0;
       border-bottom: 1px solid #eee;
@@ -23,18 +32,20 @@
       .notif-user {
         display: flex;
         align-items: center;
-      }
 
-      .notif-avatar {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        object-fit: cover;
+        .notif-avatar {
+          width: 42px;
+          height: 42px;
+          border-radius: 50%;
+          object-fit: cover;
+        }
       }
 
       .notif-text {
         display: flex;
         flex-direction: column;
+        font-size: 14px;
+        color: #333;
 
         .notif-username {
           font-weight: bold;
@@ -44,6 +55,43 @@
 
           &:hover {
             text-decoration: underline;
+          }
+        }
+
+        .notif-row {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          margin-top: 2px;
+
+          span {
+            color: #555;
+          }
+
+          .post-preview {
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            overflow: hidden;
+
+            img {
+              width: 50px;
+              height: 50px;
+              object-fit: cover;
+              display: block;
+            }
+
+            .post-text-preview {
+              width: 50px;
+              height: 50px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              font-size: 12px;
+              color: #666;
+              background: #f9f9f9;
+              text-align: center;
+              padding: 5px;
+            }
           }
         }
 
@@ -65,6 +113,7 @@
     color: white;
     border-radius: 4px;
     cursor: pointer;
+    font-size: 14px;
 
     &:disabled {
       background: #aaa;
@@ -73,7 +122,6 @@
   }
 }
 
-/* Badge for FaBell */
 .notif-badge {
   background: red;
   color: white;

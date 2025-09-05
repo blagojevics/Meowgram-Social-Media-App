@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { FaPaw, FaComment } from "react-icons/fa";
 import { useState, useEffect, useRef } from "react";
 import CommentsModal from "../commentsmodal/CommentsModal";
+import LikesListModal from "../likeslistmodal/LikesListModal";
 import "./post.scss";
 import CommentInput from "../comment-input/CommentInput";
 import CommentItem from "../commentitem/CommentItem";
@@ -39,6 +40,7 @@ export default function Post({ post, currentUser, onPostActionComplete }) {
   const [previewComments, setPreviewComments] = useState([]);
   const [totalComments, setTotalComments] = useState(0);
   const [showFullComments, setShowFullComments] = useState(false);
+  const [showLikes, setShowLikes] = useState(false);
 
   const [postUser, setPostUser] = useState(null);
 
@@ -256,7 +258,13 @@ export default function Post({ post, currentUser, onPostActionComplete }) {
         <button onClick={handleLike} className="post-action-button">
           <FaPaw style={{ color: isLiked ? "red" : "gray" }} />
         </button>
-        <span className="post-likes-count">{likesCount} Paws</span>
+        <span
+          className="post-likes-count"
+          onClick={() => setShowLikes(true)}
+          style={{ cursor: "pointer" }}
+        >
+          {likesCount} Paws
+        </span>
         <button
           onClick={() => setShowFullComments(true)}
           className="post-action-button"
@@ -320,6 +328,14 @@ export default function Post({ post, currentUser, onPostActionComplete }) {
           postId={post.id}
           currentUser={currentUser}
           isPostOwner={post.userId === currentUser.uid}
+        />
+      )}
+
+      {showLikes && (
+        <LikesListModal
+          isOpen={showLikes}
+          onClose={() => setShowLikes(false)}
+          likedByUsers={post.likedByUsers || []}
         />
       )}
 

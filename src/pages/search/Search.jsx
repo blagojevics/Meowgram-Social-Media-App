@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import placeholderImg from "../../assets/placeholderImg.jpg";
 import {
   collection,
   query,
@@ -179,7 +180,7 @@ export default function Search({ currentUser }) {
                       className="user-search-item"
                     >
                       <img
-                        src={user.avatarUrl || "path/to/default/avatar.webp"}
+                        src={user.avatarUrl || placeholderImg}
                         alt={user.username}
                         className="user-avatar"
                       />
