@@ -5,6 +5,7 @@ import { collection, query, orderBy, onSnapshot } from "firebase/firestore";
 import { db } from "../../config/firebase";
 import Post from "../../components/post/Post";
 import { useAuth } from "../../context/AuthContext";
+import homePageLogo from "../../assets/logohomepage.png";
 
 export default function Home() {
   const { authUser, userDoc } = useAuth();
@@ -73,7 +74,9 @@ export default function Home() {
 
   return (
     <div className="home-container">
-      <div className="home-header">MEOWGRAM</div>
+      <div className="home-header">
+        <img src={homePageLogo} alt="homelogo img" />
+      </div>
       <Stories />
       <div className="posts-feed">
         {posts.map((post) => (

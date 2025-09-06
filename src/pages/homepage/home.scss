@@ -8,6 +8,19 @@
   overflow: scroll;
   scrollbar-width: thin;
   scrollbar-color: rgba(219, 219, 219, 0.825) transparent;
+
+  .home-header {
+    height: 50px;
+    display: flex;
+    justify-content: left;
+    align-items: center;
+    margin-left: 5px;
+
+    img {
+      width: 100px;
+      height: 50px;
+    }
+  }
 }
 
 .posts-feed {
