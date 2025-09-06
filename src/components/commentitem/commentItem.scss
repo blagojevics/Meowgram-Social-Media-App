@@ -1,0 +1,27 @@
+.comment {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  width: 100%;
+
+  .comment-time {
+    display: flex;
+    justify-content: center;
+    width: 100px;
+  }
+
+  .comment-flexbox {
+    display: flex;
+    width: 100%;
+    align-items: center;
+  }
+
+  .delete-btn {
+    display: flex;
+    background-color: transparent;
+    color: red;
+    border: none;
+    justify-content: center;
+    align-items: center;
+  }
+}

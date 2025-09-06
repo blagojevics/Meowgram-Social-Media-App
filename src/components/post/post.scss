@@ -155,10 +155,11 @@
       display: flex;
       gap: 5px;
       align-items: center;
+      justify-content: space-between;
 
       .comment-user-link {
         display: flex;
-        justify-content: center;
+        justify-content: left;
         align-items: center;
         gap: 5px;
         color: #333;
@@ -175,6 +176,10 @@
         font-size: 12px;
         font-weight: bold;
         opacity: 0.9;
+      }
+
+      .comment-time {
+        font-size: 10px;
       }
     }
   }

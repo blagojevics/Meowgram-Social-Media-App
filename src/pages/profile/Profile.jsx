@@ -398,44 +398,46 @@ export default function Profile() {
                     />
                   )}
                 </div>
-                <div className="lightbox-stats">
-                  <span
-                    className="likes"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleLikeToggle(selectedPost);
-                    }}
-                    style={{ cursor: "pointer" }}
-                  >
-                    <FaPaw
-                      style={{
-                        color: selectedPost.likedByUsers?.includes(
-                          authUser?.uid
-                        )
-                          ? "#e63946"
-                          : "gray",
+                <div className="lightbox-helper-div">
+                  <div className="lightbox-stats">
+                    <span
+                      className="likes"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleLikeToggle(selectedPost);
                       }}
-                    />{" "}
-                    {selectedPost.likesCount || 0}
-                  </span>
-                  <span
-                    className="likes-list"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setShowLikesModal(true);
-                    }}
-                  >
-                    Paws
-                  </span>
-                  <span className="comments">
-                    <FaComment style={{ color: "#555" }} />{" "}
-                    {selectedPost.commentsCount || 0}
-                  </span>
-                </div>
-                <div className="lightbox-time">
-                  {selectedPost.createdAt?.toDate
-                    ? `· ${formatTimeAgo(selectedPost.createdAt.toDate())}`
-                    : ""}
+                      style={{ cursor: "pointer" }}
+                    >
+                      <FaPaw
+                        style={{
+                          color: selectedPost.likedByUsers?.includes(
+                            authUser?.uid
+                          )
+                            ? "#e63946"
+                            : "gray",
+                        }}
+                      />{" "}
+                      {selectedPost.likesCount || 0}
+                    </span>
+                    <span
+                      className="likes-list"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setShowLikesModal(true);
+                      }}
+                    >
+                      Paws
+                    </span>
+                    <span className="comments">
+                      <FaComment style={{ color: "#555" }} />{" "}
+                      {selectedPost.commentsCount || 0}
+                    </span>
+                  </div>
+                  <div className="lightbox-time">
+                    {selectedPost.createdAt?.toDate
+                      ? `· ${formatTimeAgo(selectedPost.createdAt.toDate())}`
+                      : ""}
+                  </div>
                 </div>
                 <div className="lightbox-caption">{selectedPost.caption}</div>
                 <div className="lightbox-comments">

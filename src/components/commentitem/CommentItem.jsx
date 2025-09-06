@@ -35,12 +35,12 @@ export default function CommentItem({
           </span>
         </Link>
         <span className="comment-text">{comment.text}</span>
-        {comment.createdAt?.toDate && (
-          <span className="comment-time">
-            •{formatTimeAgo(comment.createdAt.toDate())}
-          </span>
-        )}
       </div>
+      {comment.createdAt?.toDate && (
+        <span className="comment-time">
+          • {formatTimeAgo(comment.createdAt.toDate())}
+        </span>
+      )}
       {(isPostOwner || comment.authorId === currentUser.uid) && (
         <button onClick={() => onDelete(comment)} className="delete-btn">
           x
