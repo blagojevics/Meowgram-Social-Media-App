@@ -1,26 +1,25 @@
 import { useEffect, useState } from "react";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, onSnapshot } from "firebase/firestore";
 import { db } from "../../config/firebase";
 import "./likesListModal.scss";
+import placeholderImg from "../../assets/placeholderImg.jpg";
 
 export default function LikesListModal({ isOpen, onClose, likedByUsers }) {
   const [users, setUsers] = useState([]);
 
   useEffect(() => {
     if (!isOpen || !likedByUsers) return;
-
-    const fetchUsers = async () => {
-      const userData = [];
-      for (const uid of likedByUsers) {
-        const snap = await getDoc(doc(db, "users", uid));
+    const unsubs = likedByUsers.map((uid) =>
+      onSnapshot(doc(db, "users", uid), (snap) => {
         if (snap.exists()) {
-          userData.push({ id: uid, ...snap.data() });
+          setUsers((prev) => {
+            const filtered = prev.filter((u) => u.id !== uid);
+            return [...filtered, { id: uid, ...snap.data() }];
+          });
         }
-      }
-      setUsers(userData);
-    };
-
-    fetchUsers();
+      })
+    );
+    return () => unsubs.forEach((unsub) => unsub());
   }, [isOpen, likedByUsers]);
 
   if (!isOpen) return null;
@@ -36,7 +35,7 @@ export default function LikesListModal({ isOpen, onClose, likedByUsers }) {
           {users.map((u) => (
             <li key={u.id} className="like-user">
               <img
-                src={u.avatarUrl || "https://via.placeholder.com/32"}
+                src={u.avatarUrl || placeholderImg}
                 alt={u.username || "Unknown"}
                 className="like-user-avatar"
               />

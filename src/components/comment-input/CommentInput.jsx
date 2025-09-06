@@ -9,6 +9,7 @@ import {
 } from "firebase/firestore";
 import { db } from "../../config/firebase";
 import "./commentInput.scss";
+import placeholderImg from "../../assets/placeholderImg.jpg";
 
 export default function CommentInput({ postId, currentUser, post }) {
   const [text, setText] = useState("");
@@ -49,7 +50,7 @@ export default function CommentInput({ postId, currentUser, post }) {
   return (
     <form onSubmit={handleSubmit} className="comment-input">
       <img
-        src={currentUser?.avatarUrl || "https://via.placeholder.com/28"}
+        src={currentUser?.avatarUrl || placeholderImg}
         alt=""
         className="comment-input-avatar"
       />

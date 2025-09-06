@@ -1,6 +1,5 @@
 import "./profile.scss";
 import placeholderImg from "../../assets/placeholderImg.jpg";
-
 import { FaPaw, FaComment } from "react-icons/fa";
 import { useState, useEffect } from "react";
 import EditProfile from "../../components/editProfile/EditProfile";
@@ -100,7 +99,6 @@ export default function Profile() {
         setLoadingPosts(false);
       }
     };
-
     if (userId) fetchUserPosts();
   }, [userId]);
 
@@ -118,12 +116,23 @@ export default function Profile() {
 
   useEffect(() => {
     if (!selectedPost) return;
-    const unsub = onSnapshot(doc(db, "users", selectedPost.userId), (snap) => {
+    const unsubPost = onSnapshot(doc(db, "posts", selectedPost.id), (snap) => {
       if (snap.exists()) {
-        setPostUserData(snap.data());
+        setSelectedPost({ id: snap.id, ...snap.data() });
       }
     });
-    return () => unsub();
+    const unsubUser = onSnapshot(
+      doc(db, "users", selectedPost.userId),
+      (snap) => {
+        if (snap.exists()) {
+          setPostUserData(snap.data());
+        }
+      }
+    );
+    return () => {
+      unsubPost();
+      unsubUser();
+    };
   }, [selectedPost]);
 
   const handleFollowToggle = async () => {
@@ -168,6 +177,27 @@ export default function Profile() {
       console.error("Follow/unfollow error:", err);
     } finally {
       setLoadingFollow(false);
+    }
+  };
+
+  const handleLikeToggle = async (post) => {
+    if (!authUser) return;
+    const postRef = doc(db, "posts", post.id);
+    const alreadyLiked = post.likedByUsers?.includes(authUser.uid);
+    try {
+      if (alreadyLiked) {
+        await updateDoc(postRef, {
+          likedByUsers: arrayRemove(authUser.uid),
+          likesCount: increment(-1),
+        });
+      } else {
+        await updateDoc(postRef, {
+          likedByUsers: arrayUnion(authUser.uid),
+          likesCount: increment(1),
+        });
+      }
+    } catch (err) {
+      console.error("Error toggling like:", err);
     }
   };
 
@@ -312,20 +342,21 @@ export default function Profile() {
               </div>
               <div className="lightbox-details">
                 <div className="lightbox-header">
-                  <img
-                    src={
-                      postUserData?.avatarUrl ||
-                      "https://via.placeholder.com/40"
-                    }
-                    alt=""
-                    className="lightbox-avatar"
-                  />
-                  <div className="lightbox-userinfo">
-                    <span className="lightbox-username">
-                      {postUserData?.username || "Unknown"}
-                    </span>
+                  <div className="lightbox-header-flex">
+                    <img
+                      src={
+                        postUserData?.avatarUrl ||
+                        "https://via.placeholder.com/40"
+                      }
+                      alt=""
+                      className="lightbox-avatar"
+                    />
+                    <div className="lightbox-userinfo">
+                      <span className="lightbox-username">
+                        {postUserData?.username || "Unknown"}
+                      </span>
+                    </div>
                   </div>
-
                   {authUser?.uid === selectedPost.userId && (
                     <DropdownMenu
                       options={[
@@ -367,11 +398,13 @@ export default function Profile() {
                     />
                   )}
                 </div>
-
                 <div className="lightbox-stats">
                   <span
                     className="likes"
-                    onClick={() => setShowLikesModal(true)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleLikeToggle(selectedPost);
+                    }}
                     style={{ cursor: "pointer" }}
                   >
                     <FaPaw
@@ -385,20 +418,26 @@ export default function Profile() {
                     />{" "}
                     {selectedPost.likesCount || 0}
                   </span>
+                  <span
+                    className="likes-list"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowLikesModal(true);
+                    }}
+                  >
+                    Paws
+                  </span>
                   <span className="comments">
                     <FaComment style={{ color: "#555" }} />{" "}
                     {selectedPost.commentsCount || 0}
                   </span>
                 </div>
-
                 <div className="lightbox-time">
                   {selectedPost.createdAt?.toDate
                     ? `· ${formatTimeAgo(selectedPost.createdAt.toDate())}`
                     : ""}
                 </div>
-
                 <div className="lightbox-caption">{selectedPost.caption}</div>
-
                 <div className="lightbox-comments">
                   <CommentList
                     postId={selectedPost.id}
@@ -415,15 +454,14 @@ export default function Profile() {
               </div>
             </div>
           </div>
+          {showLikesModal && (
+            <LikesListModal
+              isOpen={showLikesModal}
+              onClose={() => setShowLikesModal(false)}
+              likedByUsers={selectedPost?.likedByUsers || []}
+            />
+          )}
         </div>
-      )}
-
-      {showLikesModal && (
-        <LikesListModal
-          isOpen={showLikesModal}
-          onClose={() => setShowLikesModal(false)}
-          likedByUsers={selectedPost?.likedByUsers || []}
-        />
       )}
 
       {modalType && (

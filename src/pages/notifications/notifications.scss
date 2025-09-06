@@ -60,6 +60,7 @@
 
         .notif-row {
           display: flex;
+          justify-content: space-between !important;
           align-items: center;
           gap: 8px;
           margin-top: 2px;
