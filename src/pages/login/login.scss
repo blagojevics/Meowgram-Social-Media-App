@@ -193,13 +193,6 @@
             transition: 0.4s;
             background-color: rgba(255, 255, 255, 1);
             border: 1px solid rgba(104, 85, 224, 1);
-
-            &:hover {
-              color: white;
-              transform: scale(0.9);
-              box-shadow: 0 0 20px rgba(104, 85, 224, 0.6);
-              background-color: rgba(104, 85, 224, 1);
-            }
           }
         }
       }
