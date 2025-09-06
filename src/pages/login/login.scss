@@ -20,13 +20,13 @@
       flex-direction: column;
 
       background: linear-gradient(
-          rgba(155, 111, 238, 0.477),
-          rgba(100, 44, 180, 0.528)
+          rgba(75, 102, 240, 0.302),
+          rgba(44, 135, 180, 0.467)
         ),
         url(https://images.pexels.com/photos/669015/pexels-photo-669015.jpeg)
           center;
       background-size: cover;
-      padding: 30px;
+      padding: 20px;
       color: rgb(0, 0, 0);
 
       h1 {
@@ -45,14 +45,24 @@
       }
 
       button {
-        width: 40%;
         cursor: pointer;
-        padding: 10px;
-        font-size: 16px;
-        border: none;
-        border-radius: 5px;
-        background-color: rgb(8, 104, 128);
-        color: white;
+        border: 0;
+        border-radius: 4px;
+        font-weight: 400;
+        margin: 0 10px;
+        width: 100px;
+        padding: 5px 0;
+        box-shadow: 0 0 20px rgba(104, 85, 224, 0.2);
+        transition: 0.4s;
+        background-color: rgb(171, 171, 171);
+        border: 1px solid rgba(104, 85, 224, 1);
+
+        &:hover {
+          color: white;
+          transform: scale(0.9);
+          box-shadow: 0 0 20px rgba(104, 85, 224, 0.6);
+          background-color: rgba(104, 85, 224, 1);
+        }
       }
     }
 
@@ -60,8 +70,31 @@
       flex: 1;
       display: flex;
       flex-direction: column;
-      gap: 30px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+
+      gap: 10px;
       padding: 30px;
+      .divider {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      button {
+        cursor: pointer;
+        border: 0;
+        border-radius: 4px;
+        font-weight: 600;
+        margin: 0 10px;
+        width: 200px;
+        padding: 10px 0;
+        box-shadow: 0 0 20px rgba(104, 85, 224, 0.2);
+        transition: 0.4s;
+        background-color: rgba(255, 255, 255, 1);
+        border: 1px solid rgba(104, 85, 224, 1);
+      }
 
       h1 {
         font-size: 40px;
@@ -71,13 +104,28 @@
         display: flex;
         flex-direction: column;
         gap: 50px;
-        width: 80%;
+        width: 100%;
+        margin: 0 auto;
 
         button {
-          width: 40%;
           cursor: pointer;
-          padding: 10px;
-          font-size: 16px;
+          border: 0;
+          border-radius: 4px;
+          font-weight: 600;
+          margin: 0 10px;
+          width: 200px;
+          padding: 10px 0;
+          box-shadow: 0 0 20px rgba(104, 85, 224, 0.2);
+          transition: 0.4s;
+          background-color: rgba(255, 255, 255, 1);
+          border: 1px solid rgba(104, 85, 224, 1);
+
+          &:hover {
+            color: white;
+            transform: scale(0.95);
+            box-shadow: 0 0 20px rgba(104, 85, 224, 0.6);
+            background-color: rgba(104, 85, 224, 1);
+          }
         }
 
         input {
@@ -98,6 +146,63 @@
       min-width: 280px;
       max-width: 530px;
       width: 380px;
+
+      .left {
+        display: flex;
+        gap: 10px;
+        h1 {
+          font-size: 24px;
+        }
+        p {
+          font-size: 16px;
+        }
+        span {
+          font-size: 14px;
+          margin-bottom: 10px;
+        }
+      }
+
+      .right {
+        .google-login-btn {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 5px;
+        }
+
+        h1 {
+          font-size: 20px;
+        }
+
+        form {
+          font-size: 16px;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          gap: 25px;
+
+          button {
+            cursor: pointer;
+            border: 0;
+            border-radius: 4px;
+            font-weight: 600;
+
+            width: 200px;
+            padding: 10px 0;
+            box-shadow: 0 0 20px rgba(104, 85, 224, 0.2);
+            transition: 0.4s;
+            background-color: rgba(255, 255, 255, 1);
+            border: 1px solid rgba(104, 85, 224, 1);
+
+            &:hover {
+              color: white;
+              transform: scale(0.9);
+              box-shadow: 0 0 20px rgba(104, 85, 224, 0.6);
+              background-color: rgba(104, 85, 224, 1);
+            }
+          }
+        }
+      }
     }
   }
 }

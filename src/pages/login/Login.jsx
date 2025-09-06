@@ -5,6 +5,7 @@ import { auth, db, googleProvider } from "../../config/firebase";
 import { signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
 import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 import { useAuth } from "../../context/AuthContext";
+import { FaGoogle } from "react-icons/fa";
 
 export default function Login() {
   const [inputs, setInputs] = useState({ email: "", password: "" });
@@ -108,17 +109,14 @@ export default function Login() {
             />
             {err && <span style={{ color: "red" }}>{err}</span>}
             <button type="submit">Login!</button>
+            <button
+              type="button"
+              onClick={handleGoogleLogin}
+              className="google-login-btn"
+            >
+              <FaGoogle /> Continue with Google
+            </button>
           </form>
-
-          <div className="divider">or</div>
-
-          <button
-            type="button"
-            onClick={handleGoogleLogin}
-            className="google-login-btn"
-          >
-            Continue with Google
-          </button>
         </div>
       </div>
     </div>
