@@ -144,7 +144,7 @@ VITE_CLOUDINARY_UPLOAD_PRESET=...
 
 **Deployment**
 
-- Deployed to Firebase Hosting (add live link here)
+- Deployed to Firebase Hosting (meowgram.online(soon))
 
 - Continuous deployment via GitHub Actions
 
@@ -163,3 +163,4 @@ VITE_CLOUDINARY_UPLOAD_PRESET=...
 - Desktop redesign with improved styling
 
 - Dark mode support
+
