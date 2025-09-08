@@ -7,50 +7,41 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
-*.local
+# Dependencies
+node_modules/
 
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
-.DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
+# Build output
+dist/
+dist-ssr/
+build/
 
-# dependencies
-/node_modules
-/.pnp
-.pnp.js
-
-# testing
-/coverage
-
-# production
-/build
-
-# misc
-.DS_Store
+# Environment variables (DO NOT COMMIT)
 .env
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
 
-# firebase
+# Firebase (only project configs are tracked, cache/emulator state ignored)
 .firebase/
 *.cache
-*.log
 
-# service account keys (never commit these!)
-*.json
+# Cloudinary or other service account JSON keys (never commit)
+*serviceAccount*.json
+*key.json
 
-# editor
+# Testing
+coverage/
+
+# IDE / OS junk
 .vscode/
 .idea/
+.DS_Store
+*.sw?
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# Misc
 *.swp
