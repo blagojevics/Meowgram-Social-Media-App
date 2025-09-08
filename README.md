@@ -115,11 +115,17 @@ Authentication & User Management
 2. Install dependencies: "npm install"
 
 3. Create .env file in project root with Firebase and Cloudinary config:
+
 VITE_FIREBASE_API_KEY=...
+
 VITE_FIREBASE_AUTH_DOMAIN=...
+
 VITE_FIREBASE_PROJECT_ID=...
+
 VITE_FIREBASE_APP_ID=...
+
 VITE_CLOUDINARY_UPLOAD_URL=...
+
 VITE_CLOUDINARY_UPLOAD_PRESET=...
 
 4. Run a development server: "npm run dev"
@@ -163,5 +169,6 @@ VITE_CLOUDINARY_UPLOAD_PRESET=...
 - Desktop redesign with improved styling
 
 - Dark mode support
+
 
 
