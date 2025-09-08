@@ -1,4 +1,4 @@
-**Meowgram**
+**MEOWGRAM**
 
 
 Full‑stack social media single‑page application built with React and Firebase. Implements authentication, posting, likes, comments, follows, and live notifications with real‑time updates.
@@ -163,4 +163,5 @@ VITE_CLOUDINARY_UPLOAD_PRESET=...
 - Desktop redesign with improved styling
 
 - Dark mode support
+
 
