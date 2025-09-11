@@ -365,10 +365,11 @@
 }
 
 .lightbox-content {
+  height: 764px;
   display: flex;
   flex: 1;
   overflow: scroll;
-  padding-bottom: 30px;
+  margin: 0;
   scrollbar-width: thin;
   scrollbar-color: rgba(219, 219, 219, 0.825) transparent;
 }
