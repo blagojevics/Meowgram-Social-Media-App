@@ -124,13 +124,14 @@
       }
 
       .profile-bio {
-        font-size: 14px;
+        font-size: 15px;
         line-height: 1.5;
         margin-bottom: 10px;
         max-width: 100%;
         word-wrap: break-word;
         display: flex;
-        justify-content: center;
+        justify-content: left;
+        color: rgb(43, 43, 43);
 
         p {
           margin: 0;
@@ -464,6 +465,16 @@
         display: flex;
 
         .profile-stats {
+          display: flex;
+          justify-content: center;
+        }
+
+        .profile-bio {
+          font-size: 14px;
+          line-height: 1.5;
+          margin-bottom: 10px;
+          max-width: 100%;
+          word-wrap: break-word;
           display: flex;
           justify-content: center;
         }
