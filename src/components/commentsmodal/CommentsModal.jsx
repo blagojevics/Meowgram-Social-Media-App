@@ -1,4 +1,3 @@
-import React from "react";
 import "./commentsModal.scss";
 import CommentList from "../comment-list/CommentList";
 

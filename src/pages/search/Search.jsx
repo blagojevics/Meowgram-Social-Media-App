@@ -162,6 +162,11 @@ export default function Search({ currentUser }) {
                 <ul className="recent-searches">
                   {recentSearches.map((s, i) => (
                     <li key={i} onClick={() => setSearchQuery(s)}>
+                      <img
+                        src={s.avatarUrl || placeholderImg}
+                        alt={s.username}
+                        className="user-avatar"
+                      />
                       {s}
                     </li>
                   ))}
@@ -214,7 +219,7 @@ export default function Search({ currentUser }) {
                   className="user-search-item"
                 >
                   <img
-                    src={user.avatarUrl || "path/to/default/avatar.webp"}
+                    src={user.avatarUrl || placeholderImg}
                     alt={user.username}
                     className="user-avatar"
                   />

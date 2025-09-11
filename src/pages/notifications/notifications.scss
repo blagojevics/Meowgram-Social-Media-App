@@ -2,6 +2,7 @@
   padding: 0 10px;
   width: 100vh;
   margin: 0 auto;
+  margin-bottom: 50px;
 
   h2 {
     margin-bottom: 15px;
@@ -118,7 +119,6 @@
 
     &:disabled {
       background: #aaa;
-      cursor: not-allowed;
     }
   }
 }

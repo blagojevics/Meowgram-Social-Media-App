@@ -10,16 +10,7 @@
   scrollbar-color: rgba(219, 219, 219, 0.825) transparent;
 
   .home-header {
-    height: 50px;
-    display: flex;
-    justify-content: left;
-    align-items: center;
-    margin-left: 5px;
-
-    img {
-      width: 100px;
-      height: 50px;
-    }
+    display: none;
   }
 }
 
@@ -27,6 +18,7 @@
   display: flex;
   flex-direction: column;
   width: 100%;
+  padding: 0;
 }
 
 @media screen and (min-width: 300px) and (max-width: 550px) {
@@ -35,5 +27,18 @@
     max-width: 530px;
     width: 400px;
     padding-bottom: 70px;
+
+    .home-header {
+      height: 50px;
+      display: flex;
+      justify-content: left;
+      align-items: center;
+      margin-left: 5px;
+
+      img {
+        width: 100px;
+        height: 50px;
+      }
+    }
   }
 }

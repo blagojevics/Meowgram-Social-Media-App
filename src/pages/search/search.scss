@@ -32,6 +32,19 @@
       color: #333;
     }
 
+    .recent-searches {
+      display: flex;
+      flex-direction: column;
+      align-items: left;
+      justify-content: center;
+
+      li {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      }
+    }
+
     .user-results-list,
     .post-results-list {
       display: flex;

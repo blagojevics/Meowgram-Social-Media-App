@@ -234,12 +234,14 @@ export default function Profile() {
               </div>
               {isOwnProfile ? (
                 <>
-                  <button
-                    className="edit-profile-button"
-                    onClick={() => setShowEditModal(true)}
-                  >
-                    Edit Profile
-                  </button>
+                  <div className="temp-div">
+                    <button
+                      className="edit-profile-button"
+                      onClick={() => setShowEditModal(true)}
+                    >
+                      Edit Profile
+                    </button>
+                  </div>
                   {showEditModal && (
                     <EditProfile
                       currentUser={{ ...authUser, ...userDoc }}
@@ -344,10 +346,7 @@ export default function Profile() {
                 <div className="lightbox-header">
                   <div className="lightbox-header-flex">
                     <img
-                      src={
-                        postUserData?.avatarUrl ||
-                        "https://via.placeholder.com/40"
-                      }
+                      src={postUserData?.avatarUrl || placeholderImg}
                       alt=""
                       className="lightbox-avatar"
                     />

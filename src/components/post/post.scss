@@ -151,6 +151,16 @@
     width: 90%;
     margin: 0 auto;
 
+    .show-more-comments-btn {
+      border: none;
+      background-color: transparent;
+      font-size: 11px;
+      font-weight: 500;
+      color: rgb(108, 108, 108);
+      cursor: pointer;
+      margin-top: -5px;
+    }
+
     .comment {
       display: flex;
       gap: 5px;
@@ -201,8 +211,8 @@
     }
 
     .post-image-container {
-      height: 400px;
-      object-fit: contain;
+      height: 450px;
+      object-fit: cover;
       .post-image {
         object-fit: cover;
       }

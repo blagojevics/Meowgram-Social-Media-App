@@ -77,7 +77,7 @@ export default function Home() {
       <div className="home-header">
         <img src={homePageLogo} alt="homelogo img" />
       </div>
-      <Stories />
+
       <div className="posts-feed">
         {posts.map((post) => (
           <Post

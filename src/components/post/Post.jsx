@@ -7,6 +7,7 @@ import "./post.scss";
 import CommentInput from "../comment-input/CommentInput";
 import CommentItem from "../commentitem/CommentItem";
 import formatTimeAgo from "../../config/timeFormat";
+import placeholderImg from "../../assets/placeholderImg.jpg";
 import {
   deleteDoc,
   doc,
@@ -207,10 +208,7 @@ export default function Post({ post, currentUser, onPostActionComplete }) {
       <div className="post-header">
         <Link to={`/profile/${post.userId}`} className="post-header-user-link">
           <img
-            src={
-              postUser?.avatarUrl ||
-              "https://via.placeholder.com/50/CCCCCC/FFFFFF?text=AV"
-            }
+            src={postUser?.avatarUrl || placeholderImg}
             alt="User Avatar"
             className="post-header-avatar"
           />
