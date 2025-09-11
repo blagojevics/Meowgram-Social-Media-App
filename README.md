@@ -2,14 +2,13 @@
 
 Full‑stack social media single‑page application built with React and Firebase. Implements authentication, posting, likes, comments, follows, and live notifications with real‑time updates.
 
-
-<img width="1902" height="1038" alt="Meowgram ss1" src="https://github.com/user-attachments/assets/40ea51db-30ae-48e5-b0ae-93c260aa5966" />
-
-
-
 **Description**
 
 Meowgram is a responsive social platform where users can register, create posts with images, interact through likes and comments, manage profiles, follow other users, and receive real‑time notifications. Built as a learning project, it has been tested with active users and iterated with real feedback.
+
+<img width="348" height="802" alt="meowgramss2" src="https://github.com/user-attachments/assets/65460bda-c5c5-49a4-b90a-8c9a5eb23b5c" />
+<img width="346" height="800" alt="meowgramss3" src="https://github.com/user-attachments/assets/0bb95d42-a4f4-46bd-9605-004acba5806e" />
+<img width="348" height="802" alt="Meowgram ss4" src="https://github.com/user-attachments/assets/f632e276-0031-4e9c-8eb6-a5a6b588e1c8" />
 
 **Features**
 
@@ -170,3 +169,5 @@ Authentication & User Management
 - Desktop redesign with improved styling
 
 - Dark mode support
+
+<img width="1522" height="952" alt="Meowgram ss1" src="https://github.com/user-attachments/assets/c06aafeb-15d1-4b94-a874-50831cf38ee7" />
