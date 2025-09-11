@@ -6,22 +6,22 @@ export default function Stories() {
   const story = [
     {
       id: 1,
-      name: "test",
+      name: "soon",
       img: storyImg,
     },
     {
       id: 3,
-      name: "test",
+      name: "soon",
       img: storyImg,
     },
     {
       id: 4,
-      name: "test",
+      name: "soon",
       img: storyImg,
     },
     {
       id: 5,
-      name: "test",
+      name: "soon",
       img: storyImg,
     },
   ];
