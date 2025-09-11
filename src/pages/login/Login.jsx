@@ -78,11 +78,7 @@ export default function Login() {
       <div className="card">
         <div className="left">
           <h1>Welcome to Meowgram</h1>
-          <p>
-            Lorem, ipsum dolor sit amet consectetur adipisicing elit. Sint in
-            blanditiis voluptatem explicabo, architecto rem cum id dolor fugit
-            aspernatur alias porro?
-          </p>
+          <p>Log In and connect with your favourite animals.</p>
           <span>Dont have an account? Register now!</span>
           <Link to="/register">
             <button type="button">Register!</button>

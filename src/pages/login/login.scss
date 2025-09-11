@@ -1,6 +1,9 @@
 .login {
   height: 100vh;
-  background-color: rgb(193, 190, 225);
+  background-image: url(https://img.freepik.com/free-photo/old-cement-wall-texture_1149-1280.jpg?semt=ais_hybrid&w=740&q=80);
+  background-size: cover;
+  background-position: center;
+  background-color: rgb(187, 186, 194);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -18,19 +21,18 @@
       flex: 1;
       display: flex;
       flex-direction: column;
-
       background: linear-gradient(
-          rgba(75, 102, 240, 0.302),
-          rgba(44, 135, 180, 0.467)
+          rgba(204, 204, 204, 0.671),
+          rgba(168, 168, 168, 0.473)
         ),
-        url(https://images.pexels.com/photos/669015/pexels-photo-669015.jpeg)
+        url(https://wallpapers.com/images/hd/black-and-white-cat-rolls-over-at-piano-keys-bys0wmzobswwn0k5.jpg)
           center;
       background-size: cover;
       padding: 20px;
       color: rgb(0, 0, 0);
 
       h1 {
-        font-size: 60px;
+        font-size: 40px;
         margin-bottom: -10px;
         margin-top: -10px;
       }
@@ -42,6 +44,7 @@
       span {
         font-size: 18px;
         margin-bottom: 50px;
+        margin-top: 200px;
       }
 
       button {
@@ -138,9 +141,13 @@
 
       .left {
         display: flex;
+        justify-content: center;
         gap: 10px;
+        height: 20%;
+        margin: auto 0px;
         h1 {
           font-size: 24px;
+          margin-top: 5px;
         }
         p {
           font-size: 16px;
@@ -148,6 +155,7 @@
         span {
           font-size: 14px;
           margin-bottom: 10px;
+          margin-top: 0;
         }
       }
 

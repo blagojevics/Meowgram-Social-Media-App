@@ -1,6 +1,9 @@
 .register {
   height: 100vh;
-  background-color: rgb(193, 190, 225);
+  background-image: url(https://img.freepik.com/free-photo/old-cement-wall-texture_1149-1280.jpg?semt=ais_hybrid&w=740&q=80);
+  background-size: cover;
+  background-position: center;
+  background-color: rgb(187, 186, 194);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -22,10 +25,10 @@
       justify-content: center;
       gap: 40px;
       background: linear-gradient(
-          rgba(155, 111, 238, 0.477),
-          rgba(100, 44, 180, 0.528)
+          rgba(204, 204, 204, 0.671),
+          rgba(168, 168, 168, 0.473)
         ),
-        url(https://images.pexels.com/photos/7725999/pexels-photo-7725999.jpeg)
+        url(https://cdn.shopify.com/s/files/1/3026/6974/files/kitten-black-and-white.jpg?v=1534094604)
           center;
       background-size: cover;
       padding: 30px;
