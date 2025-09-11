@@ -11,7 +11,7 @@ import Rightbar from "./components/rightbar/Rightbar";
 import Home from "./pages/homepage/Home";
 import Profile from "./pages/profile/Profile";
 import Onboarding from "./pages/onboarding/Onboarding";
-import AddPost from "./pages/addpost/AddPost";
+import AddPost from "./pages/addPost/AddPost";
 import Search from "./pages/search/Search";
 import Notifications from "./pages/notifications/Notifications";
 import Settings from "./pages/settings/Settings";
