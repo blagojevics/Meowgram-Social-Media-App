@@ -21,7 +21,7 @@ export default function Stories() {
     },
     {
       id: 5,
-      name: "soon",
+      name: "soon1",
       img: storyImg,
     },
   ];
