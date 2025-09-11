@@ -11,13 +11,13 @@ import Rightbar from "./components/rightbar/Rightbar";
 import Home from "./pages/homepage/Home";
 import Profile from "./pages/profile/Profile";
 import Onboarding from "./pages/onboarding/Onboarding";
-import AddPost from "./pages/addPost/AddPost";
+import AddPost from "./pages/addpost/AddPost";
 import Search from "./pages/search/Search";
 import Notifications from "./pages/notifications/Notifications";
 import Settings from "./pages/settings/Settings";
 import Login from "./pages/login/Login";
 import Register from "./pages/register/Register";
-import VerifyEmail from "./pages/verifyEmail/VerifyEmail";
+import VerifyEmail from "./pages/verifyemail/VerifyEmail";
 import PostPage from "./components/post/PostPage";
 import "./style.scss";
 

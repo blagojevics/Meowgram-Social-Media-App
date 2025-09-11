@@ -2,7 +2,7 @@ import "./profile.scss";
 import placeholderImg from "../../assets/placeholderImg.jpg";
 import { FaPaw, FaComment } from "react-icons/fa";
 import { useState, useEffect } from "react";
-import EditProfile from "../../components/editProfile/EditProfile";
+import EditProfile from "../../components/editprofile/EditProfile";
 import { useParams } from "react-router-dom";
 import formatTimeAgo from "../../config/timeFormat";
 import {
