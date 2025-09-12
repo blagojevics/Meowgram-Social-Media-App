@@ -131,7 +131,7 @@ Authentication & User Management
 
 3. Create .env file in project root with Firebase and Cloudinary config:
 
-   VITE_FIREBASE_API_KEY=...
+   `VITE_FIREBASE_API_KEY=...
 
    VITE_FIREBASE_AUTH_DOMAIN=...
 
@@ -141,7 +141,7 @@ Authentication & User Management
 
    VITE_CLOUDINARY_UPLOAD_URL=...
 
-   VITE_CLOUDINARY_UPLOAD_PRESET=...
+   VITE_CLOUDINARY_UPLOAD_PRESET=...`
 
 4. Run a development server: "npm run dev"
 
