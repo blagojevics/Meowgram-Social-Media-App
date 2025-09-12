@@ -1,10 +1,19 @@
-**MEOWGRAM**
+# Meowgram
 
-Full‑stack social media single‑page application built with React and Firebase. Implements authentication, posting, likes, comments, follows, and live notifications with real‑time updates.
+A full-stack social media single-page application built with React and Firebase. Implements authentication, posting, likes, comments, follows, and live notifications with real-time updates.
 
-TEST USER:
-email:meowgramtest@proton.me
-password:testtest
+---
+
+### 🚀 Live Demo & Test Account
+
+You can view the live, deployed application here: **[https://meowgram.online](https://meowgram.online)**
+
+To explore the app's full functionality without creating your own account, please feel free to log in with the following credentials:
+
+- **Email:** `meowgramtest@proton.me`
+- **Password:** `testtest`
+
+---
 
 **Description**
 
