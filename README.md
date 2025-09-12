@@ -4,7 +4,7 @@ A full-stack social media single-page application built with React and Firebase.
 
 ---
 
-### 🚀 Live Demo & Test Account
+### Live Demo & Test Account
 
 You can view the live, deployed application here: **[https://meowgram.online](https://meowgram.online)**
 
