@@ -6,6 +6,7 @@ import { auth, db } from "../../config/firebase";
 import { useEffect, useState } from "react";
 import { collection, query, where, onSnapshot } from "firebase/firestore";
 import { useAuth } from "../../context/AuthContext";
+import placeholderImg from "../../assets/placeholderImg.jpg";
 
 // ✅ Import icons
 import {
@@ -25,7 +26,8 @@ export default function Leftbar() {
   const [unreadCount, setUnreadCount] = useState(0);
 
   const profileLink = authUser ? `/profile/${authUser.uid}` : "/login";
-  const avatarToDisplay = userDoc?.avatarUrl || authUser?.photoURL || Logo;
+  const avatarToDisplay =
+    userDoc?.avatarUrl || authUser?.photoURL || placeholderImg;
 
   useEffect(() => {
     if (!authUser) return;
@@ -66,7 +68,7 @@ export default function Leftbar() {
             {authUser ? (
               <Link to={profileLink} className="profile-link-with-avatar">
                 <img
-                  src={avatarToDisplay}
+                  src={[avatarToDisplay || placeholderImg]}
                   alt="User Avatar"
                   className="profile-avatar-thumbnail"
                 />
@@ -75,7 +77,7 @@ export default function Leftbar() {
             ) : (
               <Link to="/login" className="profile-link-with-avatar">
                 <img
-                  src={Logo}
+                  src={placeholderImg}
                   alt="Placeholder"
                   className="profile-avatar-thumbnail"
                 />
