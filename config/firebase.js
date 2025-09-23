@@ -57,8 +57,6 @@ try {
   // Google Provider
   googleProvider = new GoogleAuthProvider();
 
-  console.log("✅ Firebase initialized successfully");
-  console.log("🔥 Project:", firebaseConfig.projectId);
 } catch (error) {
   console.error("❌ Firebase initialization failed:", error);
   // Create mock objects to prevent crashes
