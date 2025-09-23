@@ -6,6 +6,7 @@ export default defineConfig({
   base: "/",
   server: {
     port: 5173,
-    strictPort: false, // Will try 5174 if 5173 is taken
+    strictPort: true, // Force port 5173, fail if not available
+    host: true,
   },
 });

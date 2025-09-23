@@ -7,13 +7,13 @@
  * See a full list of supported triggers at https://firebase.google.com/docs/functions
  */
 
-import {setGlobalOptions} from "firebase-functions";
-import {onRequest} from "firebase-functions/https";
+import { setGlobalOptions } from "firebase-functions";
+import { onRequest } from "firebase-functions/https";
 import * as logger from "firebase-functions/logger";
-import {initializeApp} from "firebase-admin/app";
+import { initializeApp } from "firebase-admin/app";
 
 // Google Vision API
-import {ImageAnnotatorClient} from "@google-cloud/vision";
+import { ImageAnnotatorClient } from "@google-cloud/vision";
 
 // Initialize Firebase Admin
 initializeApp();
@@ -44,7 +44,7 @@ interface ModerationResult {
  * Rejects NSFW content and only allows animal photos
  */
 export const moderateImage = onRequest(
-  {cors: true},
+  { cors: true },
   async (request, response) => {
     try {
       if (request.method !== "POST") {
@@ -52,7 +52,7 @@ export const moderateImage = onRequest(
         return;
       }
 
-      const {imageUrl, userId} = request.body;
+      const { imageUrl, userId } = request.body;
 
       if (!imageUrl) {
         response.status(400).send("Missing imageUrl");
@@ -63,16 +63,16 @@ export const moderateImage = onRequest(
 
       // Download image from URL for analysis
       const [result] = await vision.safeSearchDetection({
-        image: {source: {imageUri: imageUrl}},
+        image: { source: { imageUri: imageUrl } },
       });
 
       const safeSearch = result.safeSearchAnnotation;
 
       // Check for NSFW content
-      const isNSFW = 
-        safeSearch?.adult === "LIKELY" || 
+      const isNSFW =
+        safeSearch?.adult === "LIKELY" ||
         safeSearch?.adult === "VERY_LIKELY" ||
-        safeSearch?.violence === "LIKELY" || 
+        safeSearch?.violence === "LIKELY" ||
         safeSearch?.violence === "VERY_LIKELY";
 
       if (isNSFW) {
@@ -89,25 +89,77 @@ export const moderateImage = onRequest(
 
       // Check for animals using label detection
       const [labelResult] = await vision.labelDetection({
-        image: {source: {imageUri: imageUrl}},
+        image: { source: { imageUri: imageUrl } },
       });
 
       const labels = labelResult.labelAnnotations || [];
-      
+
       // Animal-related labels to look for
       const animalKeywords = [
-        "animal", "mammal", "cat", "dog", "bird", "fish", "reptile", 
-        "amphibian", "pet", "wildlife", "zoo", "domestic animal",
-        "carnivore", "herbivore", "vertebrate", "invertebrate",
-        "feline", "canine", "equine", "bovine", "porcine",
+        "animal",
+        "mammal",
+        "cat",
+        "dog",
+        "bird",
+        "fish",
+        "reptile",
+        "amphibian",
+        "pet",
+        "wildlife",
+        "zoo",
+        "domestic animal",
+        "carnivore",
+        "herbivore",
+        "vertebrate",
+        "invertebrate",
+        "feline",
+        "canine",
+        "equine",
+        "bovine",
+        "porcine",
         // Specific animals from mouse to giraffe!
-        "mouse", "rat", "hamster", "guinea pig", "rabbit", "ferret",
-        "horse", "cow", "pig", "sheep", "goat", "chicken", "duck",
-        "giraffe", "elephant", "lion", "tiger", "bear", "wolf",
-        "fox", "deer", "monkey", "ape", "gorilla", "chimpanzee",
-        "dolphin", "whale", "shark", "turtle", "snake", "lizard",
-        "frog", "toad", "salamander", "parrot", "eagle", "owl",
-        "penguin", "flamingo", "peacock", "swan", "crane"
+        "mouse",
+        "rat",
+        "hamster",
+        "guinea pig",
+        "rabbit",
+        "ferret",
+        "horse",
+        "cow",
+        "pig",
+        "sheep",
+        "goat",
+        "chicken",
+        "duck",
+        "giraffe",
+        "elephant",
+        "lion",
+        "tiger",
+        "bear",
+        "wolf",
+        "fox",
+        "deer",
+        "monkey",
+        "ape",
+        "gorilla",
+        "chimpanzee",
+        "dolphin",
+        "whale",
+        "shark",
+        "turtle",
+        "snake",
+        "lizard",
+        "frog",
+        "toad",
+        "salamander",
+        "parrot",
+        "eagle",
+        "owl",
+        "penguin",
+        "flamingo",
+        "peacock",
+        "swan",
+        "crane",
       ];
 
       const detectedAnimals: string[] = [];
@@ -129,13 +181,17 @@ export const moderateImage = onRequest(
         }
       }
 
-      logger.info(`Labels detected:`, labels.map(l => `${l.description}: ${l.score}`));
+      logger.info(
+        `Labels detected:`,
+        labels.map((l) => `${l.description}: ${l.score}`)
+      );
       logger.info(`Animals detected:`, detectedAnimals);
 
       if (!hasAnimal) {
         const moderationResult: ModerationResult = {
           isAllowed: false,
-          reason: "Only animal photos are allowed on Meowgram! 🐱 From mice to giraffes, we love all creatures!",
+          reason:
+            "Only animal photos are allowed on Meowgram! 🐱 From mice to giraffes, we love all creatures!",
           detectedAnimals: [],
         };
 
@@ -151,9 +207,12 @@ export const moderateImage = onRequest(
         safeSearchScores: safeSearch,
       };
 
-      logger.info(`Image approved for user ${userId}. Animals: ${detectedAnimals.join(", ")}`);
+      logger.info(
+        `Image approved for user ${userId}. Animals: ${detectedAnimals.join(
+          ", "
+        )}`
+      );
       response.json(moderationResult);
-
     } catch (error) {
       logger.error("Error moderating image:", error);
       response.status(500).json({
@@ -168,6 +227,8 @@ export const moderateImage = onRequest(
  * Test function to check if everything is working
  */
 export const helloWorld = onRequest((request, response) => {
-  logger.info("Hello logs!", {structuredData: true});
-  response.send("Hello from Meowgram Functions! 🐱🦒 Ready to moderate animal photos!");
+  logger.info("Hello logs!", { structuredData: true });
+  response.send(
+    "Hello from Meowgram Functions! 🐱🦒 Ready to moderate animal photos!"
+  );
 });

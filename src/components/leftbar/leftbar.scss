@@ -36,11 +36,12 @@
           color: black;
           font-size: 24px;
           padding-left: 10px;
-          display: flex; // Added for avatar alignment
-          align-items: center; // Added for avatar alignment
-          gap: 10px; // Space between avatar and text
+          display: flex;
+          align-items: center;
+          gap: 15px; // Increased gap for better spacing
         }
 
+        // Fix profile link styling to match other menu items
         .profile-link-with-avatar {
           text-decoration: none;
           color: black;
@@ -48,15 +49,30 @@
           padding-left: 10px;
           display: flex;
           align-items: center;
-          gap: 10px;
+          gap: 15px; // Consistent gap
         }
 
         .profile-avatar-thumbnail {
-          width: 30px; // Adjust size as needed
-          height: 30px; // Adjust size as needed
+          width: 32px; // Slightly larger to match icon size
+          height: 32px;
           border-radius: 50%;
           object-fit: cover;
-          margin-left: 0px; // Align with existing padding
+          border: 2px solid #ddd; // Add subtle border
+          flex-shrink: 0; // Prevent avatar from shrinking
+          transition: none; // Remove transitions that might cause flashing
+          display: block; // Ensure proper rendering
+        }
+
+        // Ensure menu icons are consistent size
+        .menu-icon {
+          font-size: 24px;
+          color: black;
+          flex-shrink: 0;
+        }
+
+        .menu-label {
+          font-size: 24px;
+          color: black;
         }
       }
     }
@@ -143,6 +159,14 @@
           align-items: center;
           font-size: 24px; // icon size
           padding: 0;
+        }
+
+        .profile-avatar-thumbnail {
+          width: 24px; // Match mobile icon size
+          height: 24px;
+          border-radius: 50%;
+          object-fit: cover;
+          border: 1px solid #ddd;
         }
 
         .menu-icon {

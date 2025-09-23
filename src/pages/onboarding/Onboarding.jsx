@@ -6,6 +6,7 @@ import {
   CLOUDINARY_CLOUD_NAME,
   CLOUDINARY_UPLOAD_PRESET,
 } from "../../../config/cloudinary";
+import { moderateImageWithAI } from "../../services/aiModeration";
 
 export default function Onboarding() {
   const navigate = useNavigate();
@@ -15,6 +16,8 @@ export default function Onboarding() {
   const [avatarFile, setAvatarFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState(null);
+  const [moderationMessage, setModerationMessage] = useState("");
+  const [aiAnalyzing, setAiAnalyzing] = useState(false);
 
   useEffect(() => {
     if (!currentUser) {
@@ -22,8 +25,33 @@ export default function Onboarding() {
     }
   }, [currentUser, navigate]);
 
-  const handleFileChange = (e) => {
-    setAvatarFile(e.target.files[0]);
+  const handleFileChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setAvatarFile(file);
+    setErr(null);
+    setModerationMessage("");
+    setAiAnalyzing(true);
+
+    try {
+      // Quick AI moderation check
+      const aiResult = await moderateImageWithAI(file, "profile avatar");
+
+      if (!aiResult.isAllowed) {
+        setModerationMessage(`🚫 ${aiResult.reason}`);
+        setAvatarFile(null); // Clear the file
+      } else {
+        setModerationMessage("🤖 AI approved! Ready to upload.");
+      }
+    } catch (error) {
+      console.error("AI moderation failed:", error);
+      setModerationMessage(
+        "⚠️ AI analysis unavailable, upload at your own risk"
+      );
+    } finally {
+      setAiAnalyzing(false);
+    }
   };
 
   const handleBioChange = (e) => {
@@ -45,6 +73,15 @@ export default function Onboarding() {
       let avatarUrl = "";
 
       if (avatarFile) {
+        // Double-check AI moderation before upload
+        const aiResult = await moderateImageWithAI(
+          avatarFile,
+          "profile avatar"
+        );
+        if (!aiResult.isAllowed) {
+          throw new Error(`Upload blocked: ${aiResult.reason}`);
+        }
+
         const formData = new FormData();
         formData.append("file", avatarFile);
         formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
@@ -102,6 +139,18 @@ export default function Onboarding() {
           onChange={handleFileChange}
           accept="image/*"
         />
+        {aiAnalyzing && <p>🤖 AI analyzing image...</p>}
+        {moderationMessage && (
+          <p
+            style={{
+              color: moderationMessage.includes("🚫") ? "red" : "green",
+              fontSize: "14px",
+              margin: "5px 0",
+            }}
+          >
+            {moderationMessage}
+          </p>
+        )}
         <label htmlFor="user-bio">Bio:</label>
         <textarea
           id="user-bio"

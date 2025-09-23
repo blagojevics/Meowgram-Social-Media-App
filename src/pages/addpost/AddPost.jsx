@@ -8,11 +8,15 @@ import {
   CLOUDINARY_UPLOAD_PRESET,
 } from "../../../config/cloudinary";
 import { useAuth } from "../../hooks/useAuth";
-import { 
-  uploadWithModeration, 
-  getModerationMessage, 
-  checkAnimalContent 
+import {
+  uploadWithModeration,
+  getModerationMessage,
+  checkAnimalContent,
 } from "../../services/imageModeration";
+import {
+  moderateImageWithAI,
+  preloadAIModeration,
+} from "../../services/aiModeration";
 
 export default function AddPost() {
   const { authUser, userDoc } = useAuth();
@@ -22,6 +26,7 @@ export default function AddPost() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [moderationMessage, setModerationMessage] = useState("");
+  const [aiAnalyzing, setAiAnalyzing] = useState(false);
 
   const navigate = useNavigate();
 
@@ -29,17 +34,48 @@ export default function AddPost() {
     if (!authUser) {
       navigate("/login");
     }
+
+    // Preload AI moderation model in background
+    preloadAIModeration().then((success) => {
+      if (success) {
+        console.log("🤖 AI moderation ready!");
+      }
+    });
   }, [authUser, navigate]);
 
-  const handleFileChange = (e) => {
+  const handleFileChange = async (e) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       setImageFile(file);
       setPreviewUrl(URL.createObjectURL(file));
-      
-      // Quick animal content check on filename
+
+      // Quick keyword-based check first
       const animalCheck = checkAnimalContent(file.name, caption);
       setModerationMessage(getModerationMessage(animalCheck));
+
+      // Run AI analysis in background
+      setAiAnalyzing(true);
+      try {
+        const aiResult = await moderateImageWithAI(file, caption);
+        setModerationMessage(
+          aiResult.isAllowed
+            ? `🤖 AI Analysis: ${aiResult.reason}`
+            : `🚫 AI Detected: ${aiResult.reason}`
+        );
+
+        // Store AI result for use in submit
+        setImageFile((prev) => {
+          if (prev) {
+            prev.aiModerationResult = aiResult;
+          }
+          return prev;
+        });
+      } catch (error) {
+        console.error("AI analysis failed:", error);
+        setModerationMessage("⚠️ AI analysis unavailable, using basic checks");
+      } finally {
+        setAiAnalyzing(false);
+      }
     }
   };
 
@@ -70,26 +106,48 @@ export default function AddPost() {
 
     try {
       if (imageFile) {
-        // Use our moderation service for upload
-        const { moderationResult, uploadResult } = await uploadWithModeration(
-          imageFile,
-          CLOUDINARY_UPLOAD_PRESET,
-          CLOUDINARY_CLOUD_NAME,
-          caption
-        );
-
-        if (!moderationResult.isAllowed) {
-          setError(moderationResult.reason);
+        // Check AI moderation result first
+        if (
+          imageFile.aiModerationResult &&
+          !imageFile.aiModerationResult.isAllowed
+        ) {
+          setError(`AI Moderation: ${imageFile.aiModerationResult.reason}`);
           setLoading(false);
           return;
         }
 
-        if (uploadResult) {
-          imageUrl = uploadResult.secure_url;
-          setModerationMessage(getModerationMessage(moderationResult));
-        } else {
-          throw new Error("Upload failed - no result returned");
+        // Direct Cloudinary upload without complex moderation
+        console.log("🚀 Starting Cloudinary upload...");
+        console.log("Cloud name:", CLOUDINARY_CLOUD_NAME);
+        console.log("Upload preset:", CLOUDINARY_UPLOAD_PRESET);
+
+        const formData = new FormData();
+        formData.append("file", imageFile);
+        formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
+
+        const response = await fetch(
+          `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
+          {
+            method: "POST",
+            body: formData,
+          }
+        );
+
+        console.log("Upload response status:", response.status);
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error("Cloudinary error response:", errorText);
+          throw new Error(
+            `Cloudinary upload failed: ${response.status} - ${errorText}`
+          );
         }
+
+        const uploadResult = await response.json();
+        console.log("Upload successful:", uploadResult);
+
+        imageUrl = uploadResult.secure_url;
+        setModerationMessage("🎉 Upload successful! Welcome to Meowgram!");
       }
 
       const postsCollectionRef = collection(db, "posts");
@@ -153,12 +211,22 @@ export default function AddPost() {
           id="post-caption"
           onChange={(e) => setCaption(e.target.value)}
           rows={4}
-          placeholder="Write a caption for your pet's moment... (helps with animal detection!)"
+          placeholder="Share your pet's story... 🐱 (AI helps detect animals from mice to giraffes!)"
         ></textarea>
 
-        {moderationMessage && (
-          <div className={`moderation-message ${moderationMessage.includes('🎉') || moderationMessage.includes('✅') ? 'success' : 'info'}`}>
-            {moderationMessage}
+        {(moderationMessage || aiAnalyzing) && (
+          <div
+            className={`moderation-message ${
+              moderationMessage.includes("🎉") ||
+              moderationMessage.includes("✅") ||
+              moderationMessage.includes("🤖")
+                ? "success"
+                : moderationMessage.includes("🚫")
+                ? "error"
+                : "info"
+            }`}
+          >
+            {aiAnalyzing ? "🤖 AI analyzing image..." : moderationMessage}
           </div>
         )}
 

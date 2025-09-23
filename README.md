@@ -1,6 +1,14 @@
 # Meowgram
 
-A full-stack social media single-page application built with React and Firebase. Implements authentication, posting, likes, comments, follows, and live notifications with real-time updates.
+A full-stack social media single-page application built with React and Firebase. Implements authentication, posting, likes, comments, follows, and live notifications with real-tim**Future Plans**
+
+- Enhanced Google Vision API integration for enterprise-grade photo moderation
+
+- "Following feed" for posts only from followed users
+
+- Desktop redesign with improved styling
+
+- Dark mode support.
 
 ---
 
@@ -37,11 +45,17 @@ Authentication & User Management
 
 - User profile management: avatar upload, username, display name, bio, edit profile modal
 
+- **Avatar moderation** - AI content filtering prevents inappropriate profile pictures
+
 - Firestore security rules enforce that users can only access their own data
 
 **Posts**
 
 - Create posts with image upload (Cloudinary used as storage)
+
+- **AI-powered content moderation** - NSFW detection using TensorFlow.js blocks inappropriate content
+
+- **Animal-focused filtering** - Encourages animal photos from "mice to giraffes"
 
 - Edit post captions
 
@@ -115,6 +129,8 @@ Authentication & User Management
 
 - Firestore database with real‑time listeners (onSnapshot)
 
+- **Client-side AI moderation** - TensorFlow.js and NSFW.js for zero-cost content filtering
+
 - Cloudinary for image storage
 
 - Firebase Hosting for deployment
@@ -145,8 +161,6 @@ Authentication & User Management
    VITE_CLOUDINARY_CLOUD_NAME=your_cloud_name
    VITE_CLOUDINARY_UPLOAD_PRESET=your_upload_preset
    ```
-
-   **⚠️ IMPORTANT**: Never commit your `.env` file or hardcode credentials in source code!
 
 4. Set up Firebase services:
 
@@ -186,8 +200,6 @@ Authentication & User Management
 - Functional and iterated with feedback
 
 **Future Plans**
-
-- Google Vision API integration for photo moderation (NSFW filter, animal detection)
 
 - “Following feed” for posts only from followed users
 
