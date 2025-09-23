@@ -56,7 +56,6 @@ try {
 
   // Google Provider
   googleProvider = new GoogleAuthProvider();
-
 } catch (error) {
   console.error("❌ Firebase initialization failed:", error);
   // Create mock objects to prevent crashes
