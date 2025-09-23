@@ -22,10 +22,49 @@ export default function Leftbar() {
   const location = useLocation();
 
   const [unreadCount, setUnreadCount] = useState(0);
+  const [avatarError, setAvatarError] = useState(false);
 
   const profileLink = authUser ? `/profile/${authUser.uid}` : "/login";
-  const avatarToDisplay =
-    userDoc?.avatarUrl || authUser?.photoURL || placeholderImg;
+
+  // More stable avatar selection - avoid unnecessary re-evaluations
+  const avatarUrl = userDoc?.avatarUrl || authUser?.photoURL;
+  const hasValidAvatar = avatarUrl && avatarUrl.trim() !== "";
+
+  // Reset error state when avatar URL changes
+  useEffect(() => {
+    if (hasValidAvatar) {
+      setAvatarError(false);
+    }
+  }, [hasValidAvatar, avatarUrl]);
+
+  // Handle avatar load errors - only for real URLs
+  const handleAvatarError = () => {
+    if (hasValidAvatar) {
+      console.log("Avatar failed to load:", avatarUrl);
+      setAvatarError(true);
+    }
+  };
+
+  const handleAvatarLoad = () => {
+    if (hasValidAvatar) {
+      setAvatarError(false);
+    }
+  };
+
+  const getDisplayAvatar = () => {
+    // If no valid avatar URL exists, always use placeholder
+    if (!hasValidAvatar) {
+      return placeholderImg;
+    }
+    // If valid URL but failed to load, use placeholder
+    if (avatarError) {
+      return placeholderImg;
+    }
+    // Use the actual avatar
+    return avatarUrl;
+  };
+
+  const shouldUseErrorHandling = hasValidAvatar && !avatarError;
 
   useEffect(() => {
     if (!authUser) return;
@@ -66,9 +105,14 @@ export default function Leftbar() {
             {authUser ? (
               <Link to={profileLink} className="profile-link-with-avatar">
                 <img
-                  src={avatarToDisplay || placeholderImg}
+                  src={getDisplayAvatar()}
                   alt="User Avatar"
                   className="profile-avatar-thumbnail"
+                  onError={
+                    shouldUseErrorHandling ? handleAvatarError : undefined
+                  }
+                  onLoad={shouldUseErrorHandling ? handleAvatarLoad : undefined}
+                  key={hasValidAvatar ? avatarUrl : "placeholder-static"}
                 />
                 <span className="menu-label">Profile</span>
               </Link>

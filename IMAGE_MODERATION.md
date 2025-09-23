@@ -1,13 +1,15 @@
 # 🐱 Meowgram Image Moderation
 
 ## Overview
+
 Basic client-side image moderation system that encourages animal-focused content on Meowgram.
 
 ## Features
 
 ### ✅ What We Implemented:
+
 - **Animal Content Detection**: Keyword-based detection for animal-related content
-- **User-Friendly Messages**: Encouraging messages when animal content is detected  
+- **User-Friendly Messages**: Encouraging messages when animal content is detected
 - **Upload Integration**: Seamless integration with Cloudinary uploads
 - **Community Moderation**: Encourages community reporting for inappropriate content
 
@@ -19,8 +21,9 @@ Basic client-side image moderation system that encourages animal-focused content
 4. **Fallback Approach**: Allows uploads even without detected animals (community can moderate)
 
 ### 🐾 Animal Keywords Detected:
+
 - **Pets**: cat, dog, bird, fish, rabbit, hamster, guinea pig, ferret
-- **Farm Animals**: horse, cow, pig, sheep, goat, chicken, duck  
+- **Farm Animals**: horse, cow, pig, sheep, goat, chicken, duck
 - **Wildlife**: giraffe, elephant, lion, tiger, bear, wolf, fox, deer
 - **Aquatic**: dolphin, whale, shark, turtle
 - **Reptiles**: snake, lizard, frog, toad
@@ -28,21 +31,27 @@ Basic client-side image moderation system that encourages animal-focused content
 - **General Terms**: animal, pet, mammal, wildlife, zoo, paw, tail, fur, feather
 
 ### 🚀 Future Enhancements:
+
 - **Google Vision API**: Full ML-based animal detection (requires Firebase Functions)
-- **NSFW Detection**: Automated content filtering  
+- **NSFW Detection**: Automated content filtering
 - **Community Reporting**: User-driven moderation system
 - **Admin Dashboard**: Content review tools for moderators
 
 ## Implementation Details
 
 ### Files:
+
 - `src/services/imageModeration.ts` - Core moderation logic
 - `src/pages/addpost/AddPost.jsx` - Integration with upload flow
 - `src/pages/addpost/addpost.scss` - UI styling for moderation messages
 
 ### Usage:
+
 ```javascript
-import { uploadWithModeration, getModerationMessage } from '../../services/imageModeration';
+import {
+  uploadWithModeration,
+  getModerationMessage,
+} from "../../services/imageModeration";
 
 const { moderationResult, uploadResult } = await uploadWithModeration(
   imageFile,
@@ -62,6 +71,7 @@ const { moderationResult, uploadResult } = await uploadWithModeration(
 ## Next Steps
 
 To implement full Google Vision API moderation:
+
 1. Upgrade Firebase to Blaze plan
 2. Deploy Firebase Functions with Vision API integration
 3. Add server-side NSFW detection
@@ -69,4 +79,4 @@ To implement full Google Vision API moderation:
 
 ---
 
-*Made with 🐱 for the Meowgram community!*
+_Made with 🐱 for the Meowgram community!_

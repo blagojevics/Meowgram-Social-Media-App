@@ -5,6 +5,7 @@ import {
   CLOUDINARY_CLOUD_NAME,
   CLOUDINARY_UPLOAD_PRESET,
 } from "../../../config/cloudinary";
+import { moderateImageWithAI } from "../../services/aiModeration";
 import "./editProfile.scss";
 
 export default function EditProfile({ currentUser, onClose }) {
@@ -16,17 +17,37 @@ export default function EditProfile({ currentUser, onClose }) {
   const [avatarUrl, setAvatarUrl] = useState(currentUser?.avatarUrl || "");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [moderationMessage, setModerationMessage] = useState("");
+  const [aiAnalyzing, setAiAnalyzing] = useState(false);
 
-  // ✅ Upload new avatar to Cloudinary
+  // ✅ Upload new avatar to Cloudinary with AI moderation
   const handleFileChange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
+    setError(null);
+    setModerationMessage("");
+    setAiAnalyzing(true);
 
     try {
+      // Step 1: AI moderation check
+      console.log("🤖 Running AI moderation for avatar...");
+      const aiResult = await moderateImageWithAI(file, "avatar upload");
+
+      if (!aiResult.isAllowed) {
+        setError(`🚫 Upload blocked: ${aiResult.reason}`);
+        setModerationMessage(`AI detected inappropriate content`);
+        setAiAnalyzing(false);
+        return;
+      }
+
+      setModerationMessage("🤖 AI approved! Uploading to Cloudinary...");
+
+      // Step 2: Upload to Cloudinary
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
+
       const res = await fetch(
         `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
         {
@@ -34,15 +55,20 @@ export default function EditProfile({ currentUser, onClose }) {
           body: formData,
         }
       );
+
       const data = await res.json();
       if (data.secure_url) {
         setAvatarUrl(data.secure_url);
+        setModerationMessage("✅ Avatar uploaded successfully!");
       } else {
         throw new Error("Upload failed");
       }
     } catch (err) {
-      console.error("Cloudinary upload failed:", err);
+      console.error("Avatar upload failed:", err);
       setError("Failed to upload avatar. Try again.");
+      setModerationMessage("");
+    } finally {
+      setAiAnalyzing(false);
     }
   };
 
@@ -108,6 +134,18 @@ export default function EditProfile({ currentUser, onClose }) {
           <label>
             Avatar
             <input type="file" accept="image/*" onChange={handleFileChange} />
+            {aiAnalyzing && (
+              <p className="moderation-info">🤖 AI analyzing image...</p>
+            )}
+            {moderationMessage && (
+              <p
+                className={`moderation-info ${
+                  moderationMessage.includes("🚫") ? "error" : "success"
+                }`}
+              >
+                {moderationMessage}
+              </p>
+            )}
           </label>
 
           {avatarUrl && (
