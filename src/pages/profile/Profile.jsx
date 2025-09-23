@@ -4,7 +4,7 @@ import { FaPaw, FaComment } from "react-icons/fa";
 import { useState, useEffect } from "react";
 import EditProfile from "../../components/editprofile/EditProfile";
 import { useParams } from "react-router-dom";
-import formatTimeAgo from "../../config/timeFormat";
+import formatTimeAgo from "../../../config/timeFormat";
 import {
   collection,
   doc,
@@ -22,13 +22,13 @@ import {
   arrayUnion,
   arrayRemove,
 } from "firebase/firestore";
-import { db } from "../../config/firebase";
+import { db } from "../../../config/firebase";
 import CommentList from "../../components/comment-list/CommentList";
 import CommentInput from "../../components/comment-input/CommentInput";
 import DropdownMenu from "../../components/dropdownmenu/DropdownMenu";
 import FollowListModal from "../../components/followlistmodal/FollowListModal";
 import LikesListModal from "../../components/likeslistmodal/LikesListModal";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../hooks/useAuth";
 
 export default function Profile() {
   const { authUser, userDoc } = useAuth();
@@ -93,7 +93,7 @@ export default function Profile() {
           };
         });
         setProfilePosts(postsArray);
-      } catch (err) {
+      } catch {
         setErrorPosts("Failed to load posts.");
       } finally {
         setLoadingPosts(false);
@@ -217,7 +217,9 @@ export default function Profile() {
         <div className="profile-header">
           <div className="profile-avatar-container">
             <img
-              src={profileData.avatarUrl || placeholderImg}
+              src={
+                profileData.avatarUrl || profileData.photoURL || placeholderImg
+              }
               alt="User Avatar"
               className="profile-avatar"
             />
@@ -346,7 +348,11 @@ export default function Profile() {
                 <div className="lightbox-header">
                   <div className="lightbox-header-flex">
                     <img
-                      src={postUserData?.avatarUrl || placeholderImg}
+                      src={
+                        postUserData?.avatarUrl ||
+                        postUserData?.photoURL ||
+                        placeholderImg
+                      }
                       alt=""
                       className="lightbox-avatar"
                     />

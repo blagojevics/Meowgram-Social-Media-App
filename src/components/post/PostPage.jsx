@@ -1,9 +1,9 @@
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { doc, onSnapshot } from "firebase/firestore";
-import { db } from "../../config/firebase";
+import { db } from "../../../config/firebase";
 import Post from "../../components/post/Post";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../hooks/useAuth";
 
 export default function PostPage() {
   const { postId } = useParams();

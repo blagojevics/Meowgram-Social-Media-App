@@ -7,7 +7,7 @@ import {
   doc,
   increment,
 } from "firebase/firestore";
-import { db } from "../../config/firebase";
+import { db } from "../../../config/firebase";
 import "./commentInput.scss";
 import placeholderImg from "../../assets/placeholderImg.jpg";
 
@@ -50,9 +50,14 @@ export default function CommentInput({ postId, currentUser, post }) {
   return (
     <form onSubmit={handleSubmit} className="comment-input">
       <img
-        src={currentUser?.avatarUrl || placeholderImg}
+        src={currentUser?.avatarUrl || currentUser?.photoURL || placeholderImg}
         alt=""
         className="comment-input-avatar"
+        onError={(e) => {
+          if (e.target.src !== placeholderImg) {
+            e.target.src = placeholderImg;
+          }
+        }}
       />
       <input
         value={text}

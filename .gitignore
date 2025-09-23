@@ -17,27 +17,28 @@ build/
 
 # Environment variables (DO NOT COMMIT)
 .env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+.env.*
+!.env.example      # Let example configs be tracked
 
-# Firebase (only project configs are tracked, cache/emulator state ignored)
+# Private keys, credentials, service account JSON (CRITICAL!)
+keys/
+*.json
+*.pem
+*.p12
+service-account*.json
+
+# Firebase (cache/emulator state ignored)
 .firebase/
 *.cache
 
-# Cloudinary or other service account JSON keys (never commit)
-*serviceAccount*.json
-*key.json
-
-# Testing
+# Coverage
 coverage/
 
 # IDE / OS junk
 .vscode/
 .idea/
 .DS_Store
-*.sw?
+*.sw*
 *.suo
 *.ntvs*
 *.njsproj

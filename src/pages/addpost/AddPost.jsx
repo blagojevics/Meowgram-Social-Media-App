@@ -2,12 +2,12 @@ import { useEffect, useState } from "react";
 import "./addpost.scss";
 import { useNavigate } from "react-router-dom";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
-import { db } from "../../config/firebase";
+import { db } from "../../../config/firebase";
 import {
   CLOUDINARY_CLOUD_NAME,
   CLOUDINARY_UPLOAD_PRESET,
-} from "../../config/cloudinary";
-import { useAuth } from "../../context/AuthContext";
+} from "../../../config/cloudinary";
+import { useAuth } from "../../hooks/useAuth";
 
 export default function AddPost() {
   const { authUser, userDoc } = useAuth();

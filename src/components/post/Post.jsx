@@ -6,7 +6,7 @@ import LikesListModal from "../likeslistmodal/LikesListModal";
 import "./post.scss";
 import CommentInput from "../comment-input/CommentInput";
 import CommentItem from "../commentitem/CommentItem";
-import formatTimeAgo from "../../config/timeFormat";
+import formatTimeAgo from "../../../config/timeFormat";
 import placeholderImg from "../../assets/placeholderImg.jpg";
 import {
   deleteDoc,
@@ -23,7 +23,7 @@ import {
   orderBy,
   onSnapshot,
 } from "firebase/firestore";
-import { db } from "../../config/firebase";
+import { db } from "../../../config/firebase";
 
 export default function Post({ post, currentUser, onPostActionComplete }) {
   const [isLiked, setIsLiked] = useState(
@@ -208,7 +208,7 @@ export default function Post({ post, currentUser, onPostActionComplete }) {
       <div className="post-header">
         <Link to={`/profile/${post.userId}`} className="post-header-user-link">
           <img
-            src={postUser?.avatarUrl || placeholderImg}
+            src={postUser?.avatarUrl || postUser?.photoURL || placeholderImg}
             alt="User Avatar"
             className="post-header-avatar"
           />

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import {
   collection,
   query,
@@ -11,10 +11,10 @@ import {
   getDoc,
   updateDoc,
 } from "firebase/firestore";
-import { db } from "../../config/firebase";
+import { db } from "../../../config/firebase";
 import { Link } from "react-router-dom";
-import formatTimeAgo from "../../config/timeFormat";
-import { useAuth } from "../../context/AuthContext";
+import formatTimeAgo from "../../../config/timeFormat";
+import { useAuth } from "../../hooks/useAuth";
 import "./notifications.scss";
 import placeholderImg from "../../assets/placeholderImg.jpg";
 import PostPreview from "../../components/postpreview/PostPreview";
@@ -28,71 +28,122 @@ export default function Notifications() {
   const [lastDoc, setLastDoc] = useState(null);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
+  const [initialLoad, setInitialLoad] = useState(false);
 
+  // Initial load effect - only runs once when currentUser changes
   useEffect(() => {
-    if (!currentUser) return;
-    loadMore();
-    markAsRead();
+    if (!currentUser || initialLoad) return;
+
+    const initializeNotifications = async () => {
+      setNotifications([]);
+      setUsersMap({});
+      setLastDoc(null);
+      setHasMore(true);
+      setInitialLoad(true);
+
+      // Load first batch and mark as read
+      await Promise.all([loadMoreNotifications(true), markAsRead()]);
+    };
+
+    initializeNotifications();
   }, [currentUser]);
 
-  const markAsRead = async () => {
+  const markAsRead = useCallback(async () => {
     if (!currentUser) return;
-    const q = query(
-      collection(db, "notifications"),
-      where("userId", "==", currentUser.uid),
-      where("read", "==", false)
-    );
-    const snap = await getDocs(q);
-    snap.forEach(async (docSnap) => {
-      await updateDoc(doc(db, "notifications", docSnap.id), { read: true });
-    });
-  };
 
-  const loadMore = async () => {
-    if (!currentUser || loading || !hasMore) return;
-    setLoading(true);
-
-    let q = query(
-      collection(db, "notifications"),
-      where("userId", "==", currentUser.uid),
-      orderBy("createdAt", "desc"),
-      limit(PAGE_SIZE)
-    );
-
-    if (lastDoc) {
-      q = query(
+    try {
+      const q = query(
         collection(db, "notifications"),
         where("userId", "==", currentUser.uid),
-        orderBy("createdAt", "desc"),
-        startAfter(lastDoc),
-        limit(PAGE_SIZE)
+        where("read", "==", false)
       );
+      const snap = await getDocs(q);
+
+      // Batch update all unread notifications
+      const updatePromises = snap.docs.map((docSnap) =>
+        updateDoc(doc(db, "notifications", docSnap.id), { read: true })
+      );
+
+      await Promise.all(updatePromises);
+    } catch (error) {
+      console.error("Error marking notifications as read:", error);
     }
+  }, [currentUser]);
 
-    const snap = await getDocs(q);
-    const list = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  const loadMoreNotifications = useCallback(
+    async (isInitialLoad = false) => {
+      if (!currentUser || loading || (!hasMore && !isInitialLoad)) return;
 
-    const userData = {};
-    for (const n of list) {
-      if (n.fromUserId && !usersMap[n.fromUserId]) {
-        const userDoc = await getDoc(doc(db, "users", n.fromUserId));
-        if (userDoc.exists()) {
-          userData[n.fromUserId] = userDoc.data();
+      setLoading(true);
+
+      try {
+        let q = query(
+          collection(db, "notifications"),
+          where("userId", "==", currentUser.uid),
+          orderBy("createdAt", "desc"),
+          limit(PAGE_SIZE)
+        );
+
+        if (lastDoc && !isInitialLoad) {
+          q = query(
+            collection(db, "notifications"),
+            where("userId", "==", currentUser.uid),
+            orderBy("createdAt", "desc"),
+            startAfter(lastDoc),
+            limit(PAGE_SIZE)
+          );
         }
-      }
-    }
 
-    setUsersMap((prev) => ({ ...prev, ...userData }));
-    setNotifications((prev) => [...prev, ...list]);
-    setLastDoc(snap.docs[snap.docs.length - 1]);
-    setHasMore(list.length === PAGE_SIZE);
-    setLoading(false);
+        const snap = await getDocs(q);
+        const list = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+
+        // Get user data for notifications that don't have it yet
+        const newUserData = {};
+        const userFetchPromises = [];
+
+        for (const n of list) {
+          if (
+            n.fromUserId &&
+            !usersMap[n.fromUserId] &&
+            !newUserData[n.fromUserId]
+          ) {
+            userFetchPromises.push(
+              getDoc(doc(db, "users", n.fromUserId)).then((userDoc) => {
+                if (userDoc.exists()) {
+                  newUserData[n.fromUserId] = userDoc.data();
+                }
+              })
+            );
+          }
+        }
+
+        await Promise.all(userFetchPromises);
+
+        // Update state
+        setUsersMap((prev) => ({ ...prev, ...newUserData }));
+        setNotifications((prev) => (isInitialLoad ? list : [...prev, ...list]));
+        setLastDoc(snap.docs[snap.docs.length - 1] || null);
+        setHasMore(list.length === PAGE_SIZE);
+      } catch (error) {
+        console.error("Error loading notifications:", error);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [currentUser, loading, hasMore, lastDoc, usersMap]
+  );
+
+  // Wrapper function for the load more button
+  const handleLoadMore = () => {
+    loadMoreNotifications(false);
   };
 
   return (
     <div className="notifications-page">
       <h2>Notifications</h2>
-      {notifications.length === 0 ? (
+      {!initialLoad ? (
+        <div className="loading-message">Loading notifications...</div>
+      ) : notifications.length === 0 ? (
         <p>No notifications yet.</p>
       ) : (
         <ul className="notifications-list">
@@ -100,7 +151,8 @@ export default function Notifications() {
             const fromUser = usersMap[n.fromUserId];
             const displayName =
               fromUser?.username || fromUser?.displayName || "Someone";
-            const avatar = fromUser?.avatarUrl || placeholderImg;
+            const avatar =
+              fromUser?.avatarUrl || fromUser?.photoURL || placeholderImg;
 
             return (
               <li key={n.id + "-" + idx} className="notification-item">
@@ -143,8 +195,12 @@ export default function Notifications() {
         </ul>
       )}
 
-      {hasMore && (
-        <button onClick={loadMore} disabled={loading} className="load-more-btn">
+      {hasMore && initialLoad && (
+        <button
+          onClick={handleLoadMore}
+          disabled={loading}
+          className="load-more-btn"
+        >
           {loading ? "Loading..." : "Load more"}
         </button>
       )}

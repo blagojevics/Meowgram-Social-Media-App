@@ -5,7 +5,8 @@ import {
   Navigate,
   useLocation,
 } from "react-router-dom";
-import { AuthProvider, useAuth } from "./context/AuthContext";
+import { AuthProvider } from "./context/AuthContext";
+import { useAuth } from "./hooks/useAuth";
 import Leftbar from "./components/leftbar/Leftbar";
 import Rightbar from "./components/rightbar/Rightbar";
 import Home from "./pages/homepage/Home";

@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { doc, updateDoc } from "firebase/firestore";
-import { db } from "../../config/firebase";
+import { db } from "../../../config/firebase";
 import {
   CLOUDINARY_CLOUD_NAME,
   CLOUDINARY_UPLOAD_PRESET,
-} from "../../config/cloudinary";
+} from "../../../config/cloudinary";
 import "./editProfile.scss";
 
 export default function EditProfile({ currentUser, onClose }) {

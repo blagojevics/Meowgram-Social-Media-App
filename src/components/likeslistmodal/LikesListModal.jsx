@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { doc, onSnapshot } from "firebase/firestore";
-import { db } from "../../config/firebase";
+import { db } from "../../../config/firebase";
 import "./likesListModal.scss";
 import placeholderImg from "../../assets/placeholderImg.jpg";
 
@@ -35,9 +35,14 @@ export default function LikesListModal({ isOpen, onClose, likedByUsers }) {
           {users.map((u) => (
             <li key={u.id} className="like-user">
               <img
-                src={u.avatarUrl || placeholderImg}
+                src={u.avatarUrl || u.photoURL || placeholderImg}
                 alt={u.username || "Unknown"}
                 className="like-user-avatar"
+                onError={(e) => {
+                  if (e.target.src !== placeholderImg) {
+                    e.target.src = placeholderImg;
+                  }
+                }}
               />
               <span className="like-user-name">{u.username || "Unknown"}</span>
             </li>
