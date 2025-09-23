@@ -1,14 +1,18 @@
-# Meowgram
+# 🐱 Meowgram
 
-A full-stack social media single-page application built with React and Firebase. Implements authentication, posting, likes, comments, follows, and live notifications with real-tim**Future Plans**
+**A modern, full-stack social media platform built for animal lovers**
 
-- Enhanced Google Vision API integration for enterprise-grade photo moderation
+Meowgram is a complete social media application built with React and Firebase, featuring real-time interactions, AI-powered content moderation, and a mobile-first design. Users can share photos, connect with fellow animal enthusiasts, and engage through likes, comments, and follows.
 
-- "Following feed" for posts only from followed users
+## ✨ Key Highlights
 
-- Desktop redesign with improved styling
+- **Real-time everything** - Live notifications, comments, and updates
+- **AI Content Moderation** - Client-side NSFW detection using TensorFlow.js
+- **Enterprise Security** - Firestore rules
 
-- Dark mode support.
+- **Mobile-First Design** - Responsive across all devices
+- **Zero-Cost AI** - Client-side moderation keeps hosting free
+- **Production Ready** - Deployed with CI/CD pipeline
 
 ---
 
