@@ -2,9 +2,9 @@ import "./home.scss";
 import Stories from "../../components/stories/Stories";
 import { useEffect, useState } from "react";
 import { collection, query, orderBy, onSnapshot } from "firebase/firestore";
-import { db } from "../../config/firebase";
+import { db } from "../../../config/firebase";
 import Post from "../../components/post/Post";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../hooks/useAuth";
 import homePageLogo from "../../assets/logohomepage.png";
 
 export default function Home() {

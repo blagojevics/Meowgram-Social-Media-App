@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { auth } from "../../config/firebase";
+import { auth } from "../../../config/firebase";
 import { sendEmailVerification } from "firebase/auth";
 
 export default function VerifyEmail() {

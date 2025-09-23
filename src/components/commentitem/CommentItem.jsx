@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { doc, onSnapshot } from "firebase/firestore";
-import { db } from "../../config/firebase";
+import { db } from "../../../config/firebase";
 import { Link } from "react-router-dom";
 import "./commentItem.scss";
 import placeholderImg from "../../assets/placeholderImg.jpg";
-import formatTimeAgo from "../../config/timeFormat";
+import formatTimeAgo from "../../../config/timeFormat";
 
 export default function CommentItem({
   comment,
@@ -26,9 +26,14 @@ export default function CommentItem({
       <div className="comment-flexbox">
         <Link to={`/profile/${comment.authorId}`} className="comment-user-link">
           <img
-            src={author?.avatarUrl || placeholderImg}
+            src={author?.avatarUrl || author?.photoURL || placeholderImg}
             alt={author?.username || "Unknown"}
             className="comment-avatar"
+            onError={(e) => {
+              if (e.target.src !== placeholderImg) {
+                e.target.src = placeholderImg;
+              }
+            }}
           />
           <span className="comment-username">
             {author?.username || "Unknown"}

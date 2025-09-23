@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { auth, db } from "../../config/firebase";
+import { auth, db } from "../../../config/firebase";
 import { setDoc, doc, serverTimestamp } from "firebase/firestore";
 import {
   CLOUDINARY_CLOUD_NAME,
   CLOUDINARY_UPLOAD_PRESET,
-} from "../../config/cloudinary";
+} from "../../../config/cloudinary";
 
 export default function Onboarding() {
   const navigate = useNavigate();

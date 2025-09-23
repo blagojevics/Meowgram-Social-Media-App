@@ -1,10 +1,10 @@
 import { Link, useNavigate } from "react-router-dom";
 import "./login.scss";
 import { useState, useEffect } from "react";
-import { auth, db, googleProvider } from "../../config/firebase";
+import { auth, db, googleProvider } from "../../../config/firebase";
 import { signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
 import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../hooks/useAuth";
 import { FaGoogle } from "react-icons/fa";
 
 export default function Login() {
@@ -20,17 +20,39 @@ export default function Login() {
   const handleLogin = async (e) => {
     e.preventDefault();
     setErr(null);
+
+    // Check if Firebase is properly initialized
+    if (!auth) {
+      setErr(
+        "Firebase authentication is not available. Please check your configuration."
+      );
+      return;
+    }
+
     try {
       await signInWithEmailAndPassword(auth, inputs.email, inputs.password);
       // ✅ no navigate here, we let useEffect handle it
     } catch (error) {
-      setErr(error.message);
-      console.error("Login error:", error.message);
+      if (error.code === "auth/api-key-not-valid") {
+        setErr("Firebase configuration error. Please check your API key.");
+      } else {
+        setErr(error.message);
+      }
+      console.error("Login error:", error);
     }
   };
 
   const handleGoogleLogin = async () => {
     setErr(null);
+
+    // Check if Firebase is properly initialized
+    if (!auth || !googleProvider || !db) {
+      setErr(
+        "Firebase services are not available. Please check your configuration."
+      );
+      return;
+    }
+
     try {
       const result = await signInWithPopup(auth, googleProvider);
       const user = result.user;

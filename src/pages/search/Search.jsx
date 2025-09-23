@@ -8,11 +8,11 @@ import {
   limit,
   orderBy,
 } from "firebase/firestore";
-import { db } from "../../config/firebase";
+import { db } from "../../../config/firebase";
 import { Link } from "react-router-dom";
 import "./search.scss";
 
-export default function Search({ currentUser }) {
+export default function Search() {
   const [searchQuery, setSearchQuery] = useState("");
   const [userResults, setUserResults] = useState([]);
   const [postResults, setPostResults] = useState([]);
@@ -75,7 +75,6 @@ export default function Search({ currentUser }) {
     }, 500);
 
     return () => clearTimeout(delaySearch);
-    // eslint-disable-next-line
   }, [searchQuery]);
 
   const fetchSearchResults = async (queryText) => {
@@ -163,7 +162,7 @@ export default function Search({ currentUser }) {
                   {recentSearches.map((s, i) => (
                     <li key={i} onClick={() => setSearchQuery(s)}>
                       <img
-                        src={s.avatarUrl || placeholderImg}
+                        src={s.avatarUrl || s.photoURL || placeholderImg}
                         alt={s.username}
                         className="user-avatar"
                       />
@@ -185,7 +184,7 @@ export default function Search({ currentUser }) {
                       className="user-search-item"
                     >
                       <img
-                        src={user.avatarUrl || placeholderImg}
+                        src={user.avatarUrl || user.photoURL || placeholderImg}
                         alt={user.username}
                         className="user-avatar"
                       />
@@ -219,7 +218,7 @@ export default function Search({ currentUser }) {
                   className="user-search-item"
                 >
                   <img
-                    src={user.avatarUrl || placeholderImg}
+                    src={user.avatarUrl || user.photoURL || placeholderImg}
                     alt={user.username}
                     className="user-avatar"
                   />

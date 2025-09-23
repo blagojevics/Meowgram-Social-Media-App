@@ -1,8 +1,7 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { collection, query, where, onSnapshot } from "firebase/firestore";
-import { db } from "../config/firebase";
-
-const NotificationContext = createContext();
+import { db } from "../../config/firebase";
+import { NotificationContext } from "../contexts/NotificationContext";
 
 export function NotificationProvider({ currentUser, children }) {
   const [unreadCount, setUnreadCount] = useState(0);
@@ -28,8 +27,4 @@ export function NotificationProvider({ currentUser, children }) {
       {children}
     </NotificationContext.Provider>
   );
-}
-
-export function useNotifications() {
-  return useContext(NotificationContext);
 }

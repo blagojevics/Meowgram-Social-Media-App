@@ -1,11 +1,10 @@
 import "./leftbar.scss";
 import Logo from "../../assets/logoo.webp";
-import { Link, useNavigate, useLocation } from "react-router-dom";
-import { signOut } from "firebase/auth";
-import { auth, db } from "../../config/firebase";
+import { Link, useLocation } from "react-router-dom";
+import { db } from "../../../config/firebase";
 import { useEffect, useState } from "react";
 import { collection, query, where, onSnapshot } from "firebase/firestore";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../hooks/useAuth";
 import placeholderImg from "../../assets/placeholderImg.jpg";
 
 // ✅ Import icons
@@ -20,7 +19,6 @@ import {
 
 export default function Leftbar() {
   const { authUser, userDoc } = useAuth();
-  const navigate = useNavigate();
   const location = useLocation();
 
   const [unreadCount, setUnreadCount] = useState(0);
@@ -68,7 +66,7 @@ export default function Leftbar() {
             {authUser ? (
               <Link to={profileLink} className="profile-link-with-avatar">
                 <img
-                  src={[avatarToDisplay || placeholderImg]}
+                  src={avatarToDisplay || placeholderImg}
                   alt="User Avatar"
                   className="profile-avatar-thumbnail"
                 />

@@ -127,25 +127,37 @@ Authentication & User Management
 
 1. Clone this repository
 
-2. Install dependencies: "npm install"
+2. Install dependencies: `npm install`
 
-3. Create .env file in project root with Firebase and Cloudinary config:
+3. **SECURITY SETUP** - Create `.env` file in project root with your credentials:
 
-   `VITE_FIREBASE_API_KEY=...
+   ```env
+   # Firebase Configuration (get from Firebase Console)
+   VITE_FIREBASE_API_KEY=your_api_key_here
+   VITE_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
+   VITE_FIREBASE_PROJECT_ID=your_project_id
+   VITE_FIREBASE_STORAGE_BUCKET=your_project.appspot.com
+   VITE_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
+   VITE_FIREBASE_APP_ID=your_app_id
+   VITE_FIREBASE_MEASUREMENT_ID=your_measurement_id
 
-   VITE_FIREBASE_AUTH_DOMAIN=...
+   # Cloudinary Configuration
+   VITE_CLOUDINARY_CLOUD_NAME=your_cloud_name
+   VITE_CLOUDINARY_UPLOAD_PRESET=your_upload_preset
+   ```
 
-   VITE_FIREBASE_PROJECT_ID=...
+   **⚠️ IMPORTANT**: Never commit your `.env` file or hardcode credentials in source code!
 
-   VITE_FIREBASE_APP_ID=...
+4. Set up Firebase services:
 
-   VITE_CLOUDINARY_UPLOAD_URL=...
+   - Enable Authentication (Email/Password + Google)
+   - Create Firestore Database
+   - Set up Storage
+   - Configure Security Rules
 
-   VITE_CLOUDINARY_UPLOAD_PRESET=...`
+5. Run development server: `npm run dev`
 
-4. Run a development server: "npm run dev"
-
-5. Open local host
+6. Open localhost:5174
 
 **Usage**
 

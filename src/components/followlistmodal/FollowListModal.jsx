@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { collection, onSnapshot } from "firebase/firestore";
-import { db } from "../../config/firebase";
+import { db } from "../../../config/firebase";
 import { useNavigate } from "react-router-dom";
 import "./followListModal.scss";
 import placeholderImg from "../../assets/placeholderImg.jpg";
@@ -44,9 +44,17 @@ export default function FollowListModal({ userId, type, onClose }) {
               <li
                 key={u.id}
                 className="user-list-item"
-                onClick={() => handleUserClick(u.uid)}
+                onClick={() => handleUserClick(u.id)}
               >
-                <img src={u.avatarUrl || placeholderImg} alt={u.username} />
+                <img
+                  src={u.avatarUrl || u.photoURL || placeholderImg}
+                  alt={u.username}
+                  onError={(e) => {
+                    if (e.target.src !== placeholderImg) {
+                      e.target.src = placeholderImg;
+                    }
+                  }}
+                />
                 <span>{u.username}</span>
               </li>
             ))

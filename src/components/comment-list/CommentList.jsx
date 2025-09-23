@@ -10,7 +10,7 @@ import {
   updateDoc,
   increment,
 } from "firebase/firestore";
-import { db } from "../../config/firebase";
+import { db } from "../../../config/firebase";
 import CommentItem from "../commentitem/CommentItem";
 import "./commentList.scss";
 
