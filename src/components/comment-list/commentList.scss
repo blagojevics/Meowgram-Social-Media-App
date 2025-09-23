@@ -63,11 +63,11 @@
 
       .comment-flexbox {
         display: flex;
-        justify-content: left;
+        justify-content: flex-start;
         align-items: center;
       }
       .comment-time {
-        font-size: 200px;
+        font-size: 12px;
       }
     }
   }

@@ -5,6 +5,7 @@ import { collection, query, orderBy, onSnapshot } from "firebase/firestore";
 import { db } from "../../../config/firebase";
 import Post from "../../components/post/Post";
 import { useAuth } from "../../hooks/useAuth";
+import LoadingSpinner from "../../components/loading/LoadingSpinner";
 import homePageLogo from "../../assets/logohomepage.png";
 
 export default function Home() {
@@ -53,11 +54,13 @@ export default function Home() {
   }, [authUser]);
 
   if (!authUser || !userDoc) {
-    return <div className="loading-message">Loading user...</div>;
+    return <LoadingSpinner text="Loading user data..." size="large" />;
   }
 
   if (loadingPosts) {
-    return <div className="loading-message">Loading posts...</div>;
+    return (
+      <LoadingSpinner text="Loading posts from your feed..." size="large" />
+    );
   }
 
   if (error) {

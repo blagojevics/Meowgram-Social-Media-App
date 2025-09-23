@@ -4,6 +4,7 @@ import { doc, onSnapshot } from "firebase/firestore";
 import { db } from "../../../config/firebase";
 import Post from "../../components/post/Post";
 import { useAuth } from "../../hooks/useAuth";
+import LoadingSpinner from "../loading/LoadingSpinner";
 
 export default function PostPage() {
   const { postId } = useParams();
@@ -19,7 +20,7 @@ export default function PostPage() {
     return () => unsub();
   }, [postId]);
 
-  if (!post) return <p>Loading...</p>;
+  if (!post) return <LoadingSpinner text="Loading post..." size="large" />;
 
   return <Post post={post} currentUser={authUser} />;
 }

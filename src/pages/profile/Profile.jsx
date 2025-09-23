@@ -3,6 +3,7 @@ import placeholderImg from "../../assets/placeholderImg.jpg";
 import { FaPaw, FaComment } from "react-icons/fa";
 import { useState, useEffect } from "react";
 import EditProfile from "../../components/editprofile/EditProfile";
+import LoadingSpinner from "../../components/loading/LoadingSpinner";
 import { useParams } from "react-router-dom";
 import formatTimeAgo from "../../../config/timeFormat";
 import {
@@ -202,7 +203,7 @@ export default function Profile() {
   };
 
   if (loadingProfile || loadingPosts) {
-    return <div className="loading-message">Loading profile...</div>;
+    return <LoadingSpinner text="Loading profile and posts..." size="large" />;
   }
   if (errorProfile) {
     return <div className="error-message">Error: {errorProfile}</div>;
@@ -305,7 +306,7 @@ export default function Profile() {
 
         <div className="profile-posts-grid">
           {loadingPosts ? (
-            <div className="loading-posts">Loading posts...</div>
+            <LoadingSpinner text="Loading posts..." size="medium" />
           ) : errorPosts ? (
             <div className="error-posts">Error loading posts: {errorPosts}</div>
           ) : profilePosts.length === 0 ? (

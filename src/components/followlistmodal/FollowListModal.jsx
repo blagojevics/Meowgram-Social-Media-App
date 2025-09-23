@@ -4,16 +4,20 @@ import { db } from "../../../config/firebase";
 import { useNavigate } from "react-router-dom";
 import "./followListModal.scss";
 import placeholderImg from "../../assets/placeholderImg.jpg";
+import LoadingSpinner from "../loading/LoadingSpinner";
 
 export default function FollowListModal({ userId, type, onClose }) {
   const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
     if (!userId) return;
+    setLoading(true);
     const ref = collection(db, "users", userId, type); // "followers" or "following"
     const unsub = onSnapshot(ref, (snapshot) => {
       setUsers(snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
+      setLoading(false);
     });
     return () => unsub();
   }, [userId, type]);
@@ -37,7 +41,9 @@ export default function FollowListModal({ userId, type, onClose }) {
         </button>
         <h2>{type === "followers" ? "Followers" : "Following"}</h2>
         <ul className="user-list">
-          {users.length === 0 ? (
+          {loading ? (
+            <LoadingSpinner text={`Loading ${type}...`} size="medium" />
+          ) : users.length === 0 ? (
             <li className="empty">No {type} yet</li>
           ) : (
             users.map((u) => (
