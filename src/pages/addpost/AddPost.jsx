@@ -8,6 +8,11 @@ import {
   CLOUDINARY_UPLOAD_PRESET,
 } from "../../../config/cloudinary";
 import { useAuth } from "../../hooks/useAuth";
+import { 
+  uploadWithModeration, 
+  getModerationMessage, 
+  checkAnimalContent 
+} from "../../services/imageModeration";
 
 export default function AddPost() {
   const { authUser, userDoc } = useAuth();
@@ -16,6 +21,7 @@ export default function AddPost() {
   const [previewUrl, setPreviewUrl] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [moderationMessage, setModerationMessage] = useState("");
 
   const navigate = useNavigate();
 
@@ -30,12 +36,17 @@ export default function AddPost() {
       const file = e.target.files[0];
       setImageFile(file);
       setPreviewUrl(URL.createObjectURL(file));
+      
+      // Quick animal content check on filename
+      const animalCheck = checkAnimalContent(file.name, caption);
+      setModerationMessage(getModerationMessage(animalCheck));
     }
   };
 
   const handleClearImage = () => {
     setImageFile(null);
     setPreviewUrl(null);
+    setModerationMessage("");
   };
 
   const handleSubmit = async (e) => {
@@ -59,28 +70,26 @@ export default function AddPost() {
 
     try {
       if (imageFile) {
-        const formData = new FormData();
-        formData.append("file", imageFile);
-        formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
-        formData.append("cloud_name", CLOUDINARY_CLOUD_NAME);
-
-        const response = await fetch(
-          `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
-          {
-            method: "POST",
-            body: formData,
-          }
+        // Use our moderation service for upload
+        const { moderationResult, uploadResult } = await uploadWithModeration(
+          imageFile,
+          CLOUDINARY_UPLOAD_PRESET,
+          CLOUDINARY_CLOUD_NAME,
+          caption
         );
 
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(
-            errorData.error.message ||
-              `Cloudinary upload failed with status ${response.status}`
-          );
+        if (!moderationResult.isAllowed) {
+          setError(moderationResult.reason);
+          setLoading(false);
+          return;
         }
-        const data = await response.json();
-        imageUrl = data.secure_url;
+
+        if (uploadResult) {
+          imageUrl = uploadResult.secure_url;
+          setModerationMessage(getModerationMessage(moderationResult));
+        } else {
+          throw new Error("Upload failed - no result returned");
+        }
       }
 
       const postsCollectionRef = collection(db, "posts");
@@ -144,8 +153,14 @@ export default function AddPost() {
           id="post-caption"
           onChange={(e) => setCaption(e.target.value)}
           rows={4}
-          placeholder="Write a caption for your pet's moment..."
+          placeholder="Write a caption for your pet's moment... (helps with animal detection!)"
         ></textarea>
+
+        {moderationMessage && (
+          <div className={`moderation-message ${moderationMessage.includes('🎉') || moderationMessage.includes('✅') ? 'success' : 'info'}`}>
+            {moderationMessage}
+          </div>
+        )}
 
         {loading && <p>Posting...</p>}
         {error && <p style={{ color: "red" }}>Error: {error}</p>}
