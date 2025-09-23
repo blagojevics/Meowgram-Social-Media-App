@@ -15,6 +15,7 @@ import { db } from "../../../config/firebase";
 import { Link } from "react-router-dom";
 import formatTimeAgo from "../../../config/timeFormat";
 import { useAuth } from "../../hooks/useAuth";
+import LoadingSpinner from "../../components/loading/LoadingSpinner";
 import "./notifications.scss";
 import placeholderImg from "../../assets/placeholderImg.jpg";
 import PostPreview from "../../components/postpreview/PostPreview";
@@ -142,7 +143,7 @@ export default function Notifications() {
     <div className="notifications-page">
       <h2>Notifications</h2>
       {!initialLoad ? (
-        <div className="loading-message">Loading notifications...</div>
+        <LoadingSpinner text="Loading notifications..." size="large" />
       ) : notifications.length === 0 ? (
         <p>No notifications yet.</p>
       ) : (
@@ -201,7 +202,14 @@ export default function Notifications() {
           disabled={loading}
           className="load-more-btn"
         >
-          {loading ? "Loading..." : "Load more"}
+          {loading ? (
+            <div className="loading-inline">
+              <div className="spinner"></div>
+              <span className="loading-text">Loading more...</span>
+            </div>
+          ) : (
+            "Load more"
+          )}
         </button>
       )}
     </div>

@@ -10,6 +10,7 @@ import {
 } from "firebase/firestore";
 import { db } from "../../../config/firebase";
 import { Link } from "react-router-dom";
+import LoadingSpinner from "../../components/loading/LoadingSpinner";
 import "./search.scss";
 
 export default function Search() {
@@ -148,7 +149,9 @@ export default function Search() {
         className="search-input"
       />
 
-      {loading && <div className="loading-message">Searching...</div>}
+      {loading && (
+        <LoadingSpinner text="Searching users and posts..." size="medium" />
+      )}
       {error && <div className="error-message">{error}</div>}
 
       <div className="search-results">

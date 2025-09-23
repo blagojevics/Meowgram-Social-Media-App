@@ -7,6 +7,7 @@ import {
   CLOUDINARY_UPLOAD_PRESET,
 } from "../../../config/cloudinary";
 import { moderateImageWithAI } from "../../services/aiModeration";
+import LoadingSpinner from "../../components/loading/LoadingSpinner";
 
 export default function Onboarding() {
   const navigate = useNavigate();
@@ -159,7 +160,9 @@ export default function Onboarding() {
           rows="4"
           placeholder="Tell us about your pet!"
         ></textarea>
-        {loading && <p>Uploading and Saving...</p>}
+        {loading && (
+          <LoadingSpinner text="Saving your profile..." size="medium" />
+        )}
         {err && <p style={{ color: "red" }}>{err}</p>}
         <button type="submit" disabled={loading}>
           Save Profile

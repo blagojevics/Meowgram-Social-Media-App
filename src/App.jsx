@@ -20,6 +20,7 @@ import Login from "./pages/login/Login";
 import Register from "./pages/register/Register";
 import VerifyEmail from "./pages/verifyemail/VerifyEmail";
 import PostPage from "./components/post/PostPage";
+import LoadingSpinner from "./components/loading/LoadingSpinner";
 import "./style.scss";
 
 const Layout = () => {
@@ -38,7 +39,7 @@ const ProtectedRoute = ({ children }) => {
   const location = useLocation();
 
   if (authUser === undefined || userDoc === undefined) {
-    return <div>Loading...</div>;
+    return <LoadingSpinner text="Starting Meowgram..." size="large" />;
   }
 
   if (!authUser) {

@@ -7,6 +7,7 @@ import {
 } from "../../../config/cloudinary";
 import { moderateImageWithAI } from "../../services/aiModeration";
 import "./editProfile.scss";
+import LoadingSpinner from "../loading/LoadingSpinner";
 
 export default function EditProfile({ currentUser, onClose }) {
   const [displayName, setDisplayName] = useState(
@@ -168,7 +169,11 @@ export default function EditProfile({ currentUser, onClose }) {
               Cancel
             </button>
             <button type="submit" disabled={loading}>
-              {loading ? "Saving..." : "Save"}
+              {loading ? (
+                <LoadingSpinner text="Saving profile..." size="small" inline />
+              ) : (
+                "Save"
+              )}
             </button>
           </div>
         </form>

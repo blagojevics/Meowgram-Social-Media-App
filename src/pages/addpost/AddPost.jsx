@@ -13,6 +13,7 @@ import {
   getModerationMessage,
   checkAnimalContent,
 } from "../../services/imageModeration";
+import LoadingSpinner from "../../components/loading/LoadingSpinner";
 import {
   moderateImageWithAI,
   preloadAIModeration,
@@ -116,14 +117,35 @@ export default function AddPost() {
           return;
         }
 
-        // Direct Cloudinary upload without complex moderation
+        // Check environment variables first
+        if (!CLOUDINARY_CLOUD_NAME || !CLOUDINARY_UPLOAD_PRESET) {
+          throw new Error(
+            "Cloudinary configuration missing. Please check environment variables."
+          );
+        }
+
+        // Direct Cloudinary upload with better error handling
         console.log("🚀 Starting Cloudinary upload...");
         console.log("Cloud name:", CLOUDINARY_CLOUD_NAME);
         console.log("Upload preset:", CLOUDINARY_UPLOAD_PRESET);
+        console.log("File size:", imageFile.size, "bytes");
+        console.log("File type:", imageFile.type);
 
         const formData = new FormData();
         formData.append("file", imageFile);
         formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
+
+        // Add file size check (max 10MB)
+        if (imageFile.size > 10 * 1024 * 1024) {
+          throw new Error(
+            "File too large. Please choose an image smaller than 10MB."
+          );
+        }
+
+        // Verify file type
+        if (!imageFile.type.startsWith("image/")) {
+          throw new Error("Please select a valid image file.");
+        }
 
         const response = await fetch(
           `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
@@ -134,17 +156,40 @@ export default function AddPost() {
         );
 
         console.log("Upload response status:", response.status);
+        console.log("Upload response headers:", response.headers);
+
+        let uploadResult;
 
         if (!response.ok) {
-          const errorText = await response.text();
-          console.error("Cloudinary error response:", errorText);
-          throw new Error(
-            `Cloudinary upload failed: ${response.status} - ${errorText}`
-          );
+          let errorMessage;
+          try {
+            const errorData = await response.json();
+            console.error("Cloudinary error JSON:", errorData);
+            errorMessage =
+              errorData.error?.message ||
+              `HTTP ${response.status}: ${response.statusText}`;
+          } catch (e) {
+            const errorText = await response.text();
+            console.error("Cloudinary error text:", errorText);
+            errorMessage = `HTTP ${response.status}: ${
+              errorText || response.statusText
+            }`;
+          }
+          throw new Error(`Upload failed: ${errorMessage}`);
         }
 
-        const uploadResult = await response.json();
-        console.log("Upload successful:", uploadResult);
+        try {
+          uploadResult = await response.json();
+          console.log("Upload successful:", uploadResult);
+        } catch (e) {
+          console.error("Failed to parse upload response:", e);
+          throw new Error("Invalid response from upload service");
+        }
+
+        if (!uploadResult.secure_url) {
+          console.error("No secure_url in response:", uploadResult);
+          throw new Error("Upload completed but no URL received");
+        }
 
         imageUrl = uploadResult.secure_url;
         setModerationMessage("🎉 Upload successful! Welcome to Meowgram!");
@@ -177,7 +222,7 @@ export default function AddPost() {
   };
 
   if (!authUser || !userDoc) {
-    return <div>Loading user...</div>;
+    return <LoadingSpinner text="Loading user data..." size="large" />;
   }
 
   return (
@@ -230,7 +275,9 @@ export default function AddPost() {
           </div>
         )}
 
-        {loading && <p>Posting...</p>}
+        {loading && (
+          <LoadingSpinner text="Publishing your post..." size="medium" />
+        )}
         {error && <p style={{ color: "red" }}>Error: {error}</p>}
 
         <button
