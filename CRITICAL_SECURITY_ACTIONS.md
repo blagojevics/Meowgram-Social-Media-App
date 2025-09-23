@@ -4,7 +4,7 @@
 
 ## SECURITY VULNERABILITY DETECTED
 
-Your Firebase API key `AIzaSyAQcdcOEmLA4PEVWtcUM5ehTmP2zMkbdfM` is present in git history in the file `src/config/firebase.js`.
+Your Firebase API key `[REDACTED - EXPOSED KEY]` is present in git history in the file `src/config/firebase.js`.
 
 ## REQUIRED ACTIONS (IN ORDER):
 

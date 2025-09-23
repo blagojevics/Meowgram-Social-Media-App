@@ -13,7 +13,7 @@ git filter-branch --force --index-filter \
 # Method 2: Remove any commit containing the exposed API key
 
 git filter-branch --force --commit-filter \
-'if git show $GIT_COMMIT | grep -q "AIzaSyAQcdcOEmLA4PEVWtcUM5ehTmP2zMkbdfM"; then
+'if git show $GIT_COMMIT | grep -q "[REDACTED-EXPOSED-KEY]"; then
     skip_commit "$@";
 else
 git commit-tree "$@";
