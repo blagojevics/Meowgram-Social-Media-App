@@ -1,7 +1,7 @@
 .profile-page {
   padding: 20px;
-  background-color: rgb(242, 242, 242);
-  color: #000000;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
     Arial, sans-serif;
   min-height: 100vh;
@@ -33,7 +33,7 @@
         height: 150px;
         border-radius: 50%;
         object-fit: cover;
-        border: 1px solid #363636;
+        border: 1px solid var(--border-color);
       }
     }
 
@@ -68,22 +68,22 @@
             font-size: 28px;
             font-weight: 300;
             line-height: 24px;
-            color: #000000;
+            color: var(--text-primary);
             white-space: nowrap;
             text-overflow: ellipsis;
           }
 
           .profile-displayname {
             font-size: 1rem;
-            color: #555;
+            color: var(--text-secondary);
             margin-top: 0.2rem;
           }
         }
 
         .follow-button {
-          background-color: rgb(242, 242, 242);
-          color: #000000;
-          border: 1px solid #000000;
+          background-color: var(--bg-secondary);
+          color: var(--text-primary);
+          border: 1px solid var(--border-color);
           border-radius: 8px;
           padding: 8px 16px;
           font-size: 14px;
@@ -92,7 +92,7 @@
           white-space: nowrap;
 
           &:hover {
-            background-color: #959595;
+            background-color: var(--hover-bg);
           }
         }
       }
@@ -131,7 +131,7 @@
         word-wrap: break-word;
         display: flex;
         justify-content: left;
-        color: rgb(43, 43, 43);
+        color: var(--text-primary);
 
         p {
           margin: 0;
@@ -147,7 +147,7 @@
   }
 
   .profile-tabs {
-    border-top: 1px solid #363636;
+    border-top: 1px solid var(--border-color);
     display: flex;
     justify-content: center;
     margin-bottom: 10px;
@@ -200,7 +200,7 @@
       width: 100%;
       padding-bottom: 100%;
       position: relative;
-      background-color: #262626;
+      background-color: var(--bg-secondary);
 
       img {
         position: absolute;
@@ -322,7 +322,7 @@
   z-index: 4000;
 
   .lightbox-box {
-    background: #fff;
+    background: var(--bg-primary);
     border-radius: 8px;
     max-width: 900px; // ✅ fixed size like Instagram
     width: 90%;
@@ -392,15 +392,15 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  border-left: 1px solid #ddd;
-  background: #fff;
+  border-left: 1px solid var(--border-color);
+  background: var(--bg-primary);
 
   .lightbox-header {
     display: flex;
     align-items: center;
     gap: 10px;
     padding: 5px;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid var(--border-light);
 
     .lightbox-avatar {
       width: 40px;
@@ -410,6 +410,7 @@
 
     .lightbox-username {
       font-weight: 600;
+      color: var(--text-primary);
     }
   }
 
@@ -437,7 +438,8 @@
 
   .lightbox-caption {
     padding: 12px;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid var(--border-light);
+    color: var(--text-primary);
   }
 
   .lightbox-comments {
