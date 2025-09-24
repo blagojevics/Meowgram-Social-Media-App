@@ -1,18 +1,18 @@
 .r-container {
   height: 100vh;
   width: 20%;
-  border-left: 1px solid lightgray;
+  border-left: 1px solid var(--border-color);
 
-  background-color: rgb(242, 242, 242);
+  background-color: var(--bg-secondary);
   overflow: hidden;
 
   .ppl-container {
     padding: 10px;
     height: 200px;
-    border: 0.5px solid lightgray;
+    border: 0.5px solid var(--border-color);
 
     span {
-      color: rgb(129, 129, 129);
+      color: var(--text-secondary);
     }
   }
 }

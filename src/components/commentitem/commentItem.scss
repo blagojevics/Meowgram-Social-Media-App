@@ -1,27 +1,120 @@
 .comment {
   display: flex;
-  justify-content: space-between;
+  align-items: center;
   font-size: 12px;
   width: 100%;
+  gap: 8px;
+  padding: 8px 0;
 
-  .comment-time {
+  .comment-user-link {
     display: flex;
-    justify-content: center;
-    width: 100px;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    flex-shrink: 0;
+
+    .comment-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    .comment-username {
+      font-weight: 600;
+      color: var(--text-primary);
+      font-size: 13px;
+    }
   }
 
-  .comment-flexbox {
-    display: flex;
-    width: 100%;
-    align-items: center;
+  .comment-text {
+    flex: 1;
+    margin-right: 8px;
+    color: var(--text-primary);
+    font-size: 13px;
   }
 
-  .delete-btn {
+  .comment-actions {
     display: flex;
-    background-color: transparent;
-    color: red;
-    border: none;
-    justify-content: center;
     align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+
+    .comment-like-btn {
+      display: flex;
+      align-items: center;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 2px 4px;
+      border-radius: 4px;
+      transition: all 0.2s ease;
+      color: var(--text-secondary);
+      font-size: 11px;
+      gap: 2px;
+
+      &:hover {
+        background-color: var(--hover-bg);
+        color: var(--brand-secondary);
+      }
+
+      &.liked {
+        color: var(--brand-secondary);
+
+        .comment-like-icon {
+          color: var(--brand-secondary);
+        }
+      }
+
+      &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+
+      .comment-like-icon {
+        font-size: 10px;
+        transition: color 0.2s ease;
+      }
+
+      .comment-like-count {
+        font-size: 10px;
+        font-weight: 500;
+      }
+    }
+
+    .comment-time {
+      color: var(--text-secondary);
+      font-size: 11px;
+    }
+
+    .delete-btn {
+      background-color: transparent;
+      color: var(--danger);
+      border: none;
+      cursor: pointer;
+      padding: 2px 4px;
+      border-radius: 2px;
+
+      &:hover {
+        background-color: var(--hover-bg);
+      }
+    }
+  }
+
+  // Mobile responsive
+  @media (max-width: 768px) {
+    .comment-actions {
+      .comment-like-btn {
+        .comment-like-icon {
+          font-size: 9px;
+        }
+        .comment-like-count {
+          font-size: 9px;
+        }
+      }
+      .comment-time {
+        font-size: 10px;
+      }
+    }
   }
 }

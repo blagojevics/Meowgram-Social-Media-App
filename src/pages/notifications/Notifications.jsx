@@ -174,12 +174,31 @@ export default function Notifications() {
                   {n.type === "like" && (
                     <div className="notif-row">
                       <span>liked your post</span>
+                      {n.postCaption && (
+                        <span className="comment-preview">
+                          "{n.postCaption}"
+                        </span>
+                      )}
                       {n.postId && <PostPreview postId={n.postId} />}
                     </div>
                   )}
                   {n.type === "comment" && (
                     <div className="notif-row">
-                      <span>commented on your post</span>
+                      <span>commented</span>
+                      {n.commentText && (
+                        <span className="comment-preview">
+                          "{n.commentText}"
+                        </span>
+                      )}
+                      <span>on your post</span>
+                      {n.postId && <PostPreview postId={n.postId} />}
+                    </div>
+                  )}
+                  {n.type === "commentLike" && (
+                    <div className="notif-row">
+                      <span>liked your comment</span>
+                      <span className="comment-preview">"{n.commentText}"</span>
+                      <span>on your post</span>
                       {n.postId && <PostPreview postId={n.postId} />}
                     </div>
                   )}

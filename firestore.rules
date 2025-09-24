@@ -78,6 +78,22 @@ service cloud.firestore {
       // Post owner can delete any comment under their post
       allow delete: if request.auth != null &&
         request.auth.uid == get(/databases/$(database)/documents/posts/$(resource.data.postId)).data.userId;
+
+      // COMMENT LIKE FUNCTIONALITY
+      // Allow adding a like (user not in current likes array, gets added)
+      allow update: if request.auth != null
+        && request.auth.uid != resource.data.authorId  // Can't like own comments
+        && !(request.auth.uid in resource.data.get('likes', []))  // User hasn't liked yet
+        && (request.auth.uid in request.resource.data.get('likes', []))  // User is being added
+        && request.resource.data.get('likes', []).size() == resource.data.get('likes', []).size() + 1  // Only 1 user added
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likes']);
+
+      // Allow removing a like (user in current likes array, gets removed)
+      allow update: if request.auth != null
+        && (request.auth.uid in resource.data.get('likes', []))  // User has liked
+        && !(request.auth.uid in request.resource.data.get('likes', []))  // User is being removed
+        && request.resource.data.get('likes', []).size() == resource.data.get('likes', []).size() - 1  // Only 1 user removed
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likes']);
     }
 
     // ---------------- NOTIFICATIONS ----------------

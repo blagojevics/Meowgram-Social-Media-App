@@ -3,11 +3,11 @@
   width: 50%;
   display: flex;
   flex-direction: column;
-  background-color: rgba(255, 255, 255, 0.68);
+  background-color: var(--bg-primary);
   margin: 0 auto;
   overflow: scroll;
   scrollbar-width: thin;
-  scrollbar-color: rgba(219, 219, 219, 0.825) transparent;
+  scrollbar-color: var(--border-color) transparent;
 
   .home-header {
     display: none;
@@ -31,13 +31,52 @@
     .home-header {
       height: 50px;
       display: flex;
-      justify-content: left;
+      justify-content: space-between;
       align-items: center;
-      margin-left: 5px;
+      padding: 0 10px;
+      position: relative;
 
-      img {
+      img.home-logo {
         width: 100px;
         height: 50px;
+        filter: var(--logo-filter, none);
+        transition: filter 0.3s ease;
+      }
+
+      .mobile-theme-toggle {
+        display: flex;
+        align-items: center;
+
+        .theme-toggle {
+          background: var(--bg-secondary);
+          border: 1px solid var(--border-color);
+          border-radius: 50%;
+          width: 35px;
+          height: 35px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          box-shadow: 0 2px 8px var(--shadow-light);
+          transition: all 0.3s ease;
+
+          &:hover {
+            transform: scale(1.05);
+            box-shadow: 0 3px 12px var(--shadow-medium);
+          }
+
+          .theme-icon {
+            font-size: 18px;
+            transition: all 0.4s ease;
+
+            &.moon-icon {
+              animation: moonGlow 0.4s ease;
+            }
+
+            &.sun-icon {
+              animation: sunGlow 0.4s ease;
+            }
+          }
+        }
       }
     }
   }

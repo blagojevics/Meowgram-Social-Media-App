@@ -24,6 +24,7 @@ export default function CommentInput({ postId, currentUser, post }) {
       authorId: currentUser?.uid,
       text: trimmed,
       createdAt: serverTimestamp(),
+      likes: [], // Initialize empty likes array
     };
 
     try {
@@ -37,6 +38,7 @@ export default function CommentInput({ postId, currentUser, post }) {
           fromUserId: currentUser.uid,
           type: "comment",
           postId,
+          commentText: trimmed,
           createdAt: serverTimestamp(),
           read: false,
         });

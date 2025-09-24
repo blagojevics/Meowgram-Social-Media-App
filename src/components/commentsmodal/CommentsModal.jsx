@@ -7,6 +7,7 @@ export default function CommentsModal({
   postId,
   currentUser,
   isPostOwner,
+  post,
 }) {
   if (!isOpen) return null;
 
@@ -23,6 +24,7 @@ export default function CommentsModal({
           postId={postId}
           currentUser={currentUser}
           isPostOwner={isPostOwner}
+          post={post}
         />
       </div>
     </div>

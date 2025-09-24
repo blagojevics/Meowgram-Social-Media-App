@@ -61,13 +61,27 @@
 
         .notif-row {
           display: flex;
-          justify-content: space-between !important;
           align-items: center;
-          gap: 8px;
+          gap: 6px;
           margin-top: 2px;
+          flex-wrap: wrap;
 
           span {
             color: #555;
+          }
+
+          .comment-preview {
+            font-style: italic;
+            color: #777 !important;
+            max-width: 120px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            background: #f5f5f5;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 12px;
+            flex-shrink: 0;
           }
 
           .post-preview {

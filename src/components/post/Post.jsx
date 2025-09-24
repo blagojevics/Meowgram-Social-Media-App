@@ -37,6 +37,9 @@ export default function Post({ post, currentUser, onPostActionComplete }) {
   const [editedCaption, setEditedCaption] = useState(post.caption || "");
   const [editingError, setEditingError] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [lastTapTime, setLastTapTime] = useState(0);
+  const [showLikeAnimation, setShowLikeAnimation] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const [previewComments, setPreviewComments] = useState([]);
   const [totalComments, setTotalComments] = useState(0);
@@ -103,6 +106,7 @@ export default function Post({ post, currentUser, onPostActionComplete }) {
             fromUserId: currentUser.uid,
             type: "like",
             postId: post.id,
+            postCaption: post.caption,
             createdAt: serverTimestamp(),
             read: false,
           });
@@ -110,6 +114,33 @@ export default function Post({ post, currentUser, onPostActionComplete }) {
       }
     } catch (err) {
       console.error("Error updating like:", err);
+    }
+  };
+
+  const handleDoubleTap = (e) => {
+    const currentTime = new Date().getTime();
+    const tapLength = currentTime - lastTapTime;
+
+    if (tapLength < 500 && tapLength > 0) {
+      // Double tap detected
+      e.preventDefault();
+      if (!isLiked) {
+        handleLike();
+        setShowLikeAnimation(true);
+        setTimeout(() => setShowLikeAnimation(false), 1000);
+      }
+    }
+    setLastTapTime(currentTime);
+  };
+
+  const handleCopyLink = async () => {
+    try {
+      const postUrl = `${window.location.origin}/post/${post.id}`;
+      await navigator.clipboard.writeText(postUrl);
+      // You could add a toast notification here
+      alert("Post link copied to clipboard!");
+    } catch (err) {
+      console.error("Failed to copy link:", err);
     }
   };
 
@@ -154,9 +185,14 @@ export default function Post({ post, currentUser, onPostActionComplete }) {
     }
   };
 
-  const handleDeletePost = async () => {
-    setIsDeleting(true);
+  const handleDeletePost = () => {
+    setShowDeleteConfirm(true);
     setShowOptions(false);
+  };
+
+  const confirmDelete = async () => {
+    setIsDeleting(true);
+    setShowDeleteConfirm(false);
     try {
       const postDocRef = doc(db, "posts", post.id);
       await deleteDoc(postDocRef);
@@ -221,6 +257,13 @@ export default function Post({ post, currentUser, onPostActionComplete }) {
               : "· just now"}
           </span>
         </Link>
+        <button
+          onClick={handleCopyLink}
+          className="copy-link-btn"
+          title="Copy post link"
+        >
+          🔗
+        </button>
         {currentUser && currentUser.uid === post.userId && (
           <span
             onClick={() => setShowOptions((p) => !p)}
@@ -231,6 +274,7 @@ export default function Post({ post, currentUser, onPostActionComplete }) {
         )}
         {showOptions && (
           <div ref={optionsRef} className="post-options-menu">
+            <button onClick={handleCopyLink}>Copy Link</button>
             <button onClick={handleEditClick}>Edit Description</button>
             <button onClick={handleDeletePost} disabled={isDeleting}>
               {isDeleting ? "Deleting..." : "Delete Post"}
@@ -239,7 +283,7 @@ export default function Post({ post, currentUser, onPostActionComplete }) {
         )}
       </div>
 
-      <div className="post-image-container">
+      <div className="post-image-container" onClick={handleDoubleTap}>
         <img
           src={
             post.imageUrl ||
@@ -250,6 +294,11 @@ export default function Post({ post, currentUser, onPostActionComplete }) {
           }
           className="post-image"
         />
+        {showLikeAnimation && (
+          <div className="like-animation">
+            <FaPaw className="like-heart" />
+          </div>
+        )}
       </div>
 
       <div className="post-actions">
@@ -326,6 +375,7 @@ export default function Post({ post, currentUser, onPostActionComplete }) {
           postId={post.id}
           currentUser={currentUser}
           isPostOwner={post.userId === currentUser.uid}
+          post={post}
         />
       )}
 
@@ -350,6 +400,33 @@ export default function Post({ post, currentUser, onPostActionComplete }) {
           }}
         >
           Log in to comment
+        </div>
+      )}
+
+      {showDeleteConfirm && (
+        <div className="delete-confirm-modal">
+          <div className="delete-confirm-content">
+            <h3>Delete Post?</h3>
+            <p>
+              Are you sure you want to delete this post? This action cannot be
+              undone.
+            </p>
+            <div className="delete-confirm-actions">
+              <button
+                className="cancel-btn"
+                onClick={() => setShowDeleteConfirm(false)}
+              >
+                Cancel
+              </button>
+              <button
+                className="confirm-delete-btn"
+                onClick={confirmDelete}
+                disabled={isDeleting}
+              >
+                {isDeleting ? "Deleting..." : "Delete"}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
