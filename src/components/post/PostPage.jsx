@@ -23,14 +23,8 @@ export default function PostPage() {
   if (!post) return <LoadingSpinner text="Loading post..." size="large" />;
 
   return (
-    <div
-      style={{
-        backgroundColor: "var(--bg-primary)",
-        minHeight: "100vh",
-        paddingTop: "20px",
-      }}
-    >
-      <Post post={post} currentUser={authUser} />
+    <div className="post-page-container">
+      <Post post={post} currentUser={authUser} isFullScreen={true} />
     </div>
   );
 }
