@@ -257,6 +257,37 @@
   }
 }
 
+// PostPage container styles
+.post-page-container {
+  background-color: var(--bg-primary);
+  min-height: 100vh;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+// Full screen post styles for PostPage
+.post-card-fullscreen {
+  width: 95vw !important;
+  max-width: 600px !important;
+  height: 95vh !important;
+  margin: 0 !important;
+  aspect-ratio: unset !important;
+
+  .post-image-container {
+    height: 75% !important;
+    width: 95% !important;
+  }
+
+  .post-header,
+  .post-actions,
+  .post-caption,
+  .post-comment-section {
+    width: 95% !important;
+  }
+}
+
 @media screen and (min-width: 300px) and (max-width: 550px) {
   .post-card {
     height: 650px;
@@ -318,6 +349,36 @@
         margin-top: -5px;
       }
     }
+  }
+
+  // Full screen mobile styles
+  .post-card-fullscreen {
+    width: 100vw !important;
+    height: auto !important;
+    min-height: 100vh !important;
+    border-radius: 0 !important;
+    margin: 0 !important;
+    margin-bottom: 80px !important;
+    padding-bottom: 20px !important;
+
+    .post-image-container {
+      height: 70vh !important;
+      width: 100% !important;
+    }
+
+    .post-header,
+    .post-actions,
+    .post-caption,
+    .post-comment-section {
+      width: 95% !important;
+    }
+  }
+
+  // Mobile PostPage container adjustments
+  .post-page-container {
+    padding: 20px 0 !important;
+    align-items: flex-start !important;
+    padding-top: 0 !important;
   }
 }
 

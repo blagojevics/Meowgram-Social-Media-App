@@ -25,7 +25,12 @@ import {
 } from "firebase/firestore";
 import { db } from "../../../config/firebase";
 
-export default function Post({ post, currentUser, onPostActionComplete }) {
+export default function Post({
+  post,
+  currentUser,
+  onPostActionComplete,
+  isFullScreen,
+}) {
   const [isLiked, setIsLiked] = useState(
     currentUser &&
       post.likedByUsers &&
@@ -240,7 +245,7 @@ export default function Post({ post, currentUser, onPostActionComplete }) {
   };
 
   return (
-    <div className="post-card">
+    <div className={`post-card ${isFullScreen ? "post-card-fullscreen" : ""}`}>
       <div className="post-header">
         <Link to={`/profile/${post.userId}`} className="post-header-user-link">
           <img
