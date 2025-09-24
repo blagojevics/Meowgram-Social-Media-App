@@ -12,13 +12,14 @@
 }
 
 .likes-modal-content {
-  background: #fff;
+  background: var(--bg-primary);
   border-radius: 8px;
   padding: 20px;
   width: 320px;
   max-height: 400px;
   overflow-y: auto;
   position: relative;
+  border: 1px solid var(--border-color);
 }
 
 .close-btn {
@@ -29,6 +30,12 @@
   background: transparent;
   font-size: 18px;
   cursor: pointer;
+  color: var(--text-primary);
+
+  &:hover {
+    background: var(--hover-bg);
+    border-radius: 4px;
+  }
 }
 
 .likes-list {
@@ -52,4 +59,5 @@
 
 .like-user-name {
   font-weight: 500;
+  color: var(--text-primary);
 }

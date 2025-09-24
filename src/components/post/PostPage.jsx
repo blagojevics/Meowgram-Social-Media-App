@@ -22,5 +22,15 @@ export default function PostPage() {
 
   if (!post) return <LoadingSpinner text="Loading post..." size="large" />;
 
-  return <Post post={post} currentUser={authUser} />;
+  return (
+    <div
+      style={{
+        backgroundColor: "var(--bg-primary)",
+        minHeight: "100vh",
+        paddingTop: "20px",
+      }}
+    >
+      <Post post={post} currentUser={authUser} />
+    </div>
+  );
 }
