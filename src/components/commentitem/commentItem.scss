@@ -48,7 +48,7 @@
       cursor: pointer;
       padding: 2px 4px;
       border-radius: 4px;
-      transition: all 0.2s ease;
+      transition: background-color 0.1s ease;
       color: var(--text-secondary);
       font-size: 11px;
       gap: 2px;
@@ -73,7 +73,7 @@
 
       .comment-like-icon {
         font-size: 10px;
-        transition: color 0.2s ease;
+        transition: none;
       }
 
       .comment-like-count {

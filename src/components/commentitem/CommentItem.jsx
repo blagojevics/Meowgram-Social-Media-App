@@ -51,9 +51,12 @@ export default function CommentItem({
 
     setIsLiking(true);
 
-    // Optimistic update
+    // Get current state for optimistic update
     const currentLikes = comment.likes || [];
-    if (hasLiked) {
+    const wasLiked = currentLikes.includes(currentUser.uid);
+
+    // Immediate optimistic update
+    if (wasLiked) {
       // Optimistically remove like
       setOptimisticLikes(currentLikes.filter((uid) => uid !== currentUser.uid));
     } else {
@@ -64,7 +67,7 @@ export default function CommentItem({
     try {
       const commentRef = doc(db, "comments", comment.id);
 
-      if (hasLiked) {
+      if (wasLiked) {
         // Unlike the comment
         await updateDoc(commentRef, {
           likes: arrayRemove(currentUser.uid),
@@ -91,15 +94,12 @@ export default function CommentItem({
           });
         }
       }
-
-      // Reset optimistic state after successful update
-      setOptimisticLikes(null);
     } catch (error) {
       console.error("Error updating comment like:", error);
       console.error("Comment data:", comment);
       console.error("Current user:", currentUser?.uid);
-      // Reset optimistic state on error
-      setOptimisticLikes(null);
+      // Revert optimistic state on error
+      setOptimisticLikes(currentLikes);
     } finally {
       setIsLiking(false);
     }

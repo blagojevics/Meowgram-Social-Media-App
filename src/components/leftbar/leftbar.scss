@@ -137,6 +137,10 @@
       display: none; // hide text labels
     }
 
+    .theme-toggle-container {
+      display: none; // hide desktop theme toggle on mobile
+    }
+
     .notif-badge {
       width: 15px;
       height: 15px;
