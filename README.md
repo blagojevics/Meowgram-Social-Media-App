@@ -1,4 +1,4 @@
-# 🐱 Meowgram
+# Meowgram
 
 **A modern, full-stack social media platform built for animal lovers**
 
