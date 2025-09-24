@@ -5,6 +5,7 @@ import { db } from "../../../config/firebase";
 import Post from "../../components/post/Post";
 import { useAuth } from "../../hooks/useAuth";
 import LoadingSpinner from "../loading/LoadingSpinner";
+import "./postPage.scss";
 
 export default function PostPage() {
   const { postId } = useParams();
@@ -23,14 +24,10 @@ export default function PostPage() {
   if (!post) return <LoadingSpinner text="Loading post..." size="large" />;
 
   return (
-    <div
-      style={{
-        backgroundColor: "var(--bg-primary)",
-        minHeight: "100vh",
-        paddingTop: "20px",
-      }}
-    >
-      <Post post={post} currentUser={authUser} />
+    <div className="post-page-container">
+      <div className="post-wrapper">
+        <Post post={post} currentUser={authUser} />
+      </div>
     </div>
   );
 }
