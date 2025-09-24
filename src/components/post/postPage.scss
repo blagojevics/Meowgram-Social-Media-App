@@ -1,0 +1,51 @@
+.post-page-container {
+  background-color: var(--bg-primary);
+  min-height: 100vh;
+  padding: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+
+  .post-wrapper {
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+}
+
+// Mobile responsive
+@media screen and (min-width: 300px) and (max-width: 768px) {
+  .post-page-container {
+    padding: 10px 0;
+    padding-bottom: 80px; // Account for mobile nav
+
+    .post-wrapper {
+      width: 100%;
+      max-width: 100%;
+      margin: 0;
+      padding: 0 10px;
+    }
+
+    // Ensure the post component is mobile-friendly
+    .post {
+      margin-bottom: 0;
+      border-radius: 0;
+
+      .post-header {
+        padding: 15px;
+      }
+
+      .post-image {
+        border-radius: 0;
+      }
+
+      .post-content {
+        padding: 15px;
+      }
+
+      .post-actions {
+        padding: 10px 15px;
+      }
+    }
+  }
+}
