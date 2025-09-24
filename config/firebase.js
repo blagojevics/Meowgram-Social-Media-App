@@ -1,5 +1,10 @@
 import { initializeApp } from "firebase/app";
-import { getAuth, GoogleAuthProvider } from "firebase/auth";
+import {
+  getAuth,
+  GoogleAuthProvider,
+  setPersistence,
+  browserLocalPersistence,
+} from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 
@@ -22,6 +27,7 @@ const requiredEnvVars = [
   "VITE_FIREBASE_STORAGE_BUCKET",
   "VITE_FIREBASE_MESSAGING_SENDER_ID",
   "VITE_FIREBASE_APP_ID",
+  "VITE_FIREBASE_MEASUREMENT_ID",
 ];
 
 const missingVars = requiredEnvVars.filter(
@@ -47,6 +53,15 @@ try {
 
   // Auth
   auth = getAuth(app);
+
+  // Set persistence to LOCAL (survives browser restarts)
+  setPersistence(auth, browserLocalPersistence)
+    .then(() => {
+      console.log("✅ Firebase Auth persistence set to LOCAL");
+    })
+    .catch((error) => {
+      console.error("❌ Failed to set Auth persistence:", error);
+    });
 
   // Firestore
   db = getFirestore(app);

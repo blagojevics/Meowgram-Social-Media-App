@@ -7,6 +7,7 @@ import Post from "../../components/post/Post";
 import { useAuth } from "../../hooks/useAuth";
 import LoadingSpinner from "../../components/loading/LoadingSpinner";
 import homePageLogo from "../../assets/logohomepage.png";
+import ThemeToggle from "../../components/themetoggle/ThemeToggle";
 
 export default function Home() {
   const { authUser, userDoc } = useAuth();
@@ -78,7 +79,10 @@ export default function Home() {
   return (
     <div className="home-container">
       <div className="home-header">
-        <img src={homePageLogo} alt="homelogo img" />
+        <img src={homePageLogo} alt="homelogo img" className="home-logo" />
+        <div className="mobile-only mobile-theme-toggle">
+          <ThemeToggle isMobile={true} />
+        </div>
       </div>
 
       <div className="posts-feed">

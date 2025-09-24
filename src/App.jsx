@@ -6,6 +6,7 @@ import {
   useLocation,
 } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
+import { ThemeProvider } from "./contexts/ThemeContext";
 import { useAuth } from "./hooks/useAuth";
 import Leftbar from "./components/leftbar/Leftbar";
 import Rightbar from "./components/rightbar/Rightbar";
@@ -21,6 +22,7 @@ import Register from "./pages/register/Register";
 import VerifyEmail from "./pages/verifyemail/VerifyEmail";
 import PostPage from "./components/post/PostPage";
 import LoadingSpinner from "./components/loading/LoadingSpinner";
+import ThemeToggle from "./components/themetoggle/ThemeToggle";
 import "./style.scss";
 
 const Layout = () => {
@@ -102,8 +104,10 @@ export default function App() {
   ]);
 
   return (
-    <AuthProvider>
-      <RouterProvider router={router} />
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <RouterProvider router={router} />
+      </AuthProvider>
+    </ThemeProvider>
   );
 }

@@ -16,6 +16,7 @@ import {
   FaPlusSquare,
   FaCog,
 } from "react-icons/fa";
+import ThemeToggle from "../themetoggle/ThemeToggle";
 
 export default function Leftbar() {
   const { authUser, userDoc } = useAuth();
@@ -149,6 +150,9 @@ export default function Leftbar() {
             </Link>
           </li>
         </ul>
+        <div className="theme-toggle-container">
+          <ThemeToggle isMobile={false} />
+        </div>
       </div>
     </div>
   );

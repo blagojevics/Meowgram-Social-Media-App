@@ -451,6 +451,7 @@ export default function Profile() {
                     postId={selectedPost.id}
                     currentUser={{ ...authUser, ...userDoc }}
                     isPostOwner={selectedPost.userId === authUser.uid}
+                    post={selectedPost}
                     onClose={() => setSelectedPost(null)}
                   />
                 </div>
