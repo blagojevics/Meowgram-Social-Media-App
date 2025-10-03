@@ -1,0 +1,189 @@
+.container {
+  width: 20%;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--border-color);
+  height: 100vh;
+  background-color: var(--bg-secondary);
+  overflow: hidden;
+
+  .logo-container {
+    display: flex;
+    justify-content: center;
+
+    img {
+      width: 50%;
+      margin-top: -30px;
+      filter: var(--logo-filter, none) !important;
+      transition: filter 0.3s ease;
+    }
+  }
+
+  .items-container {
+    ul {
+      list-style: none;
+      padding: 0;
+      li {
+        width: 100%;
+        padding: 20px 0px;
+        border-bottom: 1px solid var(--border-light);
+        transition: 0.3s ease;
+
+        &:hover {
+          background-color: var(--hover-bg);
+        }
+
+        a {
+          text-decoration: none;
+          color: var(--text-primary);
+          font-size: 24px;
+          padding-left: 10px;
+          display: flex;
+          align-items: center;
+          gap: 15px; // Increased gap for better spacing
+        }
+
+        // Fix profile link styling to match other menu items
+        .profile-link-with-avatar {
+          text-decoration: none;
+          color: var(--text-primary);
+          font-size: 24px;
+          padding-left: 10px;
+          display: flex;
+          align-items: center;
+          gap: 15px; // Consistent gap
+        }
+
+        .profile-avatar-thumbnail {
+          width: 32px; // Slightly larger to match icon size
+          height: 32px;
+          border-radius: 50%;
+          object-fit: cover;
+          border: 2px solid var(--border-color); // Add subtle border
+          flex-shrink: 0; // Prevent avatar from shrinking
+          transition: none; // Remove transitions that might cause flashing
+          display: block; // Ensure proper rendering
+        }
+
+        // Ensure menu icons are consistent size
+        .menu-icon {
+          font-size: 24px;
+          color: var(--text-primary);
+          flex-shrink: 0;
+        }
+
+        .menu-label {
+          font-size: 24px;
+          color: var(--text-primary);
+        }
+      }
+    }
+
+    .theme-toggle-container {
+      padding: 10px 0;
+      margin-top: auto;
+    }
+
+    .notifications-link {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .notif-badge {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: red;
+      color: white;
+      font-size: 12px;
+      font-weight: bold;
+      border-radius: 50%;
+
+      width: 20px;
+      height: 20px;
+      text-align: center;
+      line-height: 1;
+    }
+  }
+}
+
+@media screen and (min-width: 300px) and (max-width: 550px) {
+  .container {
+    width: 100%;
+    height: 60px;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    border-right: none;
+    border-top: 1px solid var(--border-color);
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+    background-color: var(--bg-primary);
+    z-index: 1000;
+  }
+
+  .container .logo-container {
+    display: none;
+  }
+
+  .container .items-container {
+    width: 100%;
+
+    .menu-label {
+      display: none; // hide text labels
+    }
+
+    .theme-toggle-container {
+      display: none; // hide desktop theme toggle on mobile
+    }
+
+    .notif-badge {
+      width: 15px;
+      height: 15px;
+      font-size: 8px;
+      margin-left: -5px;
+    }
+
+    ul {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      margin: 0;
+      padding: 0;
+
+      li {
+        flex: 1; // ✅ each li takes equal space
+        display: flex;
+        justify-content: center; // ✅ center horizontally
+        align-items: center; // ✅ center vertically
+        border-bottom: none;
+        padding: 0;
+
+        a {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          font-size: 24px; // icon size
+          padding: 0;
+        }
+
+        .profile-avatar-thumbnail {
+          width: 24px; // Match mobile icon size
+          height: 24px;
+          border-radius: 50%;
+          object-fit: cover;
+          border: 1px solid var(--border-color);
+        }
+
+        .menu-icon {
+          font-size: 24px; // ✅ keep icons visible
+        }
+      }
+    }
+  }
+}

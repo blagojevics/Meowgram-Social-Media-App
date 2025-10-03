@@ -1,0 +1,42 @@
+.comments-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+.comments-modal-content {
+  background: var(--bg-primary);
+  border-radius: 8px;
+  padding: 20px;
+  width: 500px;
+  max-width: 90vw;
+  max-height: 600px;
+  overflow-y: auto;
+  position: relative;
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+
+  .close-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    border: none;
+    background: transparent;
+    font-size: 18px;
+    cursor: pointer;
+    color: var(--text-primary);
+    padding: 4px;
+    border-radius: 4px;
+
+    &:hover {
+      background: var(--hover-bg);
+    }
+  }
+}

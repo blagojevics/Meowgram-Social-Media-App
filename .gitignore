@@ -1,0 +1,48 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+dist-ssr/
+build/
+
+# Environment variables (DO NOT COMMIT)
+.env
+.env.*
+!.env.example      # Let example configs be tracked
+
+# Private keys, credentials, service account JSON (CRITICAL!)
+keys/
+*.json
+*.pem
+*.p12
+service-account*.json
+
+# Firebase (cache/emulator state ignored)
+.firebase/
+*.cache
+
+# Coverage
+coverage/
+
+# IDE / OS junk
+.vscode/
+.idea/
+.DS_Store
+*.sw*
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# Misc
+*.swp
