@@ -24,8 +24,8 @@ export default function Login() {
     e.preventDefault();
     setErr(null);
 
-    // Check reCAPTCHA first
-    if (!recaptchaToken) {
+    // Check reCAPTCHA first (only if configured)
+    if (import.meta.env.VITE_RECAPTCHA_SITE_KEY && !recaptchaToken) {
       setErr("Please complete the reCAPTCHA verification.");
       return;
     }
@@ -65,8 +65,8 @@ export default function Login() {
   const handleGoogleLogin = async () => {
     setErr(null);
 
-    // Check reCAPTCHA first
-    if (!recaptchaToken) {
+    // Check reCAPTCHA first (only if configured)
+    if (import.meta.env.VITE_RECAPTCHA_SITE_KEY && !recaptchaToken) {
       setErr("Please complete the reCAPTCHA verification.");
       return;
     }
