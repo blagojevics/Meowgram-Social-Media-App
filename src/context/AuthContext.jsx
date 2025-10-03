@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { auth, db } from "../../config/firebase";
-import { onAuthStateChanged, onIdTokenChanged } from "firebase/auth";
+import { onAuthStateChanged } from "firebase/auth";
 import { doc, onSnapshot } from "firebase/firestore";
 import { AuthContext } from "../contexts/AuthContext";
 
@@ -11,34 +11,18 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     let unsubscribeDoc;
 
-    // Network status tracking
-    const handleOnline = () => {
-      console.log("🌐 Network reconnected");
-      // Try to refresh token when back online
-      if (auth.currentUser) {
-        auth.currentUser
-          .getIdToken(true)
-          .catch((err) =>
-            console.error("❌ Token refresh after reconnect failed:", err)
-          );
-      }
-    };
-
-    const handleOffline = () => {
-      console.log("📵 Network disconnected");
-    };
-
-    window.addEventListener("online", handleOnline);
-    window.addEventListener("offline", handleOffline);
-
-    // Listen for auth state changes
+    // Listen for auth state changes - keep it simple!
     const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
       console.log(
         "🔐 Auth state changed:",
         user ? "User logged in" : "User logged out"
       );
 
-      if (unsubscribeDoc) unsubscribeDoc();
+      // Clean up previous Firestore listener
+      if (unsubscribeDoc) {
+        unsubscribeDoc();
+        unsubscribeDoc = null;
+      }
 
       if (!user) {
         setAuthUser(null);
@@ -46,126 +30,73 @@ export function AuthProvider({ children }) {
         return;
       }
 
-      try {
-        // Reload to get latest emailVerified and token
-        await user.reload();
-        setAuthUser(auth.currentUser);
+      // Set the authenticated user immediately
+      setAuthUser(user);
 
-        // Listen to Firestore user doc with retry logic
-        const ref = doc(db, "users", user.uid);
+      // Listen to Firestore user document
+      try {
+        const userDocRef = doc(db, "users", user.uid);
         unsubscribeDoc = onSnapshot(
-          ref,
+          userDocRef,
           (snap) => {
             if (snap.exists()) {
               setUserDoc(snap.data());
+              console.log("📄 User document loaded successfully");
             } else {
-              // User doc doesn't exist yet, keep auth but set userDoc to null
-              console.warn("⚠️ User document not found, keeping auth session");
+              // User doc doesn't exist yet (new user), but keep them logged in
+              console.warn("⚠️ User document not found - new user?");
               setUserDoc(null);
             }
           },
           (error) => {
             console.error("❌ Firestore listener error:", error);
-            // Keep user logged in even if Firestore fails
-            // This prevents logouts due to temporary network issues
+
+            // Don't log out users for network errors - only for permission errors
             if (error.code === "permission-denied") {
-              console.error(
-                "🚫 Permission denied - user may need to re-authenticate"
-              );
-              // Only log out on permission errors, not network errors
-              setAuthUser(null);
+              console.error("🚫 Permission denied - logging out user");
+              auth.signOut();
+            } else {
+              // For network errors, keep user logged in but clear doc
+              console.log("🌐 Network error - keeping user logged in");
               setUserDoc(null);
             }
           }
         );
       } catch (error) {
-        console.error("❌ Error reloading user:", error);
-        setAuthUser(null);
+        console.error("❌ Error setting up Firestore listener:", error);
+        // Don't log out user for setup errors
         setUserDoc(null);
       }
     });
 
-    // Also listen for token changes (handles token refresh)
-    const unsubscribeToken = onIdTokenChanged(auth, async (user) => {
-      if (user) {
-        try {
-          // Get fresh token silently
-          const token = await user.getIdToken(false); // Don't force refresh here
-          console.log("🔑 Token available for user:", user.uid);
-        } catch (error) {
-          console.error("❌ Token access failed:", error);
-          // Don't log out user here - this could be temporary
-        }
-      }
-    });
-
-    // Set up periodic token refresh (every 45 minutes, tokens expire after 1 hour)
-    const tokenRefreshInterval = setInterval(async () => {
-      const currentUser = auth.currentUser;
-      if (currentUser) {
-        try {
-          // Only refresh if user is still active and token is close to expiry
-          const tokenResult = await currentUser.getIdTokenResult(false);
-          const expirationTime = new Date(tokenResult.expirationTime);
-          const now = new Date();
-          const timeUntilExpiry = expirationTime.getTime() - now.getTime();
-
-          // Only refresh if less than 15 minutes until expiry
-          if (timeUntilExpiry < 15 * 60 * 1000) {
-            await currentUser.getIdToken(true); // Force refresh
-            console.log("🔄 Periodic token refresh completed");
-          }
-        } catch (error) {
-          console.error("❌ Periodic token refresh failed:", error);
-          // Don't log out user on refresh failure
-        }
-      }
-    }, 45 * 60 * 1000); // 45 minutes
-
-    // Refresh token when user returns to the tab (but don't be aggressive)
-    const handleVisibilityChange = async () => {
-      if (!document.hidden && auth.currentUser) {
-        try {
-          // Check if token needs refresh before forcing it
-          const tokenResult = await auth.currentUser.getIdTokenResult(false);
-          const expirationTime = new Date(tokenResult.expirationTime);
-          const now = new Date();
-          const timeUntilExpiry = expirationTime.getTime() - now.getTime();
-
-          // Only refresh if less than 10 minutes until expiry
-          if (timeUntilExpiry < 10 * 60 * 1000) {
-            await auth.currentUser.getIdToken(true);
-            console.log("🔄 Token refreshed on tab focus");
-          }
-        } catch (error) {
-          console.error("❌ Token refresh on focus failed:", error);
-          // Don't log out user on focus refresh failure
-        }
-      }
-    };
-
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-
+    // Cleanup function
     return () => {
+      console.log("🧹 Cleaning up auth listeners");
       unsubscribeAuth();
-      unsubscribeToken();
-      clearInterval(tokenRefreshInterval);
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-      window.removeEventListener("online", handleOnline);
-      window.removeEventListener("offline", handleOffline);
-      if (unsubscribeDoc) unsubscribeDoc();
+      if (unsubscribeDoc) {
+        unsubscribeDoc();
+      }
     };
-  }, []);
+  }, []); // Empty dependency array - only run once
 
-  // Log auth state for debugging
+  // Debug logging
   useEffect(() => {
     if (authUser !== undefined) {
       console.log(
-        "👤 Current auth user:",
-        authUser ? `${authUser.uid} (${authUser.email})` : "None"
+        "👤 Auth state:",
+        authUser ? `User ${authUser.uid}` : "No user"
       );
     }
   }, [authUser]);
+
+  useEffect(() => {
+    if (userDoc !== undefined) {
+      console.log(
+        "� User doc state:",
+        userDoc ? "Document loaded" : "No document"
+      );
+    }
+  }, [userDoc]);
 
   return (
     <AuthContext.Provider value={{ authUser, userDoc }}>

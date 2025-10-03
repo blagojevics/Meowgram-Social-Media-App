@@ -4,9 +4,10 @@ import {
   GoogleAuthProvider,
   setPersistence,
   browserLocalPersistence,
+  connectAuthEmulator,
 } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
-import { getStorage } from "firebase/storage";
+import { getFirestore, connectFirestoreEmulator } from "firebase/firestore";
+import { getStorage, connectStorageEmulator } from "firebase/storage";
 
 // Firebase configuration using environment variables
 const firebaseConfig = {
@@ -27,7 +28,6 @@ const requiredEnvVars = [
   "VITE_FIREBASE_STORAGE_BUCKET",
   "VITE_FIREBASE_MESSAGING_SENDER_ID",
   "VITE_FIREBASE_APP_ID",
-  "VITE_FIREBASE_MEASUREMENT_ID",
 ];
 
 const missingVars = requiredEnvVars.filter(
@@ -49,35 +49,57 @@ let storage;
 let googleProvider;
 
 try {
+  console.log("🔥 Initializing Firebase...");
   app = initializeApp(firebaseConfig);
 
-  // Auth
+  // Initialize Auth with better error handling
   auth = getAuth(app);
 
+  // Configure Google Auth Provider
+  googleProvider = new GoogleAuthProvider();
+  googleProvider.setCustomParameters({
+    prompt: "select_account",
+  });
+
   // Set persistence to LOCAL (survives browser restarts)
+  // This is crucial for preventing unexpected logouts
   setPersistence(auth, browserLocalPersistence)
     .then(() => {
-      console.log("✅ Firebase Auth persistence set to LOCAL");
+      console.log(
+        "✅ Firebase Auth persistence set to LOCAL (survives browser restarts)"
+      );
     })
     .catch((error) => {
       console.error("❌ Failed to set Auth persistence:", error);
     });
 
-  // Firestore
+  // Initialize Firestore
   db = getFirestore(app);
 
-  // Storage
+  // Initialize Storage
   storage = getStorage(app);
 
-  // Google Provider
-  googleProvider = new GoogleAuthProvider();
+  console.log("✅ Firebase initialized successfully");
 } catch (error) {
   console.error("❌ Firebase initialization failed:", error);
+
   // Create mock objects to prevent crashes
   auth = null;
   db = null;
   storage = null;
   googleProvider = null;
+}
+
+// Add auth state persistence check
+if (auth) {
+  // Listen for auth state changes once during initialization
+  auth.onAuthStateChanged((user) => {
+    if (user) {
+      console.log("🔐 User restored from persistence:", user.uid);
+    } else {
+      console.log("🔓 No user in persistence");
+    }
+  });
 }
 
 export { auth, db, storage, googleProvider };

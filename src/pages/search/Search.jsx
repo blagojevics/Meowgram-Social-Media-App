@@ -32,8 +32,8 @@ export default function Search() {
   useEffect(() => {
     if (searchQuery.trim() !== "" && userResults.length > 0) {
       const newSearches = [
-        searchQuery,
-        ...recentSearches.filter((s) => s !== searchQuery),
+        { query: searchQuery, timestamp: Date.now() },
+        ...recentSearches.filter((s) => s.query !== searchQuery),
       ].slice(0, 5); // keep last 5
       setRecentSearches(newSearches);
       localStorage.setItem("recentSearches", JSON.stringify(newSearches));
@@ -86,17 +86,19 @@ export default function Search() {
 
       const usersRef = collection(db, "users");
 
+      // Search by username (most common search)
       const usernameQuery = query(
         usersRef,
         where("username", ">=", lowerCaseQuery),
-        where("username", "<=", lowerCaseQuery + "~"),
+        where("username", "<=", lowerCaseQuery + "\uf8ff"),
         limit(10)
       );
 
+      // Search by display name (case insensitive)
       const displayNameQuery = query(
         usersRef,
-        where("displayNameLowercase", ">=", lowerCaseQuery),
-        where("displayNameLowercase", "<=", lowerCaseQuery + "~"),
+        where("displayName", ">=", queryText),
+        where("displayName", "<=", queryText + "\uf8ff"),
         limit(10)
       );
 
@@ -105,29 +107,57 @@ export default function Search() {
         getDocs(displayNameQuery),
       ]);
 
+      // Combine results and remove duplicates
       const fetchedUsersMap = new Map();
+
       usernameSnap.docs.forEach((doc) => {
-        fetchedUsersMap.set(doc.id, { id: doc.id, ...doc.data() });
+        const userData = doc.data();
+        if (userData.username && userData.displayName) {
+          fetchedUsersMap.set(doc.id, { id: doc.id, ...userData });
+        }
       });
+
       displayNameSnap.docs.forEach((doc) => {
-        fetchedUsersMap.set(doc.id, { id: doc.id, ...doc.data() });
+        const userData = doc.data();
+        if (userData.username && userData.displayName) {
+          fetchedUsersMap.set(doc.id, { id: doc.id, ...userData });
+        }
       });
 
-      const fetchedUsers = Array.from(fetchedUsersMap.values());
-      setUserResults(fetchedUsers);
+      // Additional client-side filtering for better results
+      const allUsers = Array.from(fetchedUsersMap.values());
+      const filteredUsers = allUsers.filter((user) => {
+        const username = (user.username || "").toLowerCase();
+        const displayName = (user.displayName || "").toLowerCase();
+        return (
+          username.includes(lowerCaseQuery) ||
+          displayName.includes(lowerCaseQuery)
+        );
+      });
 
+      setUserResults(filteredUsers);
+
+      // Search posts by caption - improved query
       const postsRef = collection(db, "posts");
       const postsQuery = query(
         postsRef,
         where("caption", ">=", queryText),
-        where("caption", "<=", queryText + "~"),
-        limit(10)
+        where("caption", "<=", queryText + "\uf8ff"),
+        orderBy("caption"),
+        limit(20)
       );
+
       const postSnap = await getDocs(postsQuery);
-      const fetchedPosts = postSnap.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
+      const fetchedPosts = postSnap.docs
+        .map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }))
+        .filter(
+          (post) =>
+            post.caption && post.caption.toLowerCase().includes(lowerCaseQuery)
+        );
+
       setPostResults(fetchedPosts);
     } catch (err) {
       console.error("Error fetching search results:", err);
@@ -139,15 +169,31 @@ export default function Search() {
     }
   };
 
+  const clearRecentSearches = () => {
+    setRecentSearches([]);
+    localStorage.removeItem("recentSearches");
+  };
+
   return (
     <div className="search-page">
-      <input
-        type="text"
-        placeholder="Search for users and posts..."
-        value={searchQuery}
-        onChange={(e) => setSearchQuery(e.target.value)}
-        className="search-input"
-      />
+      <div className="search-header">
+        <input
+          type="text"
+          placeholder="Search for users and posts..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="search-input"
+        />
+        {searchQuery && (
+          <button
+            onClick={() => setSearchQuery("")}
+            className="clear-search-btn"
+            title="Clear search"
+          >
+            ✕
+          </button>
+        )}
+      </div>
 
       {loading && (
         <LoadingSpinner text="Searching users and posts..." size="medium" />
@@ -160,16 +206,23 @@ export default function Search() {
           <>
             {recentSearches.length > 0 && (
               <>
-                <h3>Recent Searches</h3>
+                <div className="section-header">
+                  <h3>Recent Searches</h3>
+                  <button onClick={clearRecentSearches} className="clear-btn">
+                    Clear All
+                  </button>
+                </div>
                 <ul className="recent-searches">
-                  {recentSearches.map((s, i) => (
-                    <li key={i} onClick={() => setSearchQuery(s)}>
-                      <img
-                        src={s.avatarUrl || s.photoURL || placeholderImg}
-                        alt={s.username}
-                        className="user-avatar"
-                      />
-                      {s}
+                  {recentSearches.map((searchItem, i) => (
+                    <li
+                      key={i}
+                      onClick={() => setSearchQuery(searchItem.query)}
+                    >
+                      <span className="search-icon">🔍</span>
+                      <span className="search-text">{searchItem.query}</span>
+                      <span className="search-time">
+                        {new Date(searchItem.timestamp).toLocaleDateString()}
+                      </span>
                     </li>
                   ))}
                 </ul>
@@ -239,20 +292,28 @@ export default function Search() {
             <h3>Posts</h3>
             <div className="post-results-list">
               {postResults.map((post) => (
-                <div key={post.id} className="post-search-item">
-                  <img
-                    src={post.imgUrl}
-                    alt={post.caption}
-                    className="post-thumbnail"
-                  />
-                  <p>{post.caption}</p>
-                  <Link
-                    to={`/profile/${post.userId}`}
-                    className="post-owner-link"
-                  >
-                    By: {post.username}
-                  </Link>
-                </div>
+                <Link
+                  to={`/post/${post.id}`}
+                  key={post.id}
+                  className="post-search-item"
+                >
+                  {post.imgUrl && (
+                    <img
+                      src={post.imgUrl}
+                      alt={post.caption || "Post image"}
+                      className="post-thumbnail"
+                      onError={(e) => {
+                        e.target.style.display = "none";
+                      }}
+                    />
+                  )}
+                  <div className="post-content">
+                    <p>{post.caption || "No caption"}</p>
+                    <span className="post-owner-link">
+                      By: @{post.username || "Unknown user"}
+                    </span>
+                  </div>
+                </Link>
               ))}
             </div>
           </>

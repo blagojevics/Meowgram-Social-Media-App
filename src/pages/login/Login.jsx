@@ -1,17 +1,20 @@
 import { Link, useNavigate } from "react-router-dom";
 import "./login.scss";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { auth, db, googleProvider } from "../../../config/firebase";
 import { signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
 import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 import { useAuth } from "../../hooks/useAuth";
 import { FaGoogle } from "react-icons/fa";
+import ReCAPTCHA from "react-google-recaptcha";
 
 export default function Login() {
   const [inputs, setInputs] = useState({ email: "", password: "" });
   const [err, setErr] = useState(null);
+  const [recaptchaToken, setRecaptchaToken] = useState(null);
   const navigate = useNavigate();
   const { authUser, userDoc } = useAuth();
+  const recaptchaRef = useRef(null);
 
   const handleChange = (e) => {
     setInputs((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -20,6 +23,12 @@ export default function Login() {
   const handleLogin = async (e) => {
     e.preventDefault();
     setErr(null);
+
+    // Check reCAPTCHA first
+    if (!recaptchaToken) {
+      setErr("Please complete the reCAPTCHA verification.");
+      return;
+    }
 
     // Check if Firebase is properly initialized
     if (!auth) {
@@ -31,8 +40,19 @@ export default function Login() {
 
     try {
       await signInWithEmailAndPassword(auth, inputs.email, inputs.password);
+      // Reset reCAPTCHA after successful login
+      if (recaptchaRef.current) {
+        recaptchaRef.current.reset();
+        setRecaptchaToken(null);
+      }
       // ✅ no navigate here, we let useEffect handle it
     } catch (error) {
+      // Reset reCAPTCHA on error to prevent reuse
+      if (recaptchaRef.current) {
+        recaptchaRef.current.reset();
+        setRecaptchaToken(null);
+      }
+
       if (error.code === "auth/api-key-not-valid") {
         setErr("Firebase configuration error. Please check your API key.");
       } else {
@@ -44,6 +64,12 @@ export default function Login() {
 
   const handleGoogleLogin = async () => {
     setErr(null);
+
+    // Check reCAPTCHA first
+    if (!recaptchaToken) {
+      setErr("Please complete the reCAPTCHA verification.");
+      return;
+    }
 
     // Check if Firebase is properly initialized
     if (!auth || !googleProvider || !db) {
@@ -75,8 +101,19 @@ export default function Login() {
           createdAt: serverTimestamp(),
         });
       }
+
+      // Reset reCAPTCHA after successful login
+      if (recaptchaRef.current) {
+        recaptchaRef.current.reset();
+        setRecaptchaToken(null);
+      }
       // ✅ no navigate here either, let useEffect handle it
     } catch (error) {
+      // Reset reCAPTCHA on error
+      if (recaptchaRef.current) {
+        recaptchaRef.current.reset();
+        setRecaptchaToken(null);
+      }
       setErr(error.message);
       console.error("Google login error:", error.message);
     }
@@ -125,6 +162,39 @@ export default function Login() {
               value={inputs.password}
               required
             />
+
+            {/* reCAPTCHA */}
+            <div className="recaptcha-container">
+              {import.meta.env.VITE_RECAPTCHA_SITE_KEY ? (
+                <ReCAPTCHA
+                  ref={recaptchaRef}
+                  sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY}
+                  onChange={(token) => {
+                    console.log("reCAPTCHA token received:", token);
+                    setRecaptchaToken(token);
+                  }}
+                  onExpired={() => {
+                    console.log("reCAPTCHA expired");
+                    setRecaptchaToken(null);
+                  }}
+                  onError={(error) => {
+                    console.error("reCAPTCHA Error:", error);
+                    setErr(
+                      "reCAPTCHA failed to load. Please refresh the page."
+                    );
+                  }}
+                  onLoad={() => {
+                    console.log("reCAPTCHA loaded successfully");
+                  }}
+                  theme="light"
+                />
+              ) : (
+                <div style={{ color: "red", padding: "10px" }}>
+                  ⚠️ reCAPTCHA not configured. Check your .env file.
+                </div>
+              )}
+            </div>
+
             {err && <span style={{ color: "red" }}>{err}</span>}
             <button type="submit">Login!</button>
             <button
