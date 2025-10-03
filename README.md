@@ -1,0 +1,219 @@
+# Meowgram
+
+**A modern, full-stack social media platform built for animal lovers**
+
+Meowgram is a complete social media application built with React and Firebase.
+
+## Key Highlights
+
+- **Real-time everything** - Live notifications, comments, and updates
+- **AI Content Moderation** - Client-side NSFW detection using TensorFlow.js
+- **Enterprise Security** - Firestore rules
+
+- **Mobile-First Design** - Responsive across all devices
+- **Zero-Cost AI** - Client-side moderation keeps hosting free
+- **Production Ready** - Deployed with CI/CD pipeline
+
+**Styling & Themes**
+
+- **Dark/Light Mode Toggle** - Complete theme system with CSS variables
+- **Mobile & Desktop Optimized** - Responsive theme switching
+- **Smooth Animations** - Theme transitions and interactive feedback
+- **System Preference Detection** - Auto-detects user's preferred theme
+
+---
+
+### Live Demo & Test Account
+
+You can view the live, deployed application here: **[https://meowgram.online](https://meowgram.online)**
+
+To explore the app's full functionality without creating your own account, please feel free to log in with the following credentials:
+
+- **Email:** `meowgramtest@proton.me`
+- **Password:** `testtest`
+
+---
+
+**Description**
+
+Meowgram is a responsive social platform where users can register, create posts with images, interact through likes and comments, manage profiles, follow other users, and receive real‑time notifications. Built as a learning project, it has been tested with active users and iterated with real feedback.
+
+<img width="348" height="800" alt="meowgramss2" src="https://github.com/user-attachments/assets/65460bda-c5c5-49a4-b90a-8c9a5eb23b5c" />
+<img width="316" height="800" alt="meowgramss3" src="https://github.com/user-attachments/assets/75152447-a204-44f3-b19c-4f9719f7a139" />
+<img width="348" height="800" alt="Meowgram ss4" src="https://github.com/user-attachments/assets/f632e276-0031-4e9c-8eb6-a5a6b588e1c8" />
+
+**Features**
+
+Authentication & User Management
+
+- Register new account with email and password
+
+- Email verification required before use
+
+- Login and logout
+
+- Password reset functionality
+
+- User profile management: avatar upload, username, display name, bio, edit profile modal
+
+- **Avatar moderation** - AI content filtering prevents inappropriate profile pictures
+
+- Firestore security rules enforce that users can only access their own data
+
+**Posts**
+
+- Create posts with image upload (Cloudinary used as storage)
+
+- **AI-powered content moderation** - NSFW detection using TensorFlow.js blocks inappropriate content
+
+- **Animal-focused filtering** - Encourages animal photos from "mice to giraffes"
+
+- Edit post captions
+
+- Delete own posts
+
+- Posts show author avatar, username, timestamp, caption, and image
+
+**Likes**
+
+- Like and unlike posts
+
+- Display like count under posts
+
+- Modal to list users who liked a post (LikesListModal)
+
+**Comments**
+
+- Add comments to posts
+
+- Delete own comment (post owners can also delete)
+
+- Real‑time comment updates (onSnapshot)
+
+- Comment timestamps (2h ago style)
+
+**Follows**
+
+- Follow and unfollow users
+
+- Profile shows followers and following count
+
+- Modal lists for followers and following (FollowListModal)
+
+**Notifications**
+
+- Real‑time notifications for likes, comments, and follows
+
+- Notifications link directly to the associated post
+
+- Preview content in notifications view
+
+**Navigation & Views**
+
+- Home feed showing posts
+
+- User profile page with grid of posts
+
+- Dedicated single post modal/page
+
+- Notifications feed
+
+- Responsive bottom nav for mobile
+
+**UI / UX**
+
+- Mobile‑first responsive design
+
+- Grid profile layout, clean feed presentation
+
+- Placeholder avatars for users without profile picture
+
+- Modals: likes list, follower/following list, single post view, edit profile
+
+- Timestamps for posts and comments
+
+**Technical**
+
+- React with functional components and hooks
+
+- Firebase Authentication
+
+- Firestore database with real‑time listeners (onSnapshot)
+
+- **Client-side AI moderation** - TensorFlow.js and NSFW.js for zero-cost content filtering
+
+- Cloudinary for image storage
+
+- Firebase Hosting for deployment
+
+- Firestore rules securing user data and actions
+
+- GitHub Actions for CI/CD pipeline
+
+**Installation**
+
+1. Clone this repository
+
+2. Install dependencies: `npm install`
+
+3. **SECURITY SETUP** - Create `.env` file in project root with your credentials:
+
+   ```env
+   # Firebase Configuration (get from Firebase Console)
+   VITE_FIREBASE_API_KEY=your_api_key_here
+   VITE_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
+   VITE_FIREBASE_PROJECT_ID=your_project_id
+   VITE_FIREBASE_STORAGE_BUCKET=your_project.appspot.com
+   VITE_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
+   VITE_FIREBASE_APP_ID=your_app_id
+   VITE_FIREBASE_MEASUREMENT_ID=your_measurement_id
+
+   # Cloudinary Configuration
+   VITE_CLOUDINARY_CLOUD_NAME=your_cloud_name
+   VITE_CLOUDINARY_UPLOAD_PRESET=your_upload_preset
+   ```
+
+4. Set up Firebase services:
+
+   - Enable Authentication (Email/Password + Google)
+   - Create Firestore Database
+   - Set up Storage
+   - Configure Security Rules
+
+5. Run development server: `npm run dev`
+
+6. Open localhost:5174
+
+**Usage**
+
+- Register new user (email verification required)
+
+- Set up profile with avatar, username, bio
+
+- Create, edit, or delete posts with images uploaded to Cloudinary
+
+- Like and comment on posts
+
+- Follow or unfollow other users
+
+- View notifications as actions happen in real‑time
+
+**Deployment**
+
+- Deployed to Firebase Hosting (meowgram.online(soon))
+
+- Continuous deployment via GitHub Actions
+
+**Current State**
+
+- Tested with several real users (posts, likes, comments, follows, notifications)
+
+- Functional and iterated with feedback
+
+**Future Plans**
+
+- “Following feed” for posts only from followed users
+
+- Desktop redesign with improved styling
+
+<img width="1522" height="952" alt="Meowgram ss1" src="https://github.com/user-attachments/assets/c06aafeb-15d1-4b94-a874-50831cf38ee7" />

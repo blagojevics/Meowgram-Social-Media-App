@@ -1,0 +1,24 @@
+.r-container {
+  height: 100vh;
+  width: 20%;
+  border-left: 1px solid var(--border-color);
+
+  background-color: var(--bg-secondary);
+  overflow: hidden;
+
+  .ppl-container {
+    padding: 10px;
+    height: 200px;
+    border: 0.5px solid var(--border-color);
+
+    span {
+      color: var(--text-secondary);
+    }
+  }
+}
+
+@media screen and (min-width: 300px) and (max-width: 550px) {
+  .r-container {
+    display: none;
+  }
+}

@@ -1,0 +1,77 @@
+/* Theme Variables */
+:root {
+  /* Light Theme Colors */
+  --bg-primary: #ffffff;
+  --bg-secondary: #f5f5f5;
+  --bg-tertiary: #e9ecef;
+
+  --text-primary: #212529;
+  --text-secondary: #6c757d;
+  --text-muted: #adb5bd;
+
+  --border-color: #dee2e6;
+  --border-light: #e9ecef;
+
+  --hover-bg: #f8f9fa;
+  --active-bg: #e9ecef;
+
+  --shadow-light: rgba(0, 0, 0, 0.1);
+  --shadow-medium: rgba(0, 0, 0, 0.15);
+  --shadow-dark: rgba(0, 0, 0, 0.25);
+
+  /* Brand Colors (same in both themes) */
+  --brand-primary: #0095f6;
+  --brand-secondary: #e74c3c;
+  --success: #28a745;
+  --warning: #ffc107;
+  --danger: #dc3545;
+  --info: #17a2b8;
+
+  /* Logo Color */
+  --logo-color: var(--text-primary);
+  --logo-filter: none;
+}
+
+/* Dark Theme Colors */
+[data-theme="dark"] {
+  --bg-primary: #181818;
+  --bg-secondary: #1f1f1f;
+  --bg-tertiary: #2f2f2f;
+
+  --text-primary: #d4d4d4;
+  --text-secondary: #b8b8b8;
+  --text-muted: #999999;
+
+  --border-color: #3a3a3a;
+  --border-light: #484848;
+
+  --hover-bg: #2a2a2a;
+  --active-bg: #353535;
+
+  --shadow-light: rgba(0, 0, 0, 0.3);
+  --shadow-medium: rgba(0, 0, 0, 0.5);
+  --shadow-dark: rgba(0, 0, 0, 0.7);
+
+  /* Logo Color */
+  --logo-color: #d4d4d4;
+  --logo-filter: brightness(0) invert(1) opacity(0.83);
+}
+
+/* Mobile/Desktop Responsive Classes */
+.mobile-only {
+  display: block;
+}
+
+.desktop-only {
+  display: none;
+}
+
+@media (min-width: 769px) {
+  .mobile-only {
+    display: none;
+  }
+
+  .desktop-only {
+    display: block;
+  }
+}
