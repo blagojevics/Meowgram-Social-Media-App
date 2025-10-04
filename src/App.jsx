@@ -1,8 +1,8 @@
 import {
   createBrowserRouter,
   RouterProvider,
-  Outlet,
   Navigate,
+  Outlet,
   useLocation,
 } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
