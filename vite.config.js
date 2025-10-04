@@ -6,7 +6,8 @@ export default defineConfig({
   base: "/",
   server: {
     port: 5173,
-    strictPort: true, // Force port 5173, fail if not available
-    host: true,
+    strictPort: true,
+    host: "0.0.0.0", // Allow external connections
+    https: false, // Keep as HTTP for local testing
   },
 });

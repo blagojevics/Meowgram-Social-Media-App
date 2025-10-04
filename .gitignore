@@ -22,14 +22,18 @@ build/
 
 # Private keys, credentials, service account JSON (CRITICAL!)
 keys/
-*.json
+service-account*.json
+firebase-service-account*.json
 *.pem
 *.p12
-service-account*.json
 
 # Firebase (cache/emulator state ignored)
 .firebase/
 *.cache
+
+# Specific config files that should be ignored
+firebase-debug.log
+firestore-debug.log
 
 # Coverage
 coverage/
