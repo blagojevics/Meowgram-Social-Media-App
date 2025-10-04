@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { chatAPI } from '../../services/chat/api';
-import { useSocket } from '../../contexts/chat/SocketContext';
-import { useChatAuth } from '../../contexts/chat/ChatAuthContext';
-import Message from './Message';
-import MessageInput from './MessageInput';
-import './chatWindow.scss';
+import React, { useState, useEffect, useRef } from "react";
+import { chatAPI } from "../../services/chat/api";
+import { useSocket } from "../../contexts/chat/SocketContext";
+import { useChatAuth } from "../../contexts/chat/ChatAuthContext";
+import Message from "./Message";
+import MessageInput from "./MessageInput";
+import "./chatWindow.scss";
 
 const ChatWindow = ({ chat, onBack }) => {
   const [messages, setMessages] = useState([]);
@@ -15,7 +15,7 @@ const ChatWindow = ({ chat, onBack }) => {
   const messagesEndRef = useRef(null);
   const messagesContainerRef = useRef(null);
   const { socket } = useSocket();
-  const { chatUser } = useChatAuth();
+  const { chatUser, chatUsers } = useChatAuth();
 
   useEffect(() => {
     if (chat) {
@@ -26,14 +26,17 @@ const ChatWindow = ({ chat, onBack }) => {
 
   useEffect(() => {
     if (socket && chat) {
-      socket.on('new_message', handleNewMessage);
-      socket.on('message_deleted', handleMessageDeleted);
-      socket.on('message_edited', handleMessageEdited);
-      
+      console.log("🔌 Setting up socket listeners for chat:", chat._id);
+
+      socket.on("message_received", handleNewMessage);
+      socket.on("message_edited", handleMessageEdited);
+      socket.on("message_deleted", handleMessageDeleted);
+
       return () => {
-        socket.off('new_message');
-        socket.off('message_deleted');
-        socket.off('message_edited');
+        console.log("🔌 Removing socket listeners");
+        socket.off("message_received");
+        socket.off("message_edited");
+        socket.off("message_deleted");
       };
     }
   }, [socket, chat]);
@@ -53,20 +56,64 @@ const ChatWindow = ({ chat, onBack }) => {
   const loadMessages = async (pageNum = page, isReset = false) => {
     try {
       if (!isReset) setLoadingMore(true);
-      
+
       const response = await chatAPI.getChatMessages(chat._id, pageNum, 30);
-      const newMessages = response.data.messages || [];
-      
+      const rawMessages = response.data.messages || [];
+
+      // Populate sender data
+      const populatedMessages = rawMessages.map((msg) => ({
+        ...msg,
+        sender:
+          typeof msg.sender === "string"
+            ? (() => {
+                const found = chatUsers.find(
+                  (u) => u._id === msg.sender || u.id === msg.sender
+                );
+                if (found) {
+                  return found;
+                } else if (
+                  msg.sender === chatUser._id ||
+                  msg.sender === chatUser.id
+                ) {
+                  return chatUser;
+                } else {
+                  return {
+                    _id: msg.sender,
+                    id: msg.sender,
+                    username: "Unknown User",
+                    email: "",
+                    profilePicture: "/logo2update.png",
+                  };
+                }
+              })()
+            : msg.sender,
+      }));
+
+      // Sort messages by creation time (oldest first)
+      const sortedMessages = populatedMessages.sort(
+        (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
+      );
+
       if (isReset) {
-        setMessages(newMessages.reverse());
+        setMessages(sortedMessages);
       } else {
-        setMessages(prev => [...newMessages.reverse(), ...prev]);
+        setMessages((prev) => {
+          const combined = [...sortedMessages, ...prev];
+          // Remove duplicates and sort
+          const unique = combined.filter(
+            (msg, index, self) =>
+              index === self.findIndex((m) => m._id === msg._id)
+          );
+          return unique.sort(
+            (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
+          );
+        });
       }
-      
-      setHasMore(newMessages.length === 30);
+
+      setHasMore(rawMessages.length === 30);
       setPage(pageNum + 1);
     } catch (error) {
-      console.error('Failed to load messages:', error);
+      console.error("Failed to load messages:", error);
     } finally {
       setLoading(false);
       setLoadingMore(false);
@@ -83,34 +130,129 @@ const ChatWindow = ({ chat, onBack }) => {
     try {
       await chatAPI.markMessagesAsRead(chat._id);
     } catch (error) {
-      console.error('Failed to mark messages as read:', error);
+      console.error("Failed to mark messages as read:", error);
     }
   };
 
   const handleNewMessage = (message) => {
+    console.log("📨 Received new message via socket:", message);
+
     if (message.chat === chat._id) {
-      setMessages(prev => [...prev, message]);
+      // Don't add our own messages from socket since they're already added via API
+      const isOwnMessage =
+        message.sender._id === chatUser._id ||
+        message.sender.id === chatUser.id;
+
+      if (isOwnMessage) {
+        console.log("💬 Ignoring own message from socket");
+        return;
+      }
+
+      setMessages((prev) => {
+        // Check if we already have this message (from API response)
+        const existingMessage = prev.find((msg) => msg._id === message._id);
+
+        if (!existingMessage) {
+          console.log("💬 Adding new message from socket");
+
+          // Populate sender data
+          const populatedMessage = {
+            ...message,
+            sender:
+              typeof message.sender === "string"
+                ? (() => {
+                    const found = chatUsers.find(
+                      (u) => u._id === message.sender || u.id === message.sender
+                    );
+                    if (found) {
+                      return found;
+                    } else if (
+                      message.sender === chatUser._id ||
+                      message.sender === chatUser.id
+                    ) {
+                      return chatUser;
+                    } else {
+                      return {
+                        _id: message.sender,
+                        id: message.sender,
+                        username: "Unknown User",
+                        email: "",
+                        profilePicture: "/logo2update.png",
+                      };
+                    }
+                  })()
+                : message.sender,
+          };
+          return [...prev, populatedMessage].sort(
+            (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
+          );
+        } else {
+          console.log("💬 Message already exists, skipping");
+          return prev;
+        }
+      });
+
       markMessagesAsRead();
+    } else {
+      console.log("💬 Message is for different chat, ignoring");
     }
   };
 
   const handleMessageDeleted = (messageId) => {
-    setMessages(prev => prev.filter(msg => msg._id !== messageId));
+    setMessages((prev) => prev.filter((msg) => msg._id !== messageId));
   };
 
   const handleMessageEdited = (updatedMessage) => {
-    setMessages(prev => prev.map(msg => 
-      msg._id === updatedMessage._id ? updatedMessage : msg
-    ));
+    // Populate sender data
+    const populatedMessage = {
+      ...updatedMessage,
+      sender:
+        typeof updatedMessage.sender === "string"
+          ? (() => {
+              const found = chatUsers.find(
+                (u) =>
+                  u._id === updatedMessage.sender ||
+                  u.id === updatedMessage.sender
+              );
+              if (found) {
+                return found;
+              } else if (
+                updatedMessage.sender === chatUser._id ||
+                updatedMessage.sender === chatUser.id
+              ) {
+                return chatUser;
+              } else {
+                return {
+                  _id: updatedMessage.sender,
+                  id: updatedMessage.sender,
+                  username: "Unknown User",
+                  email: "",
+                  profilePicture: "/logo2update.png",
+                };
+              }
+            })()
+          : updatedMessage.sender,
+    };
+    setMessages((prev) =>
+      prev.map((msg) =>
+        msg._id === populatedMessage._id ? populatedMessage : msg
+      )
+    );
   };
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  const handleSendMessage = async (content, messageType = 'text') => {
+  const handleSendMessage = async (content, messageType = "text") => {
+    const tempId = Date.now().toString();
+    console.log("📤 Attempting to send message:", {
+      content,
+      messageType,
+      chatId: chat._id,
+    });
+
     try {
-      const tempId = Date.now().toString();
       const tempMessage = {
         _id: tempId,
         content,
@@ -118,22 +260,100 @@ const ChatWindow = ({ chat, onBack }) => {
         sender: chatUser,
         chat: chat._id,
         createdAt: new Date().toISOString(),
-        isTemporary: true
+        isTemporary: true,
       };
-      
-      setMessages(prev => [...prev, tempMessage]);
-      
-      const response = await chatAPI.sendMessage(chat._id, content, messageType);
-      
-      // Replace temporary message with real one
-      setMessages(prev => prev.map(msg => 
-        msg._id === tempId ? response.data.message : msg
-      ));
-      
+
+      console.log("📝 Adding temporary message:", tempMessage);
+      setMessages((prev) => {
+        const newMessages = [...prev, tempMessage];
+        return newMessages.sort(
+          (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
+        );
+      });
+
+      const response = await chatAPI.sendMessage(
+        chat._id,
+        content,
+        messageType
+      );
+
+      console.log("📨 API response:", response.data);
+
+      // Check if response contains the message
+      let realMessage = null;
+      if (response.data) {
+        if (
+          response.data.message &&
+          typeof response.data.message === "object"
+        ) {
+          realMessage = response.data.message;
+        } else if (response.data._id) {
+          realMessage = response.data;
+        }
+      }
+
+      if (realMessage) {
+        // Populate sender data for the real message
+        const populatedMessage = {
+          ...realMessage,
+          sender:
+            typeof realMessage.sender === "string"
+              ? (() => {
+                  const found = chatUsers.find(
+                    (u) =>
+                      u._id === realMessage.sender ||
+                      u.id === realMessage.sender
+                  );
+                  if (found) {
+                    return found;
+                  } else if (
+                    realMessage.sender === chatUser._id ||
+                    realMessage.sender === chatUser.id
+                  ) {
+                    return chatUser;
+                  } else {
+                    return {
+                      _id: realMessage.sender,
+                      id: realMessage.sender,
+                      username: "Unknown User",
+                      email: "",
+                      profilePicture: "/logo2update.png",
+                    };
+                  }
+                })()
+              : realMessage.sender || chatUser,
+        };
+
+        console.log("🔄 Replacing with real message:", populatedMessage);
+
+        // Replace temporary message with real one
+        setMessages((prev) => {
+          const updated = prev.map((msg) =>
+            msg._id === tempId
+              ? { ...populatedMessage, isTemporary: false }
+              : msg
+          );
+          return updated.sort(
+            (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
+          );
+        });
+      } else {
+        // If no message in response, keep temporary message and wait for socket
+        console.log("⏳ No message in response, keeping temporary message");
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg._id === tempId ? { ...tempMessage, isTemporary: false } : msg
+          )
+        );
+      }
+
+      console.log("✅ Message sent successfully");
     } catch (error) {
-      console.error('Failed to send message:', error);
+      console.error("❌ Failed to send message:", error);
+      console.error("Error details:", error.response?.data);
+
       // Remove temporary message on error
-      setMessages(prev => prev.filter(msg => msg._id !== tempId));
+      setMessages((prev) => prev.filter((msg) => msg._id !== tempId));
     }
   };
 
@@ -141,7 +361,7 @@ const ChatWindow = ({ chat, onBack }) => {
     try {
       await chatAPI.deleteMessage(messageId);
     } catch (error) {
-      console.error('Failed to delete message:', error);
+      console.error("Failed to delete message:", error);
     }
   };
 
@@ -149,23 +369,26 @@ const ChatWindow = ({ chat, onBack }) => {
     try {
       await chatAPI.editMessage(messageId, newContent);
     } catch (error) {
-      console.error('Failed to edit message:', error);
+      console.error("Failed to edit message:", error);
     }
   };
 
   const getChatDisplayInfo = () => {
-    if (chat.isGroup) {
+    if (chat.type !== "private") {
       return {
-        name: chat.chatName || 'Group Chat',
-        avatar: chat.groupAvatar || '/logo2update.png',
-        subtitle: `${chat.participants.length} members`
+        name: chat.chatName || "Group Chat",
+        avatar: chat.chatImage || "/logo2update.png",
+        subtitle: `${chat.participants.length} members`,
       };
     } else {
-      const otherUser = chat.participants.find(p => p._id !== chatUser._id);
+      const otherParticipant = chat.participants.find(
+        (p) => p.user._id !== chatUser._id && p.user._id !== chatUser.id
+      );
+      const otherUser = otherParticipant ? otherParticipant.user : null;
       return {
-        name: otherUser?.displayName || otherUser?.email || 'Unknown User',
-        avatar: otherUser?.photoURL || '/logo2update.png',
-        subtitle: 'Last seen recently' // You can enhance this with real presence data
+        name: otherUser?.username || otherUser?.email || "Unknown User",
+        avatar: otherUser?.profilePicture || "/logo2update.png",
+        subtitle: "Last seen recently", // You can enhance this with real presence data
       };
     }
   };
@@ -176,7 +399,9 @@ const ChatWindow = ({ chat, onBack }) => {
     return (
       <div className="chat-window-loading">
         <div className="loading-header">
-          <div className="back-button" onClick={onBack}>←</div>
+          <div className="back-button" onClick={onBack}>
+            ←
+          </div>
           <div className="header-skeleton">
             <div className="avatar-skeleton"></div>
             <div className="info-skeleton">
@@ -218,8 +443,8 @@ const ChatWindow = ({ chat, onBack }) => {
       </div>
 
       {/* Messages */}
-      <div 
-        className="messages-container" 
+      <div
+        className="messages-container"
         ref={messagesContainerRef}
         onScroll={(e) => {
           if (e.target.scrollTop === 0 && hasMore) {
@@ -232,21 +457,23 @@ const ChatWindow = ({ chat, onBack }) => {
             <div className="loading-spinner"></div>
           </div>
         )}
-        
+
         <div className="messages-list">
-          {messages.map((message, index) => (
-            <Message
-              key={message._id}
-              message={message}
-              isOwn={message.sender._id === chatUser._id}
-              showAvatar={
-                index === 0 || 
-                messages[index - 1].sender._id !== message.sender._id
-              }
-              onDelete={handleDeleteMessage}
-              onEdit={handleEditMessage}
-            />
-          ))}
+          {messages.map((message, index) => {
+            const isOwnMessage =
+              message.sender._id === chatUser._id ||
+              message.sender.id === chatUser.id;
+
+            return (
+              <Message
+                key={message._id}
+                message={message}
+                isOwn={isOwnMessage}
+                onDelete={handleDeleteMessage}
+                onEdit={handleEditMessage}
+              />
+            );
+          })}
           <div ref={messagesEndRef} />
         </div>
       </div>

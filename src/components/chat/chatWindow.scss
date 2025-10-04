@@ -3,94 +3,94 @@
   display: flex;
   flex-direction: column;
   height: 100%;
-  background: var(--bg);
+  background: var(--bg-primary);
 }
 
 .chat-header {
   display: flex;
   align-items: center;
   padding: 15px 20px;
-  border-bottom: 1px solid var(--border);
-  background: var(--cardBg, var(--bg));
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  
+  border-bottom: 1px solid var(--border-color);
+  background: var(--bg-secondary);
+  box-shadow: 0 1px 3px var(--shadow-light);
+
   .back-button {
     background: none;
     border: none;
     font-size: 24px;
-    color: var(--textColor);
+    color: var(--text-primary);
     cursor: pointer;
     margin-right: 15px;
     padding: 5px;
     border-radius: 50%;
     transition: all 0.2s ease;
-    
+
     @media (min-width: 769px) {
       display: none;
     }
-    
+
     &:hover {
-      background: var(--hover, rgba(0, 0, 0, 0.05));
+      background: var(--hover-bg);
     }
   }
-  
+
   .chat-info {
     display: flex;
     align-items: center;
     flex: 1;
     min-width: 0;
-    
+
     .chat-avatar {
       width: 40px;
       height: 40px;
       border-radius: 50%;
       object-fit: cover;
       margin-right: 12px;
-      border: 2px solid var(--border);
+      border: 2px solid var(--border-color);
     }
-    
+
     .chat-details {
       flex: 1;
       min-width: 0;
-      
+
       .chat-name {
         margin: 0 0 2px 0;
         font-size: 16px;
         font-weight: 600;
-        color: var(--textColor);
+        color: var(--text-primary);
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
       }
-      
+
       .chat-subtitle {
         margin: 0;
         font-size: 12px;
-        color: var(--textColorSoft);
+        color: var(--text-secondary);
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
       }
     }
   }
-  
+
   .chat-actions {
     display: flex;
     gap: 8px;
-    
+
     .action-btn {
       background: none;
       border: none;
       font-size: 18px;
-      color: var(--textColorSoft);
+      color: var(--text-secondary);
       cursor: pointer;
       padding: 8px;
       border-radius: 50%;
       transition: all 0.2s ease;
-      
+
       &:hover {
-        background: var(--hover, rgba(0, 0, 0, 0.05));
-        color: var(--textColor);
+        background: var(--hover-bg);
+        color: var(--text-primary);
       }
     }
   }
@@ -99,19 +99,19 @@
 .messages-container {
   flex: 1;
   overflow-y: auto;
-  background: var(--chatBg, var(--bg));
+  background: var(--bg-primary);
   position: relative;
-  
+
   &::-webkit-scrollbar {
     width: 6px;
   }
-  
+
   &::-webkit-scrollbar-track {
     background: transparent;
   }
-  
+
   &::-webkit-scrollbar-thumb {
-    background: var(--border);
+    background: var(--border-color);
     border-radius: 3px;
   }
 }
@@ -128,20 +128,24 @@
   display: flex;
   justify-content: center;
   padding: 10px;
-  
+
   .loading-spinner {
     width: 20px;
     height: 20px;
-    border: 2px solid var(--border);
-    border-top: 2px solid var(--primary);
+    border: 2px solid var(--border-color);
+    border-top: 2px solid var(--brand-primary);
     border-radius: 50%;
     animation: spin 1s linear infinite;
   }
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 // Loading States
@@ -149,90 +153,90 @@
   display: flex;
   flex-direction: column;
   height: 100%;
-  background: var(--bg);
-  
+  background: var(--bg-primary);
+
   .loading-header {
     display: flex;
     align-items: center;
     padding: 15px 20px;
-    border-bottom: 1px solid var(--border);
-    
+    border-bottom: 1px solid var(--border-color);
+
     .back-button {
       font-size: 24px;
-      color: var(--textColor);
+      color: var(--text-primary);
       margin-right: 15px;
       cursor: pointer;
-      
+
       @media (min-width: 769px) {
         display: none;
       }
     }
-    
+
     .header-skeleton {
       display: flex;
       align-items: center;
       flex: 1;
-      
+
       .avatar-skeleton {
         width: 40px;
         height: 40px;
         border-radius: 50%;
-        background: var(--skeletonBg, #f0f0f0);
+        background: var(--bg-tertiary);
         margin-right: 12px;
         animation: skeleton-pulse 1.5s ease-in-out infinite alternate;
       }
-      
+
       .info-skeleton {
         flex: 1;
-        
+
         .name-skeleton {
           width: 120px;
           height: 16px;
-          background: var(--skeletonBg, #f0f0f0);
+          background: var(--bg-tertiary);
           border-radius: 4px;
           margin-bottom: 6px;
           animation: skeleton-pulse 1.5s ease-in-out infinite alternate;
         }
-        
+
         .subtitle-skeleton {
           width: 80px;
           height: 12px;
-          background: var(--skeletonBg, #f0f0f0);
+          background: var(--bg-tertiary);
           border-radius: 4px;
           animation: skeleton-pulse 1.5s ease-in-out infinite alternate;
         }
       }
     }
   }
-  
+
   .messages-loading {
     flex: 1;
     padding: 20px;
     display: flex;
     flex-direction: column;
     gap: 15px;
-    
+
     .message-skeleton {
       display: flex;
-      
+
       &:nth-child(odd) {
         justify-content: flex-start;
-        
+
         .message-bubble-skeleton {
-          background: var(--skeletonBg, #f0f0f0);
+          background: var(--bg-tertiary);
           margin-right: auto;
         }
       }
-      
+
       &:nth-child(even) {
         justify-content: flex-end;
-        
+
         .message-bubble-skeleton {
-          background: var(--primaryLight, rgba(0, 123, 255, 0.2));
+          background: rgba(0, 123, 255, 0.1);
           margin-left: auto;
         }
       }
-      
+
       .message-bubble-skeleton {
         width: 200px;
         height: 40px;
@@ -243,21 +247,11 @@
   }
 }
 
-// Theme specific adjustments
-[data-theme="dark"] {
-  .chat-window {
-    --chatBg: #0a0a0a;
-    --hover: rgba(255, 255, 255, 0.05);
-    --primaryLight: rgba(74, 144, 226, 0.15);
-    --skeletonBg: #2a2a2a;
+@keyframes skeleton-pulse {
+  from {
+    opacity: 0.6;
   }
-}
-
-[data-theme="light"] {
-  .chat-window {
-    --chatBg: #f8f9fa;
-    --hover: rgba(0, 0, 0, 0.05);
-    --primaryLight: rgba(0, 123, 255, 0.1);
-    --skeletonBg: #f0f0f0;
+  to {
+    opacity: 1;
   }
 }
