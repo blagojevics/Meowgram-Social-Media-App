@@ -6,6 +6,7 @@
 
   @media (max-width: 550px) {
     height: calc(100vh - 60px);
+    width: 100%;
   }
 
   .chat-layout {
@@ -20,8 +21,8 @@
 
 // Chat Sidebar
 .chat-sidebar {
-  width: 350px;
-  min-width: 300px;
+  width: 25%;
+  min-width: 350px;
   border-right: 1px solid var(--border);
   background: var(--bg);
   display: flex;
@@ -77,7 +78,7 @@
 
 // Chat Main Window
 .chat-main {
-  flex: 1;
+  width: 500px;
   display: flex;
   flex-direction: column;
   background: var(--bg);

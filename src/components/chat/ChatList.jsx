@@ -4,7 +4,7 @@ import { useSocket } from "../../contexts/chat/SocketContext";
 import { useChatAuth } from "../../contexts/chat/ChatAuthContext";
 import "./chatList.scss";
 
-const ChatList = ({ selectedChat, onSelectChat }) => {
+const ChatList = ({ selectedChat, onSelectChat, refreshTrigger }) => {
   const [chats, setChats] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -13,7 +13,7 @@ const ChatList = ({ selectedChat, onSelectChat }) => {
 
   useEffect(() => {
     fetchChats();
-  }, []);
+  }, [refreshTrigger]);
 
   useEffect(() => {
     if (socket) {

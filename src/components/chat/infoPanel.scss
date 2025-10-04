@@ -1,0 +1,47 @@
+// Info Panel Styles
+.info-panel {
+  width: 20%;
+  min-width: 300px;
+  border-left: 1px solid var(--border);
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+
+  @media (max-width: 768px) {
+    display: none; // Hide on mobile
+  }
+
+  .info-header {
+    padding: 20px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+
+    h3 {
+      margin: 0;
+      color: var(--textColor);
+      font-size: 1.2rem;
+      font-weight: 600;
+    }
+  }
+
+  .info-content {
+    padding: 20px;
+    flex: 1;
+    overflow-y: auto;
+
+    .chat-details {
+      h4 {
+        margin: 0 0 10px 0;
+        color: var(--textColor);
+        font-size: 1.1rem;
+      }
+
+      p {
+        margin: 0 0 15px 0;
+        color: var(--textColorSoft);
+        font-size: 0.9rem;
+      }
+    }
+  }
+}

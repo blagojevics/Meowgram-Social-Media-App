@@ -24,19 +24,28 @@ import VerifyEmail from "./pages/verifyemail/VerifyEmail";
 import PostPage from "./components/post/PostPage";
 import LoadingSpinner from "./components/loading/LoadingSpinner";
 import ThemeToggle from "./components/themetoggle/ThemeToggle";
+import ChatPage from "./pages/ChatPage";
 import "./style.scss";
 
 const Layout = () => {
   const { authUser } = useAuth();
   return (
-    <div style={{ display: "flex", justifyContent: "space-between" }}>
+    <div style={{ display: "flex", minHeight: "100vh" }}>
       <Leftbar currentUser={authUser} />
-      <Outlet />
+      {/* --- THIS IS THE FIX --- */}
+      {/* We wrap the Outlet in a main tag to control its styling */}
+      <main className="main-content">
+        <Outlet />
+      </main>
+      {/* --- END OF FIX --- */}
       <Rightbar />
     </div>
   );
 };
 
+// ... (The rest of your App.jsx file remains exactly the same) ...
+
+// --- The code below is unchanged ---
 const ProtectedRoute = ({ children }) => {
   const { authUser, userDoc } = useAuth();
   const location = useLocation();
@@ -87,9 +96,12 @@ export default function App() {
         { path: "addpost", element: <AddPost /> },
         { path: "search", element: <Search /> },
         { path: "chat", element: <Chat /> },
+        { path: "messages", element: <ChatPage /> },
+        { path: "messages/:chatId", element: <ChatPage /> },
         { path: "notifications", element: <Notifications /> },
         { path: "settings", element: <Settings /> },
         { path: "post/:postId", element: <PostPage /> },
+        { path: "chatpage", element: <ChatPage /> },
       ],
     },
     { path: "/login", element: <Login /> },

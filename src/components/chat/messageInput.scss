@@ -170,6 +170,12 @@
     gap: 8px;
   }
 
+  .text-input-container {
+    flex: 0 1 auto;
+    min-width: 250px;
+    max-width: 350px;
+  }
+
   .attach-btn {
     font-size: 18px;
     padding: 6px;

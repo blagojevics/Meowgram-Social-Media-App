@@ -104,7 +104,7 @@ export default function Leftbar() {
             </Link>
           </li>
           <li>
-            <Link to="/chat">
+            <Link to="/messages">
               <FaComments className="menu-icon" />
               <span className="menu-label">Messages</span>
             </Link>

@@ -8,3 +8,26 @@ body {
   color: var(--text-primary);
   transition: background-color 0.2s ease, color 0.2s ease;
 }
+
+/* --- ADD ALL THE CODE BELOW TO YOUR STYLESHEET --- */
+
+/* 1. Make the main content area flexible and take up all available space */
+.main-content {
+  flex: 1; /* This is the key: it tells the element to grow */
+  display: flex;
+  flex-direction: column; /* Allows children to use height: 100% */
+}
+
+/* 2. Make the ChatPage container fill the main content area */
+.chat-page-container {
+  flex: 1; /* This makes it grow to fill the .main-content parent */
+  display: flex;
+  flex-direction: column;
+}
+
+/* 3. Make the iframe fill the ChatPage container */
+.chat-iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
