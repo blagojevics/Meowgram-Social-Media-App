@@ -4,6 +4,7 @@ import { SocketProvider } from "../../contexts/chat/SocketContext";
 import ChatList from "../../components/chat/ChatList";
 import ChatWindow from "../../components/chat/ChatWindow";
 import UserList from "../../components/chat/UserList";
+import InfoPanel from "../../components/chat/InfoPanel";
 import LoadingSpinner from "../../components/loading/LoadingSpinner";
 import { useChatAuth } from "../../contexts/chat/ChatAuthContext";
 import { useAuth } from "../../hooks/useAuth";
@@ -13,6 +14,7 @@ const ChatContent = () => {
   const [selectedChat, setSelectedChat] = useState(null);
   const [showUserList, setShowUserList] = useState(false);
   const [connectionTimeout, setConnectionTimeout] = useState(false);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
   const { chatUser, isLoading, error, loginWithFirebase, apiBaseUrl } =
     useChatAuth();
   const { currentUser } = useAuth();
@@ -121,6 +123,7 @@ const ChatContent = () => {
           <ChatList
             selectedChat={selectedChat}
             onSelectChat={setSelectedChat}
+            refreshTrigger={refreshTrigger}
           />
         </div>
 
@@ -141,13 +144,17 @@ const ChatContent = () => {
           )}
         </div>
 
+        {/* Info Panel */}
+        <InfoPanel chat={selectedChat} />
+
         {/* User List Modal */}
         {showUserList && (
           <UserList
             onClose={() => setShowUserList(false)}
-            onStartChat={(user) => {
-              // Handle starting new chat
+            onStartChat={(chat) => {
+              setSelectedChat(chat);
               setShowUserList(false);
+              setRefreshTrigger((prev) => prev + 1); // Trigger chat list refresh
             }}
           />
         )}

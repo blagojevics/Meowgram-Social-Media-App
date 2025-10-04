@@ -7,8 +7,12 @@
 }
 
 .chat-search {
-  padding: 15px 20px;
+  padding: 10px 10px;
   border-bottom: 1px solid var(--border-color);
+
+  @media (max-width: 550px) {
+    min-width: 250px;
+  }
 
   .search-input {
     width: 100%;
@@ -20,6 +24,10 @@
     font-size: 14px;
     outline: none;
     transition: all 0.2s ease;
+
+    @media (max-width: 550px) {
+      min-width: 250px;
+    }
 
     &:focus {
       border-color: var(--brand-primary);

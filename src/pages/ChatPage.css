@@ -1,0 +1,29 @@
+/* This is the main container that will hold our chat app */
+.chat-page-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  /* Make it fill the entire available content area from your main layout */
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  margin: 0;
+}
+
+/* This is the iframe itself */
+.chat-iframe {
+  /* Remove the default border that makes it look like a separate box */
+  border: none;
+
+  /* Make the iframe fill its container perfectly */
+  width: 100%;
+  height: 100%;
+}
+
+/* Optional: Style the message shown to users who are not logged in */
+.chat-login-prompt {
+  text-align: center;
+  color: #ccc;
+}
