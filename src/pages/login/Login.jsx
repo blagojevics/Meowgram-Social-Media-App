@@ -16,6 +16,19 @@ export default function Login() {
   const { authUser, userDoc } = useAuth();
   const recaptchaRef = useRef(null);
 
+  // Debug environment variables
+  useEffect(() => {
+    console.log("Environment check:");
+    console.log(
+      "VITE_RECAPTCHA_SITE_KEY:",
+      import.meta.env.VITE_RECAPTCHA_SITE_KEY
+    );
+    console.log(
+      "All env vars starting with VITE:",
+      Object.keys(import.meta.env).filter((key) => key.startsWith("VITE_"))
+    );
+  }, []);
+
   const handleChange = (e) => {
     setInputs((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
@@ -191,6 +204,11 @@ export default function Login() {
               ) : (
                 <div style={{ color: "red", padding: "10px" }}>
                   ⚠️ reCAPTCHA not configured. Check your .env file.
+                  <br />
+                  <small>
+                    Current env value:{" "}
+                    {JSON.stringify(import.meta.env.VITE_RECAPTCHA_SITE_KEY)}
+                  </small>
                 </div>
               )}
             </div>
