@@ -3,6 +3,10 @@
   border-top: 1px solid var(--border-color);
   background: var(--bg-secondary);
   padding: 15px 20px;
+  flex-shrink: 0; // Don't shrink input area
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden; // Prevent overflow
 }
 
 .input-container {
@@ -164,16 +168,19 @@
 @media (max-width: 480px) {
   .message-input {
     padding: 12px 15px;
+    overflow-x: hidden; // Prevent horizontal scroll
   }
 
   .input-container {
     gap: 8px;
+    overflow: hidden; // Prevent overflow
   }
 
   .text-input-container {
     flex: 0 1 auto;
     min-width: 250px;
     max-width: 350px;
+    overflow: hidden; // Prevent overflow
   }
 
   .attach-btn {
@@ -184,11 +191,15 @@
   .message-textarea {
     padding: 10px 14px;
     font-size: 16px; // Prevent zoom on iOS
+    width: 100%;
+    box-sizing: border-box;
+    overflow-x: hidden; // Prevent horizontal scroll
   }
 
   .send-btn {
     width: 36px;
     height: 36px;
     font-size: 14px;
+    flex-shrink: 0;
   }
 }

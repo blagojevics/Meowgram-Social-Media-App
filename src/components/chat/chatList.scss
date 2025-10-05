@@ -4,6 +4,7 @@
   flex-direction: column;
   height: 100%;
   background: var(--bg-primary);
+  overflow-x: hidden; // Prevent horizontal scrolling
 }
 
 .chat-search {

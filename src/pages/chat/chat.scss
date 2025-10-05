@@ -1,20 +1,31 @@
 // Chat Page Styles - Integrated with MeowGram Theme
 .chat-container {
   height: 100vh;
-  background: var(--bg);
-  color: var(--textColor);
+  height: 100dvh; // Use dynamic viewport height for better mobile support
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  overflow-x: hidden; // Prevent horizontal scrolling
+  width: 100%;
+  position: fixed; // Prevent any layout shifts
+  left: 0;
+  top: 0;
 
   @media (max-width: 550px) {
     height: calc(100vh - 60px);
-    width: 100%;
+    height: calc(100dvh - 60px); // Dynamic viewport height for mobile
+    width: 100vw; // Ensure full width
+    overflow-x: hidden; // Double ensure no horizontal scroll
   }
 
   .chat-layout {
     display: flex;
     height: 100%;
+    width: 100%;
+    overflow: hidden; // Prevent any overflow
 
     @media (max-width: 768px) {
       flex-direction: column;
+      overflow-x: hidden; // Prevent horizontal scroll on mobile
     }
   }
 }
@@ -23,15 +34,17 @@
 .chat-sidebar {
   width: 25%;
   min-width: 350px;
-  border-right: 1px solid var(--border);
-  background: var(--bg);
+  border-right: 1px solid var(--border-color);
+  background: var(--bg-primary);
   display: flex;
   flex-direction: column;
+  overflow: hidden; // Prevent overflow
 
   @media (max-width: 768px) {
     width: 100%;
     border-right: none;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid var(--border-color);
+    overflow-x: hidden; // Prevent horizontal scroll
 
     &.hidden-mobile {
       display: none;
@@ -40,24 +53,26 @@
 
   .chat-header {
     padding: 20px;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid var(--border-color);
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: var(--bg);
+    background: var(--bg-primary);
+    flex-shrink: 0; // Don't shrink header
 
     h2 {
       margin: 0;
-      color: var(--textColor);
+      color: var(--text-primary);
       font-size: 1.5rem;
       font-weight: 600;
+      white-space: nowrap; // Prevent text wrapping
     }
 
     .new-chat-btn {
       width: 40px;
       height: 40px;
       border-radius: 50%;
-      background: var(--primary);
+      background: var(--brand-primary);
       color: white;
       border: none;
       display: flex;
@@ -67,9 +82,10 @@
       font-size: 1.2rem;
       font-weight: bold;
       transition: all 0.2s ease;
+      flex-shrink: 0; // Don't shrink button
 
       &:hover {
-        background: var(--primaryHover, #0056b3);
+        background: var(--brand-secondary);
         transform: scale(1.05);
       }
     }
@@ -81,11 +97,13 @@
   width: 500px;
   display: flex;
   flex-direction: column;
-  background: var(--bg);
+  background: var(--bg-primary);
+  overflow: hidden; // Prevent overflow
 
   @media (max-width: 768px) {
     width: 100%;
     height: 100%;
+    overflow-x: hidden; // Prevent horizontal scroll
 
     &.hidden-mobile {
       display: none;
@@ -99,15 +117,18 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--bg);
+  background: var(--bg-primary);
+  overflow: hidden; // Prevent overflow
 
   .welcome-message {
     text-align: center;
-    color: var(--textColorSoft);
+    color: var(--text-secondary);
+    padding: 20px; // Add padding to prevent edge touching
+    box-sizing: border-box;
 
     h3 {
       margin: 0 0 10px 0;
-      color: var(--textColor);
+      color: var(--text-primary);
       font-size: 1.5rem;
     }
 
@@ -125,13 +146,16 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: var(--bg);
-  color: var(--textColor);
+  background: var(--bg-primary);
+  color: var(--text-primary);
   gap: 20px;
+  overflow: hidden; // Prevent overflow
 
   p {
     font-size: 1.1rem;
-    color: var(--textColorSoft);
+    color: var(--text-secondary);
+    text-align: center;
+    padding: 0 20px;
   }
 }
 
@@ -141,25 +165,28 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--bg);
+  background: var(--bg-primary);
+  overflow: hidden; // Prevent overflow
 
   .error-message {
     text-align: center;
     padding: 40px;
     border-radius: 12px;
-    background: var(--cardBg, var(--bg));
-    border: 1px solid var(--border);
-    box-shadow: var(--shadow);
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-medium);
     max-width: 500px;
+    width: calc(100% - 40px); // Ensure it fits on mobile
+    box-sizing: border-box;
 
     h3 {
-      color: #ff6b35;
+      color: var(--danger);
       margin: 0 0 15px 0;
       font-size: 1.4rem;
     }
 
     p {
-      color: var(--textColorSoft);
+      color: var(--text-secondary);
       margin: 0 0 20px 0;
       line-height: 1.5;
     }
@@ -169,34 +196,37 @@
       gap: 12px;
       justify-content: center;
       margin-bottom: 25px;
+      flex-wrap: wrap; // Allow wrapping on small screens
 
       button {
         padding: 12px 24px;
-        background: var(--primary);
+        background: var(--brand-primary);
         color: white;
         border: none;
         border-radius: 8px;
         cursor: pointer;
         font-weight: 500;
         transition: background 0.2s ease;
+        flex: 1;
+        min-width: 120px;
 
         &:hover {
-          background: var(--primaryHover, #0056b3);
+          background: var(--brand-secondary);
         }
 
         &:last-child {
-          background: var(--border);
-          color: var(--textColor);
+          background: var(--border-color);
+          color: var(--text-primary);
 
           &:hover {
-            background: var(--hover, rgba(0, 0, 0, 0.1));
+            background: var(--hover-bg);
           }
         }
       }
     }
 
     .setup-info {
-      background: var(--hover, rgba(0, 0, 0, 0.05));
+      background: var(--hover-bg);
       border-radius: 8px;
       padding: 15px;
       margin-top: 20px;
@@ -208,7 +238,7 @@
 
         &:first-child {
           font-weight: 600;
-          color: var(--textColor);
+          color: var(--text-primary);
           margin-bottom: 10px;
         }
 
@@ -218,11 +248,12 @@
       }
 
       code {
-        background: var(--border);
+        background: var(--border-color);
         padding: 2px 6px;
         border-radius: 4px;
         font-family: "Courier New", monospace;
         font-size: 12px;
+        word-break: break-all; // Prevent overflow
       }
     }
   }
@@ -234,25 +265,28 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--bg);
+  background: var(--bg-primary);
+  overflow: hidden; // Prevent overflow
 
   .auth-message {
     text-align: center;
     padding: 40px;
     border-radius: 12px;
-    background: var(--cardBg, var(--bg));
-    border: 1px solid var(--border);
-    box-shadow: var(--shadow);
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-medium);
     max-width: 400px;
+    width: calc(100% - 40px); // Ensure it fits on mobile
+    box-sizing: border-box;
 
     h3 {
-      color: var(--textColor);
+      color: var(--text-primary);
       margin: 0 0 15px 0;
       font-size: 1.3rem;
     }
 
     p {
-      color: var(--textColorSoft);
+      color: var(--text-secondary);
       margin: 0;
       line-height: 1.5;
     }

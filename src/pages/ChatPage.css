@@ -22,8 +22,15 @@
   height: 100%;
 }
 
-/* Optional: Style the message shown to users who are not logged in */
-.chat-login-prompt {
-  text-align: center;
-  color: #ccc;
+/* Mobile responsive adjustments for bottom navigation */
+@media screen and (max-width: 550px) {
+  .chat-page-container {
+    padding-bottom: 60px; /* Account for fixed bottom navigation height */
+  }
+
+  .chat-iframe {
+    height: calc(
+      100dvh - 60px
+    ); /* Use dynamic viewport height and subtract bottom navigation height */
+  }
 }

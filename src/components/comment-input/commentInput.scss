@@ -1,54 +1,133 @@
+//copy to the relevant SCSS file in meowgram
+
 .comment-input {
   display: flex;
-  justify-content: start;
+  align-items: flex-end; /* This aligns items to the bottom edge for desktop */
   gap: 10px;
   width: 90%;
   margin: 10px auto;
 
-  .comment-input-avatar {
-    min-width: 35px;
-    height: 35px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 1px solid black;
-  }
+  .comment-input-container {
+    flex: 1;
+    display: flex;
+    align-items: flex-end; /* Also align items here for desktop */
+    gap: 8px;
 
-  input {
-    border: none;
-    background-color: transparent;
-    border-bottom: 1px solid var(--border-color);
-    width: 85%;
-    color: var(--text-primary);
-
-    &::placeholder {
-      color: var(--text-primary);
-      opacity: 0.7;
-    }
-  }
-
-  button {
-    background-color: transparent;
-    color: var(--text-primary);
-    border: none;
-    font-size: 14px;
-    width: 60px;
-    height: 25px;
-    cursor: pointer;
-    font-weight: 600;
-  }
-}
-
-@media screen and (min-width: 300px) and (max-width: 550px) {
-  .comment-input {
     .comment-input-avatar {
-      min-width: 25px;
-      height: 25px;
+      min-width: 35px;
+      height: 35px;
       border-radius: 50%;
       object-fit: cover;
       border: 1px solid black;
+      flex-shrink: 0;
     }
+
     .comment-input-field {
-      height: 25px;
+      flex: 1;
+      border: 1px solid var(--border-color);
+      border-radius: 18px;
+      padding: 8px 12px;
+      background-color: var(--bg-secondary);
+      color: var(--text-primary);
+      font-family: inherit;
+      font-size: 14px;
+      line-height: 1.4;
+      resize: none;
+      outline: none;
+      min-height: 21px;
+      max-height: 120px;
+      overflow-y: auto;
+
+      &:focus {
+        border-color: var(--brand-primary);
+        box-shadow: 0 0 0 2px rgba(0, 149, 246, 0.1);
+      }
+
+      &::placeholder {
+        color: var(--text-secondary);
+      }
+
+      &::-webkit-scrollbar {
+        width: 4px;
+      }
+
+      &::-webkit-scrollbar-track {
+        background: transparent;
+      }
+
+      &::-webkit-scrollbar-thumb {
+        background: var(--border-color);
+        border-radius: 2px;
+      }
+    }
+
+    .comment-input-btn {
+      background-color: var(--brand-primary);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 35px;
+      height: 35px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.2s ease;
+
+      &:hover:not(:disabled) {
+        background-color: var(--brand-secondary);
+        transform: scale(1.05);
+      }
+
+      &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+      }
+    }
+  }
+}
+
+/* --- THE FINAL, MORE ROBUST FIX IS IN THE MOBILE STYLES BELOW --- */
+@media screen and (min-width: 300px) and (max-width: 550px) {
+  .comment-input {
+    width: 90%;
+    gap: 8px;
+    align-items: center;
+
+    .comment-input-container {
+      gap: 6px;
+      align-items: center;
+      max-width: 300px;
+
+      .comment-input-avatar {
+        width: 32px;
+        height: 32px;
+        min-width: 32px;
+      }
+
+      .comment-input-field {
+        box-sizing: border-box;
+        border-radius: 16px;
+        font-size: 16px; /* Prevent zoom on iOS */
+
+        /* --- THIS IS THE NEW FIX --- */
+        /* Reset default textarea styles and apply symmetrical padding */
+        margin: 0;
+        min-height: 32px; /* Set a minimum height */
+        height: auto; /* Allow it to grow if needed */
+        padding: 6px 12px; /* Symmetrical vertical padding */
+        line-height: 1.25; /* Adjust line-height for better centering */
+      }
+
+      .comment-input-btn {
+        width: 32px;
+        height: 32px;
+        font-size: 11px;
+      }
     }
   }
 }

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
   collection,
   addDoc,
@@ -10,9 +10,20 @@ import {
 import { db } from "../../../config/firebase";
 import "./commentInput.scss";
 import placeholderImg from "../../assets/placeholderImg.jpg";
+import { FaPaperPlane } from "react-icons/fa";
 
 export default function CommentInput({ postId, currentUser, post }) {
   const [text, setText] = useState("");
+  const textareaRef = useRef(null);
+
+  // Auto-resize textarea
+  useEffect(() => {
+    const textarea = textareaRef.current;
+    if (textarea) {
+      textarea.style.height = "auto";
+      textarea.style.height = Math.min(textarea.scrollHeight, 120) + "px";
+    }
+  }, [text]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -49,31 +60,45 @@ export default function CommentInput({ postId, currentUser, post }) {
     }
   };
 
+  const handleKeyPress = (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSubmit(e);
+    }
+  };
+
   return (
     <form onSubmit={handleSubmit} className="comment-input">
-      <img
-        src={currentUser?.avatarUrl || currentUser?.photoURL || placeholderImg}
-        alt=""
-        className="comment-input-avatar"
-        onError={(e) => {
-          if (e.target.src !== placeholderImg) {
-            e.target.src = placeholderImg;
+      <div className="comment-input-container">
+        <img
+          src={
+            currentUser?.avatarUrl || currentUser?.photoURL || placeholderImg
           }
-        }}
-      />
-      <input
-        value={text}
-        onChange={(e) => setText(e.target.value)}
-        placeholder="Write a comment..."
-        className="comment-input-field"
-      />
-      <button
-        type="submit"
-        disabled={!text.trim()}
-        className="comment-input-btn"
-      >
-        Post
-      </button>
+          alt=""
+          className="comment-input-avatar"
+          onError={(e) => {
+            if (e.target.src !== placeholderImg) {
+              e.target.src = placeholderImg;
+            }
+          }}
+        />
+        <textarea
+          ref={textareaRef}
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          onKeyDown={handleKeyPress}
+          placeholder="Write a comment..."
+          className="comment-input-field"
+          rows={1}
+        />
+        <button
+          type="submit"
+          disabled={!text.trim()}
+          className="comment-input-btn"
+        >
+          <FaPaperPlane />
+        </button>
+      </div>
     </form>
   );
 }

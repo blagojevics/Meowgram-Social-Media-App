@@ -8,6 +8,7 @@
   overflow: scroll;
   scrollbar-width: thin;
   scrollbar-color: var(--border-color) transparent;
+  overflow-x: hidden; // Prevent horizontal scrolling
 
   .home-header {
     display: none;
@@ -19,14 +20,19 @@
   flex-direction: column;
   width: 100%;
   padding: 0;
+  gap: 0; // Remove gap to prevent extra spacing
 }
 
 @media screen and (min-width: 300px) and (max-width: 550px) {
   .home-container {
     min-width: 280px;
     max-width: 530px;
-    width: 400px;
-    padding-bottom: 70px;
+    width: 100vw; // Use full viewport width
+    padding-bottom: 70px; // Account for bottom navigation
+    height: auto; // Let content determine height instead of fixed vh
+    min-height: 100vh; // Minimum height
+    overflow-x: hidden; // Prevent horizontal scrolling
+    box-sizing: border-box;
 
     .home-header {
       height: 50px;
@@ -35,6 +41,7 @@
       align-items: center;
       padding: 0 10px;
       position: relative;
+      flex-shrink: 0; // Don't shrink header
 
       img.home-logo {
         width: 100px;
@@ -79,5 +86,10 @@
         }
       }
     }
+  }
+
+  .posts-feed {
+    padding: 0 10px; // Add some padding to prevent edge touching
+    box-sizing: border-box;
   }
 }
