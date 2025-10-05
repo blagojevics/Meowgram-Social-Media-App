@@ -43,7 +43,7 @@
 
 .chat-items {
   flex: 1;
-  overflow-y: auto;
+  overflow: hidden; // Prevent scrolling - conversations should be fixed height
 
   &::-webkit-scrollbar {
     width: 4px;
