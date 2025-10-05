@@ -11,11 +11,11 @@
   top: 0;
 
   @media (max-width: 550px) {
-    height: calc(100vh - 60px);
-    height: calc(100dvh - 60px); // Dynamic viewport height for mobile
+    height: 100vh; // Use full viewport height on mobile
+    height: 100svh; // Use small viewport height for better mobile support
     width: 100vw; // Ensure full width
-    overflow-x: hidden; // Double ensure no horizontal scroll
-    overflow-y: hidden; // Prevent vertical scrolling on mobile to keep input visible
+    overflow-x: hidden; // Prevent horizontal scroll
+    // Remove overflow-y: hidden to allow natural scrolling
   }
 
   .chat-layout {
@@ -27,7 +27,7 @@
     @media (max-width: 768px) {
       flex-direction: column;
       overflow-x: hidden; // Prevent horizontal scroll on mobile
-      overflow-y: hidden; // Prevent vertical scroll on mobile
+      // Remove overflow-y: hidden to allow proper scrolling
     }
   }
 }
@@ -47,7 +47,7 @@
     border-right: none;
     border-bottom: 1px solid var(--border-color);
     overflow-x: hidden; // Prevent horizontal scroll
-    overflow-y: hidden; // Prevent vertical scroll on mobile
+    // Remove overflow-y: hidden to allow proper layout
 
     &.hidden-mobile {
       display: none;
@@ -107,7 +107,7 @@
     width: 100%;
     height: 100%;
     overflow-x: hidden; // Prevent horizontal scroll
-    overflow-y: hidden; // Prevent vertical scroll on mobile
+    // Remove overflow-y: hidden to allow message scrolling
 
     &.hidden-mobile {
       display: none;

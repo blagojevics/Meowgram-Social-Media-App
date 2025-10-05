@@ -7,6 +7,14 @@
   width: 100%;
   box-sizing: border-box;
   overflow: hidden; // Prevent overflow
+  position: relative; // Ensure proper positioning
+  z-index: 10; // Ensure input stays above other content
+
+  @media (max-width: 768px) {
+    position: sticky;
+    bottom: 0; // Stick to bottom on mobile
+    z-index: 100; // Higher z-index on mobile
+  }
 }
 
 .input-container {

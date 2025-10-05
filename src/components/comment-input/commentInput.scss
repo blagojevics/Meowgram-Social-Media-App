@@ -92,16 +92,17 @@
 }
 
 /* --- THE FINAL, MORE ROBUST FIX IS IN THE MOBILE STYLES BELOW --- */
-@media screen and (min-width: 300px) and (max-width: 550px) {
+@media screen and (min-width: 300px) and (max-width: 768px) {
   .comment-input {
-    width: 90%;
+    width: 100%;
     gap: 8px;
     align-items: center;
 
     .comment-input-container {
       gap: 6px;
       align-items: center;
-      max-width: 300px;
+      width: 100%;
+      flex: 1; // Ensure it stretches to fill available space on larger mobile screens
 
       .comment-input-avatar {
         width: 32px;
@@ -113,6 +114,7 @@
         box-sizing: border-box;
         border-radius: 16px;
         font-size: 16px; /* Prevent zoom on iOS */
+        flex: 1; // Allow input field to stretch more on larger screens
 
         /* --- THIS IS THE NEW FIX --- */
         /* Reset default textarea styles and apply symmetrical padding */
