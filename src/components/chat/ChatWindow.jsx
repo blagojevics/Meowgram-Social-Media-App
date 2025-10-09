@@ -24,6 +24,18 @@ const ChatWindow = ({ chat, onBack }) => {
     }
   }, [chat]);
 
+  // Set dynamic --vh CSS variable for mobile viewport bug (address bar hide)
+  useEffect(() => {
+    const setVh = () => {
+      const vh = window.innerHeight * 0.01;
+      document.documentElement.style.setProperty("--vh", `${vh}px`);
+    };
+
+    setVh();
+    window.addEventListener("resize", setVh);
+    return () => window.removeEventListener("resize", setVh);
+  }, []);
+
   useEffect(() => {
     if (socket && chat) {
       console.log("🔌 Setting up socket listeners for chat:", chat._id);
@@ -44,6 +56,14 @@ const ChatWindow = ({ chat, onBack }) => {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // Ensure we scroll once after initial loading completes
+  useEffect(() => {
+    if (!loading) {
+      setTimeout(() => scrollToBottom(), 50);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading]);
 
   const resetAndLoadMessages = async () => {
     setMessages([]);
@@ -241,7 +261,20 @@ const ChatWindow = ({ chat, onBack }) => {
   };
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (messagesEndRef.current) {
+      try {
+        messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+      } catch (e) {
+        // Fallback: directly set container scrollTop
+        if (messagesContainerRef.current) {
+          messagesContainerRef.current.scrollTop =
+            messagesContainerRef.current.scrollHeight;
+        }
+      }
+    } else if (messagesContainerRef.current) {
+      messagesContainerRef.current.scrollTop =
+        messagesContainerRef.current.scrollHeight;
+    }
   };
 
   const handleSendMessage = async (content, messageType = "text") => {

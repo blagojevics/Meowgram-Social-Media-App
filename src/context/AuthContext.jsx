@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { auth, db } from "../../config/firebase";
-import { onAuthStateChanged } from "firebase/auth";
+import { onAuthStateChanged, onIdTokenChanged } from "firebase/auth";
 import { doc, onSnapshot } from "firebase/firestore";
 import { AuthContext } from "../contexts/AuthContext";
 import { authAPI } from "../services/chat/api";
@@ -13,6 +13,7 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     let unsubscribeDoc;
+    let unsubscribeIdToken;
 
     // Listen for auth state changes - keep it simple!
     const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
@@ -86,13 +87,42 @@ export function AuthProvider({ children }) {
               setUserDoc(null);
             }
           },
-          (error) => {
+          async (error) => {
             console.error("❌ Firestore listener error:", error);
 
-            // Don't log out users for network errors - only for permission errors
-            if (error.code === "permission-denied") {
-              console.error("🚫 Permission denied - logging out user");
-              auth.signOut();
+            // For permission/unauthenticated errors, attempt a token refresh first
+            if (
+              error.code === "permission-denied" ||
+              error.code === "unauthenticated"
+            ) {
+              console.error(
+                "🚫 Permission/Unauthenticated - attempting token refresh before signing out"
+              );
+              try {
+                // attempt to force-refresh token once
+                if (user && user.getIdToken) {
+                  await user.getIdToken(true);
+                  console.log(
+                    "🔁 Token refresh succeeded - keeping user logged in"
+                  );
+                  // Clear doc so UI re-fetches if needed
+                  setUserDoc(null);
+                  return;
+                }
+              } catch (refreshErr) {
+                console.error("❌ Token refresh failed:", refreshErr);
+                // fall-through to sign out
+              }
+
+              // If refresh failed, sign out to keep behavior consistent
+              try {
+                await auth.signOut();
+              } catch (signOutErr) {
+                console.error(
+                  "❌ Failed to sign out after token refresh failure:",
+                  signOutErr
+                );
+              }
             } else {
               // For network errors, keep user logged in but clear doc
               console.log("🌐 Network error - keeping user logged in");
@@ -107,10 +137,26 @@ export function AuthProvider({ children }) {
       }
     });
 
+    // Subscribe to token change events (diagnostics + ensure refresh events are observed)
+    try {
+      unsubscribeIdToken = onIdTokenChanged(auth, (u) => {
+        if (u) {
+          console.log("🔐 onIdTokenChanged: token refreshed for user", u.uid);
+        } else {
+          console.log("🔐 onIdTokenChanged: no user (signed out)");
+        }
+      });
+    } catch (e) {
+      console.warn("Could not attach onIdTokenChanged listener:", e);
+    }
+
     // Cleanup function
     return () => {
       console.log("🧹 Cleaning up auth listeners");
       unsubscribeAuth();
+      if (unsubscribeIdToken) {
+        unsubscribeIdToken();
+      }
       if (unsubscribeDoc) {
         unsubscribeDoc();
       }
